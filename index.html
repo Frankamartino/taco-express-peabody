@@ -200,25 +200,36 @@
       padding: 12px;
       text-align: center;
     }
-    .drink-card img, .drink-card .img-placeholder {
-      width: 72px;
-      height: 72px;
-      object-fit: contain;
+    .drink-photo {
+      width: 80px;
+      height: 120px;
       margin: 0 auto 8px;
       border-radius: 8px;
-      background: rgba(255,255,255,0.05);
+      background: rgba(255, 255, 255, 0.92);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+    }
+    .drink-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center center;
       display: block;
     }
     .drink-card .img-placeholder {
-      width: 72px;
-      height: 72px;
+      width: 80px;
+      height: 120px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 0.6rem;
       color: var(--muted);
-      margin-left: auto;
-      margin-right: auto;
+      margin: 0 auto 8px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.08);
     }
     .drink-card h4 { font-size: 0.82rem; font-weight: 700; }
     .drink-card p { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
@@ -478,15 +489,13 @@
       <p class="subhead">Mexican sodas — glass bottle · $3.99</p>
       <div class="drink-grid">
         <div class="drink-card">
-          <img src="images/drinks/mexican-coke.png" alt="Mexican Coke glass bottle" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
-          <div class="img-placeholder" style="display:none">Mexican Coke</div>
+          <div class="drink-photo"><img src="images/drinks/mexican-coke.png" alt="Mexican Coke glass bottle" /></div>
           <h4>Mexican Coke</h4>
           <p>Cane sugar · glass bottle</p>
           <p class="price">$3.99</p>
         </div>
         <div class="drink-card">
-          <img src="images/drinks/jarritos.png" alt="Jarritos" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
-          <div class="img-placeholder" style="display:none">Jarritos</div>
+          <div class="drink-photo"><img src="images/drinks/jarritos.png" alt="Jarritos" /></div>
           <h4>Jarritos</h4>
           <p>Mexican soda · glass bottle</p>
           <p class="price">$3.99</p>
@@ -495,28 +504,26 @@
 
       <p class="subhead">Soda — 12 oz cans · $2.99</p>
       <div class="drink-grid">
-        <div class="drink-card"><img src="images/drinks/coca-cola.png" alt="Coca-Cola" onerror="this.outerHTML='<div class=img-placeholder>Coke</div>'" /><h4>Coca-Cola</h4><p class="price">$2.99</p></div>
-        <div class="drink-card"><img src="images/drinks/diet-coke.png" alt="Diet Coke" onerror="this.outerHTML='<div class=img-placeholder>Diet</div>'" /><h4>Diet Coke</h4><p class="price">$2.99</p></div>
-        <div class="drink-card"><img src="images/drinks/coke-zero.png" alt="Coke Zero" onerror="this.outerHTML='<div class=img-placeholder>Zero</div>'" /><h4>Coke Zero</h4><p class="price">$2.99</p></div>
-        <div class="drink-card"><img src="images/drinks/sprite.png" alt="Sprite" onerror="this.outerHTML='<div class=img-placeholder>Sprite</div>'" /><h4>Sprite</h4><p class="price">$2.99</p></div>
-        <div class="drink-card"><img src="images/drinks/ginger-ale.png" alt="Canada Dry Ginger Ale" onerror="this.outerHTML='<div class=img-placeholder>Ginger</div>'" /><h4>Canada Dry Ginger Ale</h4><p class="price">$2.99</p></div>
-        <div class="drink-card"><img src="images/drinks/grape-fanta.png" alt="Grape Fanta" onerror="this.outerHTML='<div class=img-placeholder>Grape</div>'" /><h4>Grape Fanta</h4><p class="price">$2.99</p></div>
-        <div class="drink-card"><img src="images/drinks/orange-fanta.png" alt="Orange Fanta" onerror="this.outerHTML='<div class=img-placeholder>Orange</div>'" /><h4>Orange Fanta</h4><p class="price">$2.99</p></div>
-        <div class="drink-card"><img src="images/drinks/barqs-root-beer.png" alt="Barq's Root Beer" onerror="this.outerHTML='<div class=img-placeholder>Barqs</div>'" /><h4>Barq's Root Beer</h4><p class="price">$2.99</p></div>
-        <div class="drink-card"><img src="images/drinks/dr-pepper.png" alt="Dr Pepper" onerror="this.outerHTML='<div class=img-placeholder>Dr P</div>'" /><h4>Dr Pepper</h4><p class="price">$2.99</p></div>
+        <div class="drink-card"><div class="drink-photo"><img src="images/drinks/coca-cola.png" alt="Coca-Cola" /></div><h4>Coca-Cola</h4><p class="price">$2.99</p></div>
+        <div class="drink-card"><div class="drink-photo"><img src="images/drinks/diet-coke.png" alt="Diet Coke" /></div><h4>Diet Coke</h4><p class="price">$2.99</p></div>
+        <div class="drink-card"><div class="drink-photo"><img src="images/drinks/coke-zero.png" alt="Coke Zero" /></div><h4>Coke Zero</h4><p class="price">$2.99</p></div>
+        <div class="drink-card"><div class="drink-photo"><img src="images/drinks/sprite.png" alt="Sprite" /></div><h4>Sprite</h4><p class="price">$2.99</p></div>
+        <div class="drink-card"><div class="drink-photo"><img src="images/drinks/ginger-ale.png" alt="Canada Dry Ginger Ale" /></div><h4>Canada Dry Ginger Ale</h4><p class="price">$2.99</p></div>
+        <div class="drink-card"><div class="drink-photo"><img src="images/drinks/grape-fanta.png" alt="Grape Fanta" /></div><h4>Grape Fanta</h4><p class="price">$2.99</p></div>
+        <div class="drink-card"><div class="drink-photo"><img src="images/drinks/orange-fanta.png" alt="Orange Fanta" /></div><h4>Orange Fanta</h4><p class="price">$2.99</p></div>
+        <div class="drink-card"><div class="drink-photo"><img src="images/drinks/barqs-root-beer.png" alt="Barq's Root Beer" /></div><h4>Barq's Root Beer</h4><p class="price">$2.99</p></div>
+        <div class="drink-card"><div class="drink-photo"><img src="images/drinks/dr-pepper.png" alt="Dr Pepper" /></div><h4>Dr Pepper</h4><p class="price">$2.99</p></div>
       </div>
 
       <p class="subhead">Water</p>
       <div class="drink-grid">
         <div class="drink-card">
-          <img src="images/drinks/aquafina.png" alt="Aquafina water" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
-          <div class="img-placeholder" style="display:none">Aquafina</div>
+          <div class="drink-photo"><img src="images/drinks/aquafina.png" alt="Aquafina water" /></div>
           <h4>Aquafina</h4>
           <p class="price">$2.00</p>
         </div>
         <div class="drink-card">
-          <img src="images/drinks/pellegrino.png" alt="San Pellegrino" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
-          <div class="img-placeholder" style="display:none">Pellegrino</div>
+          <div class="drink-photo"><img src="images/drinks/pellegrino.png" alt="San Pellegrino" /></div>
           <h4>San Pellegrino</h4>
           <p class="price">$3.49</p>
         </div>
