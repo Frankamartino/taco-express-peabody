@@ -45,8 +45,13 @@ def fit_portrait(im: Image.Image) -> Image.Image:
     return canvas
 
 
+SKIP_PREFIXES = ("jarritos-variety-pack",)
+
+
 def main() -> None:
     for path in sorted(DRINKS_DIR.glob("*.png")):
+        if any(path.name.startswith(p) for p in SKIP_PREFIXES):
+            continue
         out = fit_portrait(Image.open(path))
         out.save(path, format="PNG", optimize=True)
         print(f"{path.name}: {out.size}")
