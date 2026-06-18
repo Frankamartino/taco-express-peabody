@@ -1,6 +1,7 @@
 Drop drink product-shot PNGs here. Expected filenames:
 
   mexican-coke.png
+  karma-cola.png
   jarritos-tamarind.png
   jarritos-fruit-punch.png
   jarritos-grapefruit.png
