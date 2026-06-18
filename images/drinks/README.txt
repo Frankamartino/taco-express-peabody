@@ -1,18 +1,6 @@
 Drop drink product-shot PNGs here. Expected filenames:
 
   mexican-coke.png
-  jarritos-tamarind.png
-  jarritos-fruit-punch.png
-  jarritos-grapefruit.png
-  jarritos-mango.png
-  jarritos-mandarin.png
-  jarritos-mexican-cola.png
-  jarritos-lime.png
-  jarritos-guava.png
-  jarritos-strawberry.png
-  jarritos-watermelon.png
-  jarritos-pina.png
-  jarritos-passion-fruit.png
   coca-cola.png
   diet-coke.png
   coke-zero.png
