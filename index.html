@@ -63,6 +63,26 @@
       line-height: 1;
     }
     .brand p { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .doordash-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #ff3008;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.88rem;
+      padding: 11px 18px;
+      border-radius: 999px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .doordash-btn:hover { background: #e62800; }
     .call-btn {
       display: inline-flex;
       align-items: center;
@@ -75,6 +95,25 @@
       border-radius: 999px;
       text-decoration: none;
       white-space: nowrap;
+    }
+    .call-btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--cream);
+    }
+    .call-btn-secondary:hover { border-color: var(--muted); }
+    .order-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .order-strip p {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin: 8px 0 0;
+      max-width: 520px;
     }
     nav {
       max-width: 960px;
@@ -286,7 +325,10 @@
         <h1>Taco Express Peabody</h1>
         <p>Party platters &amp; counter to-go</p>
       </div>
-      <a class="call-btn" href="tel:+19789821800">Call to Order</a>
+      <div class="header-actions">
+        <a class="doordash-btn order-doordash" href="https://www.doordash.com/search/store/Taco%20Express%20Peabody%20MA" target="_blank" rel="noopener noreferrer">Order on DoorDash</a>
+        <a class="call-btn call-btn-secondary" href="tel:+19789821800">Call (978) 982-1800</a>
+      </div>
     </div>
     <nav aria-label="Menu sections">
       <a href="#platters">Party Platters</a>
@@ -296,6 +338,7 @@
       <a href="#addons">Add-ons</a>
       <a href="#fryer">Fryer</a>
       <a href="#drinks">Drinks</a>
+      <a href="#order">Order</a>
       <a href="#hours">Hours</a>
     </nav>
   </header>
@@ -309,6 +352,11 @@
       </div>
       <h2>Party platters &amp; counter to-go.</h2>
       <p>Shredded beef, shredded chicken, or grilled shrimp. Platters for the office or the party — counter plates for one protein, grab-and-go.</p>
+      <div class="order-strip">
+        <a class="doordash-btn order-doordash" href="https://www.doordash.com/search/store/Taco%20Express%20Peabody%20MA" target="_blank" rel="noopener noreferrer">Order on DoorDash</a>
+        <a class="call-btn call-btn-secondary" href="tel:+19789821800">Call for platters</a>
+      </div>
+      <p class="order-strip" style="display:block;text-align:center;">Delivery &amp; pickup on DoorDash · party platters &amp; special requests by phone</p>
     </div>
 
     <section id="platters">
@@ -682,7 +730,21 @@
           <p class="price">$3.49</p>
         </div>
       </div>
-      <p class="note-box" style="margin-top:16px;">Drink photos: drop PNG files in <code>images/drinks/</code> — see README in that folder. Not linked to any other website.</p>
+      <p class="note-box" style="margin-top:16px;">Drinks shown are what we carry at the counter when available.</p>
+    </section>
+
+    <section id="order">
+      <p class="section-label">Order</p>
+      <h2>How to order</h2>
+      <p class="section-intro">This menu is for browsing prices and photos. To pay and check out, use DoorDash for delivery or pickup. For large party platters, call the shop — those are not on DoorDash yet.</p>
+      <div class="order-strip" style="justify-content:flex-start;margin-top:0;margin-bottom:16px;">
+        <a class="doordash-btn order-doordash" href="https://www.doordash.com/search/store/Taco%20Express%20Peabody%20MA" target="_blank" rel="noopener noreferrer">Order on DoorDash</a>
+        <a class="call-btn call-btn-secondary" href="tel:+19789821800">Call (978) 982-1800</a>
+      </div>
+      <div class="note-box">
+        <strong>DoorDash</strong> — customers add items, pay online, and choose delivery or pickup.<br><br>
+        <strong>Phone</strong> — best for party platters ($55 / $110 / $220), mix-and-match proteins on trays, and questions about spice level or timing.
+      </div>
     </section>
 
     <section id="hours">
@@ -698,6 +760,9 @@
         <strong>58 Pulaski Street</strong><br>
         Peabody, Massachusetts 01960<br>
         <a href="tel:+19789821800">(978) 982-1800</a>
+      </p>
+      <p style="margin-top:14px;">
+        <a class="doordash-btn order-doordash" href="https://www.doordash.com/search/store/Taco%20Express%20Peabody%20MA" target="_blank" rel="noopener noreferrer" style="display:inline-flex;">Order on DoorDash</a>
       </p>
       <p style="margin-top:12px;">
         <a href="https://www.google.com/maps/search/?api=1&amp;query=58+Pulaski+St+Peabody+MA+01960" target="_blank" rel="noopener">Get directions</a>
@@ -731,6 +796,16 @@
         probe.onloadeddata = function () { heroWrap.hidden = false; };
         probe.src = "videos/hero.mp4";
       }
+
+      fetch("order-config.json")
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (cfg) {
+          if (!cfg || !cfg.doordashUrl) return;
+          document.querySelectorAll(".order-doordash").forEach(function (a) {
+            a.href = cfg.doordashUrl;
+          });
+        })
+        .catch(function () {});
     })();
   </script>
 </body>

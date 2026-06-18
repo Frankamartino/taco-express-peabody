@@ -2,10 +2,22 @@
 
 **Separate project** — not Martino Pasta Bar.
 
-- **Domain:** https://tacoexpresspeabody.com
+- **Domain:** https://www.tacoexpresspeabody.com
 - **Phone:** (978) 982-1800
 - **Address:** 58 Pulaski St, Peabody, MA 01960
-- **Ordering:** Call to order only (no voice agent, no online checkout yet)
+- **Ordering:** DoorDash (delivery & pickup) + phone for party platters
+
+## Online ordering
+
+The website is a **menu board** — items are not clickable for checkout. Customers pay through **DoorDash**.
+
+1. Complete [DoorDash Merchant](https://get.doordash.com/) onboarding for 58 Pulaski St.
+2. Copy your store URL from the DoorDash Merchant Portal.
+3. Paste it into `order-config.json` as `doordashUrl` and push — all **Order on DoorDash** buttons update automatically.
+
+Until the store is live, buttons link to a DoorDash search for Taco Express Peabody.
+
+**Party platters** — call (978) 982-1800 (not on DoorDash menu yet).
 
 ## Preview locally
 
