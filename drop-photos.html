@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Taco Express — food photo checklist</title>
+  <style>
+    :root { --ok: #22c55e; --miss: #a8a29e; --ink: #1c1917; --cream: #fffbeb; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--ink);
+      color: var(--cream);
+      padding: 24px;
+      line-height: 1.5;
+    }
+    h1 { font-size: 1.25rem; margin-bottom: 4px; }
+    .sub { color: #a8a29e; font-size: 0.88rem; margin-bottom: 20px; }
+    a { color: #84cc16; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    th, td { padding: 10px 8px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: left; vertical-align: top; }
+    th { color: #a8a29e; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+    .badge.ok { background: rgba(34,197,94,0.2); color: var(--ok); }
+    .badge.miss { background: rgba(255,255,255,0.08); color: var(--miss); }
+    .thumb {
+      width: 96px;
+      height: 72px;
+      object-fit: cover;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.06);
+      display: block;
+    }
+    .thumb.miss { display: none; }
+    code { font-size: 0.82rem; }
+    .summary { margin: 16px 0; font-weight: 600; }
+    .note { margin-top: 24px; font-size: 0.82rem; color: #a8a29e; max-width: 640px; }
+  </style>
+</head>
+<body>
+  <h1>Taco Express Peabody — food photos</h1>
+  <p class="sub">Taco Express only · <a href="index.html">Back to menu</a> · see <a href="OPEN-LOCAL-REX.md">OPEN-LOCAL-REX.md</a></p>
+  <p class="summary" id="summary">Checking…</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Status</th>
+        <th>Preview</th>
+        <th>Filename</th>
+        <th>Menu item</th>
+      </tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <p class="note">
+    Install from <code>taco-express-photos.zip</code> in Downloads. Example PowerShell for beef tacos:<br>
+    <code>Copy-Item "$env:TEMP\taco-express-photos-extract\images\menu\tacos-beef.jpg" "images\menu\tacos-beef.jpg"</code>
+    (extract zip first with <code>Expand-Archive</code>). Shrimp enchiladas intentionally have no photo.
+  </p>
+  <script>
+    var PHOTOS = [
+      { path: "images/menu/tacos-beef.jpg", label: "Three Tacos · Shredded Beef" },
+      { path: "images/menu/tacos-chicken.jpg", label: "Three Tacos · Shredded Chicken" },
+      { path: "images/menu/tacos-shrimp.jpg", label: "Three Tacos · Grilled Shrimp" },
+      { path: "images/menu/burrito-beef.jpg", label: "Burrito · Shredded Beef" },
+      { path: "images/menu/burrito-chicken.jpg", label: "Burrito · Shredded Chicken" },
+      { path: "images/menu/burrito-shrimp.jpg", label: "Burrito · Grilled Shrimp" },
+      { path: "images/menu/enchiladas-beef.jpg", label: "Two Enchiladas · Shredded Beef" },
+      { path: "images/menu/enchiladas-chicken.jpg", label: "Two Enchiladas · Shredded Chicken" },
+      { path: "images/platters/platter.jpg", label: "Party platter card" }
+    ];
+
+    var tbody = document.getElementById("rows");
+    var done = 0;
+
+    PHOTOS.forEach(function (item) {
+      var tr = document.createElement("tr");
+      var statusTd = document.createElement("td");
+      var thumbTd = document.createElement("td");
+      var pathTd = document.createElement("td");
+      var labelTd = document.createElement("td");
+
+      var badge = document.createElement("span");
+      badge.className = "badge miss";
+      badge.textContent = "Missing";
+      statusTd.appendChild(badge);
+
+      var img = document.createElement("img");
+      img.className = "thumb miss";
+      img.alt = item.label;
+      thumbTd.appendChild(img);
+
+      pathTd.innerHTML = "<code>" + item.path + "</code>";
+      labelTd.textContent = item.label;
+
+      img.onload = function () {
+        badge.className = "badge ok";
+        badge.textContent = "Installed";
+        img.classList.remove("miss");
+        done++;
+        document.getElementById("summary").textContent =
+          done + " of " + PHOTOS.length + " food photos installed.";
+      };
+      img.onerror = function () {
+        document.getElementById("summary").textContent =
+          done + " of " + PHOTOS.length + " food photos installed.";
+      };
+      img.src = item.path + "?t=" + Date.now();
+
+      tr.appendChild(statusTd);
+      tr.appendChild(thumbTd);
+      tr.appendChild(pathTd);
+      tr.appendChild(labelTd);
+      tbody.appendChild(tr);
+    });
+  </script>
+</body>
+</html>
