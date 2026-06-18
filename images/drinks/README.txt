@@ -1,6 +1,7 @@
 Drop drink product-shot PNGs here. Expected filenames:
 
   mexican-coke.png
+  jarritos-tamarind.png
   coca-cola.png
   diet-coke.png
   coke-zero.png
