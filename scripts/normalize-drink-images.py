@@ -3,71 +3,39 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PIL import Image, ImageChops, ImageEnhance
+from PIL import Image, ImageChops
 
 DRINKS_DIR = Path(__file__).resolve().parent.parent / "images" / "drinks"
 TARGET_W = 480
 TARGET_H = 720
-FILL = 0.96  # default product uses 96% of canvas height
+FILL = 0.94  # product uses 94% of the shorter canvas edge
 BG = (255, 255, 255, 255)
-
-# Skinny glass bottles (Jarritos, Mexican Coke) need extra zoom vs cans
-NARROW_ASPECT = 0.48  # width / height after trim
-MIN_WIDTH_FRACTION = 0.54  # zoom until bottle ~54% of card width
-TRIM_THRESHOLD = 12
 
 
 def trim_whitespace(im: Image.Image) -> Image.Image:
     rgba = im.convert("RGBA")
     rgb = rgba.convert("RGB")
+    # Trim near-white background
     bg = Image.new("RGB", rgb.size, (255, 255, 255))
     diff = ImageChops.difference(rgb, bg)
     gray = diff.convert("L")
-    mask = gray.point(lambda p: 255 if p > TRIM_THRESHOLD else 0)
+    # Ignore faint compression noise
+    mask = gray.point(lambda p: 255 if p > 18 else 0)
     bbox = mask.getbbox()
     if bbox:
         rgba = rgba.crop(bbox)
     return rgba
 
 
-def enhance(im: Image.Image) -> Image.Image:
-    rgba = im.convert("RGBA")
-    rgb = rgba.convert("RGB")
-    rgb = ImageEnhance.Contrast(rgb).enhance(1.08)
-    rgb = ImageEnhance.Sharpness(rgb).enhance(1.22)
-    rgba.paste(rgb, mask=rgba.split()[3])
-    return rgba
-
-
-def center_crop(im: Image.Image, w: int, h: int) -> Image.Image:
-    if im.width <= w and im.height <= h:
-        return im
-    left = max(0, (im.width - w) // 2)
-    top = max(0, (im.height - h) // 2)
-    return im.crop((left, top, left + w, top + h))
-
-
 def fit_portrait(im: Image.Image) -> Image.Image:
     im = trim_whitespace(im)
     max_w = int(TARGET_W * FILL)
     max_h = int(TARGET_H * FILL)
-    aspect = im.width / im.height
 
-    if aspect < NARROW_ASPECT:
-        # Zoom narrow bottles so they read closer to can size on the menu
-        target_w = int(TARGET_W * MIN_WIDTH_FRACTION)
-        scale = target_w / im.width
-        new_w = max(1, int(im.width * scale))
-        new_h = max(1, int(im.height * scale))
-        im = im.resize((new_w, new_h), Image.Resampling.LANCZOS)
-        im = center_crop(im, TARGET_W, TARGET_H)
-    else:
-        scale = min(max_w / im.width, max_h / im.height)
-        new_w = max(1, int(im.width * scale))
-        new_h = max(1, int(im.height * scale))
-        im = im.resize((new_w, new_h), Image.Resampling.LANCZOS)
-
-    im = enhance(im)
+    scale = min(max_w / im.width, max_h / im.height)
+    new_w = max(1, int(im.width * scale))
+    new_h = max(1, int(im.height * scale))
+    im = im.resize((new_w, new_h), Image.Resampling.LANCZOS)
 
     canvas = Image.new("RGBA", (TARGET_W, TARGET_H), BG)
     x = (TARGET_W - im.width) // 2
