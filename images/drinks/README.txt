@@ -12,7 +12,6 @@ Drop drink product-shot PNGs here. Expected filenames:
   jarritos-strawberry.png
   jarritos-watermelon.png
   jarritos-passion-fruit.png
-  kabisa-energy.png
   coca-cola.png
   diet-coke.png
   coke-zero.png
