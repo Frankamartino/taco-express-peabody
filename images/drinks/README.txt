@@ -5,6 +5,7 @@ Drop drink product-shot PNGs here. Expected filenames:
   jarritos-fruit-punch.png
   jarritos-grapefruit.png
   jarritos-mango.png
+  jarritos-mandarin.png
   coca-cola.png
   diet-coke.png
   coke-zero.png
