@@ -12,6 +12,7 @@ Drop drink product-shot PNGs here. Expected filenames:
   jarritos-mexican-cola.png
   jarritos-strawberry.png
   jarritos-watermelon.png
+  jarritos-passion-fruit.png
   bundaberg-root-beer.png
   kabisa-energy.png
   coca-cola.png
