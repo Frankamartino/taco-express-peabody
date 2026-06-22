@@ -1,4 +1,6 @@
 {
-  "doordashUrl": "https://www.doordash.com/search/store/Taco%20Express%20Peabody%20MA",
-  "doordashNote": "Replace doordashUrl with your store link from DoorDash Merchant Portal after onboarding."
+  "doordashUrl": "https://order.online/business/taco-express-peabody--58-pulaski-st--unit-b-22509311",
+  "storefrontBusinessId": 22509311,
+  "storefrontBusinessSlug": "TacoExpressPeabody-58PulaskiStUnitB",
+  "doordashNote": "DoorDash Online Ordering link from Merchant Portal (Channels > Online Ordering)."
 }
