@@ -55,6 +55,20 @@
       gap: 12px;
       flex-wrap: wrap;
     }
+    .brand-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+    .brand-logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 10px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
     .brand h1 {
       font-family: "Bebas Neue", sans-serif;
       font-size: 1.65rem;
@@ -62,7 +76,14 @@
       color: var(--lime);
       line-height: 1;
     }
-    .brand p { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+    .brand-domain {
+      font-size: 0.72rem;
+      color: var(--terra);
+      margin-top: 2px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .brand-tagline { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
     .header-actions {
       display: flex;
       align-items: center;
@@ -322,8 +343,14 @@
   <header>
     <div class="header-inner">
       <div class="brand">
-        <h1>Taco Express Peabody</h1>
-        <p>Party platters &amp; counter to-go</p>
+        <a class="brand-link" href="https://www.tacoexpresspeabody.com/">
+          <img class="brand-logo" src="images/taco-express-logo.png" width="52" height="52" alt="" />
+          <div>
+            <h1>Taco Express Peabody</h1>
+            <p class="brand-domain">tacoexpresspeabody.com</p>
+            <p class="brand-tagline">Party platters &amp; counter to-go</p>
+          </div>
+        </a>
       </div>
       <div class="header-actions">
         <a class="doordash-btn order-doordash" href="https://www.doordash.com/search/store/Taco%20Express%20Peabody%20MA" target="_blank" rel="noopener noreferrer">Order on DoorDash</a>
