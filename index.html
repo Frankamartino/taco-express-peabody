@@ -725,7 +725,7 @@
         <a class="call-btn call-btn-secondary" href="tel:+19789821800">Call (978) 982-1800</a>
       </div>
       <div class="note-box">
-        <strong>DoorDash</strong> — customers add items, pay online, and choose delivery or pickup.<br><br>
+        <strong>Online ordering</strong> — add items, pay online, choose pickup or delivery.<br><br>
         <strong>Phone</strong> — best for party platters ($55 / $110 / $220), mix-and-match proteins on trays, and questions about spice level or timing.
       </div>
     </section>
@@ -759,7 +759,23 @@
     <p style="margin-top:12px;">© Taco Express Peabody</p>
   </footer>
   <script>
-    (function () {      var heroWrap = document.getElementById("hero-video");
+    !function(e,t,r,n){var o,c,s;o=e.document,c=t.children[0],s=o.createElement("script"),e.StorefrontSDKObject="StorefrontSDK",e[e.StorefrontSDKObject]={executeCommand:function(t,r){e[e.StorefrontSDKObject].buffer.push([t,r])},buffer:[]},s.async=1,s.src="https://web-assets.cdn4dd.com/prod/storefront-sdk/latest/app.js",t.insertBefore(s,c)}(window,document.head);
+    StorefrontSDK.executeCommand("renderFloatingButton", {
+      businessId: 22509311,
+      businessSlug: "TacoExpressPeabody-58PulaskiStUnitB",
+      floatingBar: true,
+      position: "bottom",
+      buttonAlignment: "center",
+      backgroundColor: "transparent",
+      buttonBackgroundColor: "#ff3008",
+      borderColor: "transparent",
+      buttonText: "Order pickup & delivery",
+      showModal: true
+    });
+  </script>
+  <script>
+    (function () {
+      var heroWrap = document.getElementById("hero-video");
       if (heroWrap) {
         var probe = document.createElement("video");
         probe.preload = "metadata";
@@ -777,21 +793,6 @@
         })
         .catch(function () {});
     })();
-  </script>
-  <script>
-    !function(e,t,r,n){var o,c,s;o=e.document,c=t.children[0],s=o.createElement("script"),e.StorefrontSDKObject="StorefrontSDK",e[e.StorefrontSDKObject]={executeCommand:function(t,r){e[e.StorefrontSDKObject].buffer.push([t,r])},buffer:[]},s.async=1,s.src="https://web-assets.cdn4dd.com/prod/storefront-sdk/latest/app.js",t.insertBefore(s,c)}(window,document.head);
-    StorefrontSDK.executeCommand("renderFloatingButton", {
-      businessId: 22509311,
-      businessSlug: "TacoExpressPeabody-58PulaskiStUnitB",
-      floatingBar: true,
-      position: "bottom",
-      buttonAlignment: "center",
-      backgroundColor: "transparent",
-      buttonBackgroundColor: "#ff3008",
-      borderColor: "transparent",
-      buttonText: "Order pickup & delivery",
-      showModal: true
-    });
   </script>
 </body>
 </html>
