@@ -1,8 +1,7 @@
 {
-  "doordashUrl": "https://order.online/store/47282984?pickup=true",
-  "doordashBusinessUrl": "https://order.online/business/taco-express-peabody--58-pulaski-st--unit-b-22509311",
-  "storefrontStoreId": 47282984,
+  "orderOnlineUrl": "https://order.online/business/taco-express-peabody--58-pulaski-st--unit-b-22509311",
+  "orderOnlineStoreUrl": "https://order.online/store/47282984?pickup=true",
   "storefrontBusinessId": 22509311,
   "storefrontBusinessSlug": "TacoExpressPeabody-58PulaskiStUnitB",
-  "doordashNote": "Direct store menu with pickup default. Business URL is the multi-store landing page."
+  "storefrontStoreId": 47282984
 }

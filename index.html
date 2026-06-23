@@ -90,11 +90,11 @@
       gap: 8px;
       flex-wrap: wrap;
     }
-    .doordash-btn {
+    .order-btn {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: #ff3008;
+      background: var(--terra);
       color: #fff;
       font-weight: 700;
       font-size: 0.88rem;
@@ -103,7 +103,7 @@
       text-decoration: none;
       white-space: nowrap;
     }
-    .doordash-btn:hover { background: #e62800; }
+    .order-btn:hover { background: #c2410c; }
     .call-btn {
       display: inline-flex;
       align-items: center;
@@ -158,6 +158,12 @@
       white-space: nowrap;
     }
     nav a:hover { color: var(--cream); border-color: var(--border); }
+    nav a.order-online-nav {
+      color: #fff;
+      background: var(--terra);
+      border-color: var(--terra);
+    }
+    nav a.order-online-nav:hover { background: #c2410c; border-color: #c2410c; }
     .wrap { max-width: 960px; margin: 0 auto; padding: 0 18px 64px; }
     .hero {
       text-align: center;
@@ -353,7 +359,7 @@
         </a>
       </div>
       <div class="header-actions">
-        <a class="doordash-btn order-doordash" href="https://order.online/store/47282984?pickup=true" target="_blank" rel="noopener noreferrer">Order pickup &amp; delivery</a>
+        <a class="order-btn order-online" href="https://order.online/business/taco-express-peabody--58-pulaski-st--unit-b-22509311" target="_blank" rel="noopener noreferrer">Order Now</a>
         <a class="call-btn call-btn-secondary" href="tel:+19789821800">Call (978) 982-1800</a>
       </div>
     </div>
@@ -367,6 +373,7 @@
       <a href="#drinks">Drinks</a>
       <a href="#order">Order</a>
       <a href="#hours">Hours</a>
+      <a class="order-online-nav" href="https://order.online/business/taco-express-peabody--58-pulaski-st--unit-b-22509311" target="_blank" rel="noopener noreferrer">Order Now</a>
     </nav>
   </header>
 
@@ -380,10 +387,10 @@
       <h2>Party platters &amp; counter to-go.</h2>
       <p>Shredded beef, shredded chicken, or grilled shrimp. Platters for the office or the party — counter plates for one protein, grab-and-go.</p>
       <div class="order-strip">
-        <a class="doordash-btn order-doordash" href="https://order.online/store/47282984?pickup=true" target="_blank" rel="noopener noreferrer">Order pickup &amp; delivery</a>
+        <a class="order-btn order-online" href="https://order.online/business/taco-express-peabody--58-pulaski-st--unit-b-22509311" target="_blank" rel="noopener noreferrer">Order Now</a>
         <a class="call-btn call-btn-secondary" href="tel:+19789821800">Call for platters</a>
       </div>
-      <p class="order-strip" style="display:block;text-align:center;">Delivery &amp; pickup on DoorDash · party platters &amp; special requests by phone</p>
+      <p class="order-strip" style="display:block;text-align:center;">Order online for pickup or delivery · party platters &amp; special requests by phone</p>
     </div>
 
     <section id="platters">
@@ -721,7 +728,7 @@
       <h2>How to order</h2>
       <p class="section-intro">This menu is for browsing prices and photos. To pay and check out, order pickup or delivery online. For party platter timing or mix-and-match trays, call the shop.</p>
       <div class="order-strip" style="justify-content:flex-start;margin-top:0;margin-bottom:16px;">
-        <a class="doordash-btn order-doordash" href="https://order.online/store/47282984?pickup=true" target="_blank" rel="noopener noreferrer">Order pickup &amp; delivery</a>
+        <a class="order-btn order-online" href="https://order.online/business/taco-express-peabody--58-pulaski-st--unit-b-22509311" target="_blank" rel="noopener noreferrer">Order Now</a>
         <a class="call-btn call-btn-secondary" href="tel:+19789821800">Call (978) 982-1800</a>
       </div>
       <div class="note-box">
@@ -745,7 +752,7 @@
         <a href="tel:+19789821800">(978) 982-1800</a>
       </p>
       <p style="margin-top:14px;">
-        <a class="doordash-btn order-doordash" href="https://order.online/store/47282984?pickup=true" target="_blank" rel="noopener noreferrer" style="display:inline-flex;">Order pickup &amp; delivery</a>
+        <a class="order-btn order-online" href="https://order.online/business/taco-express-peabody--58-pulaski-st--unit-b-22509311" target="_blank" rel="noopener noreferrer" style="display:inline-flex;">Order Now</a>
       </p>
       <p style="margin-top:12px;">
         <a href="https://www.google.com/maps/search/?api=1&amp;query=58+Pulaski+St+Peabody+MA+01960" target="_blank" rel="noopener">Get directions</a>
@@ -767,11 +774,11 @@
       position: "bottom",
       buttonAlignment: "center",
       backgroundColor: "transparent",
-      buttonBackgroundColor: "#ff3008",
+      buttonBackgroundColor: "#ea580c",
       borderColor: "transparent",
-      buttonText: "Order pickup & delivery",
+      buttonText: "Order Now",
       showModal: false,
-      redirectUrl: "https://order.online/store/47282984?pickup=true"
+      redirectUrl: "https://order.online/business/taco-express-peabody--58-pulaski-st--unit-b-22509311"
     });
   </script>
   <script>
@@ -787,9 +794,10 @@
       fetch("order-config.json")
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (cfg) {
-          if (!cfg || !cfg.doordashUrl) return;
-          document.querySelectorAll(".order-doordash").forEach(function (a) {
-            a.href = cfg.doordashUrl;
+          var orderUrl = cfg.orderOnlineUrl || cfg.doordashUrl;
+          if (!orderUrl) return;
+          document.querySelectorAll(".order-online, .order-online-nav").forEach(function (a) {
+            a.href = orderUrl;
           });
         })
         .catch(function () {});
