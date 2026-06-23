@@ -158,12 +158,6 @@
       white-space: nowrap;
     }
     nav a:hover { color: var(--cream); border-color: var(--border); }
-    nav a.order-online-nav {
-      color: #fff;
-      background: var(--terra);
-      border-color: var(--terra);
-    }
-    nav a.order-online-nav:hover { background: #c2410c; border-color: #c2410c; }
     .wrap { max-width: 960px; margin: 0 auto; padding: 0 18px 64px; }
     .hero {
       text-align: center;
@@ -372,24 +366,17 @@
       <a href="#drinks">Drinks</a>
       <a href="#order">Order</a>
       <a href="#hours">Hours</a>
-      <a class="order-online-nav" href="https://order.online/business/taco-express-peabody--58-pulaski-st--unit-b-22509311" target="_blank" rel="noopener noreferrer">Order Now</a>
     </nav>
   </header>
 
   <main class="wrap">
     <div class="hero">
-      <div class="hero-video-wrap" id="hero-video" hidden>
-        <video autoplay muted loop playsinline poster="" aria-label="Taco Express kitchen">
-          <source src="videos/hero.mp4" type="video/mp4" />
-        </video>
+      <div class="hero-banner-wrap">
+        <img src="images/taco-express-header.png" width="1400" height="400" alt="Taco Express Peabody" />
       </div>
       <h2>Party platters &amp; counter to-go.</h2>
       <p>Shredded beef, shredded chicken, or grilled shrimp. Platters for the office or the party — counter plates for one protein, grab-and-go.</p>
-      <div class="order-strip">
-        <a class="order-btn order-online" href="https://order.online/business/taco-express-peabody--58-pulaski-st--unit-b-22509311" target="_blank" rel="noopener noreferrer">Order Now</a>
-        <a class="call-btn call-btn-secondary" href="tel:+19789821800">Call for platters</a>
-      </div>
-      <p class="order-strip" style="display:block;text-align:center;">Order online for pickup or delivery · party platters &amp; special requests by phone</p>
+      <p style="margin-top:16px;font-size:0.88rem;color:var(--muted);">Order online for pickup or delivery · party platters &amp; special requests by phone</p>
     </div>
 
     <section id="platters">
@@ -725,11 +712,7 @@
     <section id="order">
       <p class="section-label">Order</p>
       <h2>How to order</h2>
-      <p class="section-intro">This menu is for browsing prices and photos. To pay and check out, order pickup or delivery online. For party platter timing or mix-and-match trays, call the shop.</p>
-      <div class="order-strip" style="justify-content:flex-start;margin-top:0;margin-bottom:16px;">
-        <a class="order-btn order-online" href="https://order.online/business/taco-express-peabody--58-pulaski-st--unit-b-22509311" target="_blank" rel="noopener noreferrer">Order Now</a>
-        <a class="call-btn call-btn-secondary" href="tel:+19789821800">Call (978) 982-1800</a>
-      </div>
+      <p class="section-intro">This menu is for browsing prices and photos. To pay and check out, use <strong>Order Now</strong> at the top of the page or the button at the bottom as you scroll. For party platter timing or mix-and-match trays, call the shop.</p>
       <div class="note-box">
         <strong>Online ordering</strong> — add items, pay online, choose pickup or delivery.<br><br>
         <strong>Phone</strong> — best for party platters ($55 / $110 / $220), mix-and-match proteins on trays, and questions about spice level or timing.
@@ -750,9 +733,6 @@
         Peabody, Massachusetts 01960<br>
         <a href="tel:+19789821800">(978) 982-1800</a>
       </p>
-      <p style="margin-top:14px;">
-        <a class="order-btn order-online" href="https://order.online/business/taco-express-peabody--58-pulaski-st--unit-b-22509311" target="_blank" rel="noopener noreferrer" style="display:inline-flex;">Order Now</a>
-      </p>
       <p style="margin-top:12px;">
         <a href="https://www.google.com/maps/search/?api=1&amp;query=58+Pulaski+St+Peabody+MA+01960" target="_blank" rel="noopener">Get directions</a>
       </p>
@@ -765,41 +745,49 @@
     <p style="margin-top:12px;">© Taco Express Peabody</p>
   </footer>
   <script>
-    !function(e,t,r,n){var o,c,s;o=e.document,c=t.children[0],s=o.createElement("script"),e.StorefrontSDKObject="StorefrontSDK",e[e.StorefrontSDKObject]={executeCommand:function(t,r){e[e.StorefrontSDKObject].buffer.push([t,r])},buffer:[]},s.async=1,s.src="https://web-assets.cdn4dd.com/prod/storefront-sdk/latest/app.js",t.insertBefore(s,c)}(window,document.head);
-    StorefrontSDK.executeCommand("renderFloatingButton", {
-      businessId: 22509311,
-      businessSlug: "TacoExpressPeabody-58PulaskiStUnitB",
-      floatingBar: true,
-      position: "bottom",
-      buttonAlignment: "center",
-      backgroundColor: "transparent",
-      buttonBackgroundColor: "#ea580c",
-      borderColor: "transparent",
-      buttonText: "Order Now",
-      showModal: false,
-      redirectUrl: "https://order.online/business/taco-express-peabody--58-pulaski-st--unit-b-22509311"
-    });
+    !function(e,t){var o,c,s;o=e.document,c=t.children[0],s=o.createElement("script"),e.StorefrontSDKObject="StorefrontSDK",e[e.StorefrontSDKObject]={executeCommand:function(t,r){e[e.StorefrontSDKObject].buffer.push([t,r])},buffer:[]},s.async=1,s.src="https://web-assets.cdn4dd.com/prod/storefront-sdk/latest/app.js",t.insertBefore(s,c)}(window,document.head);
   </script>
   <script>
     (function () {
-      var heroWrap = document.getElementById("hero-video");
-      if (heroWrap) {
-        var probe = document.createElement("video");
-        probe.preload = "metadata";
-        probe.onloadeddata = function () { heroWrap.hidden = false; };
-        probe.src = "videos/hero.mp4";
+      var defaultOrderUrl = "https://order.online/business/taco-express-peabody--58-pulaski-st--unit-b-22509311";
+      var defaultSdk = {
+        businessId: 22509311,
+        businessSlug: "TacoExpressPeabody-58PulaskiStUnitB",
+        floatingBar: true,
+        position: "bottom",
+        buttonAlignment: "center",
+        backgroundColor: "transparent",
+        buttonBackgroundColor: "#ea580c",
+        borderColor: "transparent",
+        buttonText: "Order Now",
+        showModal: false,
+        redirectUrl: defaultOrderUrl,
+      };
+
+      function boot(cfg) {
+        var orderUrl = (cfg && (cfg.orderOnlineUrl || cfg.doordashUrl)) || defaultOrderUrl;
+        StorefrontSDK.executeCommand("renderFloatingButton", {
+          businessId: cfg && cfg.storefrontBusinessId || defaultSdk.businessId,
+          businessSlug: cfg && cfg.storefrontBusinessSlug || defaultSdk.businessSlug,
+          floatingBar: defaultSdk.floatingBar,
+          position: defaultSdk.position,
+          buttonAlignment: defaultSdk.buttonAlignment,
+          backgroundColor: defaultSdk.backgroundColor,
+          buttonBackgroundColor: defaultSdk.buttonBackgroundColor,
+          borderColor: defaultSdk.borderColor,
+          buttonText: defaultSdk.buttonText,
+          showModal: defaultSdk.showModal,
+          redirectUrl: orderUrl,
+        });
+        document.querySelectorAll(".order-online").forEach(function (a) {
+          a.href = orderUrl;
+        });
       }
 
       fetch("order-config.json")
         .then(function (r) { return r.ok ? r.json() : null; })
-        .then(function (cfg) {
-          var orderUrl = cfg.orderOnlineUrl || cfg.doordashUrl;
-          if (!orderUrl) return;
-          document.querySelectorAll(".order-online, .order-online-nav").forEach(function (a) {
-            a.href = orderUrl;
-          });
-        })
-        .catch(function () {});
+        .then(boot)
+        .catch(function () { boot(null); });
     })();
   </script>
 </body>
