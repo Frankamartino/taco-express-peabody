@@ -250,6 +250,50 @@
     .card .meta { font-size: 0.75rem; color: var(--lime); font-weight: 600; }
     .price { font-weight: 700; color: var(--lime); font-size: 1.05rem; }
     .price-dash { color: var(--muted); }
+    .feature {
+      margin: 4px 0 12px;
+      background: linear-gradient(135deg, rgba(234,88,12,0.20), rgba(132,204,22,0.10));
+      border: 1px solid var(--terra);
+      border-radius: 16px;
+      padding: 22px 22px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .feature-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--terra);
+      margin-bottom: 6px;
+    }
+    .feature-body { flex: 1; min-width: 220px; }
+    .feature-body h2 { font-size: 1.4rem; margin: 0 0 6px; }
+    .feature-body p { font-size: 0.9rem; color: var(--muted); }
+    .feature-price { text-align: center; line-height: 1; flex-shrink: 0; }
+    .feature-price .amount {
+      display: block;
+      font-size: 3.6rem;
+      font-weight: 900;
+      color: var(--lime);
+      text-shadow: 0 0 20px rgba(132,204,22,0.6);
+      letter-spacing: -0.02em;
+    }
+    .feature-price .tax {
+      display: block;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    @media (max-width: 520px) {
+      .feature { justify-content: center; text-align: center; }
+      .feature-price .amount { font-size: 3.1rem; }
+    }
     .subhead {
       font-size: 0.78rem;
       font-weight: 700;
@@ -381,6 +425,18 @@
       <p>Shredded beef, shredded chicken, pork, or grilled shrimp — tacos, burritos, loaded quesadillas &amp; bowls made fresh to go. Party platters for the office or a crowd.</p>
       <p style="margin-top:16px;font-size:0.88rem;color:var(--muted);">Order online for pickup or delivery on DoorDash · party platters &amp; special requests by phone</p>
     </div>
+
+    <section class="feature" id="express-bites" aria-label="Featured special">
+      <div class="feature-body">
+        <span class="feature-badge">Grab &amp; Go · All day</span>
+        <h2>Single Taco · Express Bites</h2>
+        <p>One taco, made fresh to order — beef, chicken, or pork. Grab it hot at the counter. Not on DoorDash.</p>
+      </div>
+      <div class="feature-price">
+        <span class="amount">$5</span>
+        <span class="tax">tax included</span>
+      </div>
+    </section>
 
     <section id="counter">
       <p class="section-label">Counter menu</p>
