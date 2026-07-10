@@ -12,6 +12,9 @@ so it drops straight into the website with no code changes needed (just replace/
 
 ## Still missing (cards currently show "Photo coming soon")
 
+### Burritos  →  `images/menu/`
+- [ ] Burrito · Prime Rib (Special) → `burrito-prime-rib.jpg`  *(hand-cut grilled prime rib, beans, rice, salsa verde)*
+
 ### Taco Bowls  →  `images/menu/`
 - [ ] Taco Bowl · Shredded Beef → `taco-bowl-beef.jpg`
 - [ ] Taco Bowl · Shredded Chicken → `taco-bowl-chicken.jpg`
