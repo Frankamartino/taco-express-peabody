@@ -276,7 +276,14 @@
           });
           dc.addEventListener('open', function () {
             try {
-              dcSend({ type: 'response.create' });
+              // Force first turn: exact opening only — no menu dump
+              dcSend({
+                type: 'response.create',
+                response: {
+                  instructions:
+                    'Say EXACTLY and ONLY: "Hey, what are you in the mood for? Just tell me what you want." Sound awake, warm, upbeat, friendly counter guy. Then stop. Do not list food. Do not say mild or spicy. Do not say if you are unsure. Nothing else.',
+                },
+              });
             } catch (e) {}
           });
 
