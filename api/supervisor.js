@@ -2,20 +2,32 @@
  * GPT-5.6 supervisor brain for Taco Express Massimo (COPY /voice only).
  * Realtime 2.1 talks; this endpoint thinks hard and returns a short answer Massimo can speak.
  */
-const MENU_BRIEF = `
+const FULL_MENU = `
 Taco Express Peabody — 58 Pulaski Street, Peabody MA 01960 · (978) 982-1800
-COPY voice-order experiment (not the photo menu board).
+Hours: Mon–Tue CLOSED. Wed–Sat 11AM–8PM. Sun 11AM–6PM.
 
-Rules: one protein per item (no mix on same plate). Mild or spicy when asked.
+RULES:
+- One protein per item / plate — never mix proteins on the same order item.
+- Mild or spicy when asked (party platters default medium).
+- Proteins: shredded beef (never ground), shredded chicken, pork, grilled shrimp. Prime rib ONLY on Prime Rib Burrito.
+- NO veggie / vegetable / grilled vegetable / tofu / vegetarian protein. Do not invent. Do not tell them to call to "check" veggie — answer no.
 
-Tacos: Three Tacos shredded beef/chicken/pork $13.49; grilled shrimp $14.99.
-Express single taco (counter): beef/chicken/pork $5 tax included.
-Burritos 12": shredded beef/chicken/pork $13.49; shrimp $14.99.
-Prime Rib Burrito SPECIAL: hand-cut grilled prime rib, beans, rice, salsa verde $17.99.
-Loaded quesadillas ~$13.99–$14.99 by protein.
-Taco bowls / burrito bowls ~$14.50–$15.50.
-Two enchiladas ~$13.99–$15.99.
-Sides extras, fries, drinks (Mexican Coke, Jarritos, sodas, water) available.
+SPECIALS / EXPRESS:
+- Prime Rib Burrito SPECIAL $17.99 — hand-cut grilled prime rib, beans, rice, salsa verde.
+- One taco your choice (Express) $5 tax included — beef, chicken, or pork. No DoorDash.
+
+TACOS: Three · Beef/Chicken/Pork $13.49 · Shrimp $14.99
+BURRITOS 12": Prime Rib $17.99 · Beef/Chicken/Pork $13.49 · Shrimp $14.99
+QUESADILLAS loaded 10": Beef/Chicken/Pork $13.99 · Shrimp $14.99 (rice, black OR refried beans, cheese, sour cream)
+TACO BOWLS: Beef/Chicken/Pork $14.99 · Shrimp $15.50
+BURRITO BOWLS: Beef/Chicken/Pork $14.50 · Shrimp $15.50
+ENCHILADAS (two): Beef/Chicken/Pork $13.99 · Shrimp $15.99
+SIDES: Brown rice / black beans / refried $3.49 each
+FRYER: Fries $4.99 · Onion rings $5.99 · Chicken fingers 6 $12 · Wings 6 $13
+EXTRAS: House hot & mild sauce free. Salsa $1.50 · Pico $2 · Chips $2.50 · Guac $3 · Consommé $2.
+Extra protein beef/chicken/pork $4 · shrimp $5. Extra scoops rice/beans/guac $2 · cheese $1.50 · sour cream $1.
+PARTY PLATTERS (tacos only): from $55 / $110 / $220 — call (978) 982-1800.
+DRINKS: Mexican Coke $3.99 · cans $2.99 · Aquafina $2 · Pellegrino $3.49.
 `.trim();
 
 module.exports = async function handler(req, res) {
@@ -66,10 +78,12 @@ module.exports = async function handler(req, res) {
     'You are the silent supervisor brain for Massimo at Taco Express Peabody.',
     'Massimo speaks to the customer with Realtime voice. You never speak as yourself.',
     'Return a short, clear answer Massimo can say out loud (1–3 short sentences max).',
-    'Be accurate on menu, prices, and rules. If unsure, say so briefly and suggest calling (978) 982-1800.',
-    'Do not invent items. No AI disclaimers.',
+    'Be accurate on menu, prices, and rules from FULL MENU. If it is on the menu, answer with confidence — never say you cannot confirm beef/chicken/pork/shrimp.',
+    'No veggie protein — say no. Do not invent items. No AI disclaimers.',
+    'Only suggest calling (978) 982-1800 for true unknowns (live stock, platter timing, something not listed).',
     '',
-    MENU_BRIEF,
+    'FULL MENU:',
+    FULL_MENU,
   ].join('\n');
 
   const user = [
