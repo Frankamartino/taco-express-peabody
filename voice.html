@@ -26,9 +26,7 @@
       flex-direction: column;
       padding: 28px 20px 40px;
     }
-    .top {
-      text-align: center;
-    }
+    .top { text-align: center; }
     h1 {
       font-family: "Bebas Neue", sans-serif;
       font-size: clamp(2.6rem, 11vw, 4.2rem);
@@ -50,7 +48,9 @@
     .bottom {
       margin-top: auto;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
       padding-top: 48px;
       padding-bottom: 12px;
     }
@@ -69,6 +69,20 @@
       color: #fff;
     }
     #orderNowBtn:hover { filter: brightness(1.08); }
+    #orderNowBtn:disabled {
+      opacity: 0.65;
+      cursor: wait;
+    }
+    #orderNowBtn.live {
+      background: var(--lime);
+      color: #14532d;
+    }
+    #status {
+      min-height: 1.2em;
+      font-size: 0.82rem;
+      color: var(--muted);
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -82,6 +96,136 @@
 
   <div class="bottom">
     <button type="button" id="orderNowBtn">Order Now</button>
+    <p id="status" aria-live="polite"></p>
   </div>
+
+  <audio id="remoteAudio" autoplay playsinline></audio>
+
+  <script>
+    (function () {
+      var btn = document.getElementById('orderNowBtn');
+      var statusEl = document.getElementById('status');
+      var remoteAudio = document.getElementById('remoteAudio');
+      var pc = null;
+      var dc = null;
+      var localStream = null;
+      var connected = false;
+      var connecting = false;
+
+      function setStatus(msg) {
+        statusEl.textContent = msg || '';
+      }
+
+      function cleanup() {
+        try { if (dc) dc.close(); } catch (e) {}
+        try { if (pc) pc.close(); } catch (e) {}
+        if (localStream) {
+          localStream.getTracks().forEach(function (t) { t.stop(); });
+        }
+        pc = null;
+        dc = null;
+        localStream = null;
+        connected = false;
+        connecting = false;
+        btn.disabled = false;
+        btn.classList.remove('live');
+        btn.textContent = 'Order Now';
+      }
+
+      function hangUp() {
+        cleanup();
+        setStatus('');
+      }
+
+      async function startMassimo() {
+        if (connecting) return;
+        if (connected) {
+          hangUp();
+          return;
+        }
+        connecting = true;
+        btn.disabled = true;
+        btn.textContent = 'Connecting…';
+        setStatus('Talking to Massimo…');
+
+        try {
+          var tokenPromise = fetch('/api/realtime-token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: '{}',
+          }).then(async function (resp) {
+            if (!resp.ok) {
+              var errText = await resp.text().catch(function () { return ''; });
+              throw new Error('token ' + resp.status + (errText ? ': ' + errText.slice(0, 180) : ''));
+            }
+            return resp.json();
+          });
+
+          localStream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true,
+            },
+          });
+
+          pc = new RTCPeerConnection();
+          localStream.getTracks().forEach(function (track) {
+            pc.addTrack(track, localStream);
+          });
+
+          pc.ontrack = function (ev) {
+            var stream = ev.streams && ev.streams[0] ? ev.streams[0] : new MediaStream([ev.track]);
+            remoteAudio.srcObject = stream;
+            remoteAudio.play().catch(function () {});
+          };
+
+          dc = pc.createDataChannel('oai-events');
+          dc.addEventListener('open', function () {
+            try {
+              dc.send(JSON.stringify({ type: 'response.create' }));
+            } catch (e) {}
+          });
+
+          var offer = await pc.createOffer();
+          await pc.setLocalDescription(offer);
+
+          var tokenPayload = await tokenPromise;
+          var ephemeralKey = (tokenPayload.value || '').trim();
+          if (!ephemeralKey) throw new Error('Missing ephemeral token');
+
+          var sdpResp = await fetch('https://api.openai.com/v1/realtime/calls', {
+            method: 'POST',
+            body: offer.sdp,
+            headers: {
+              Authorization: 'Bearer ' + ephemeralKey,
+              'Content-Type': 'application/sdp',
+            },
+          });
+          if (!sdpResp.ok) {
+            var sdpErr = await sdpResp.text().catch(function () { return ''; });
+            throw new Error('realtime ' + sdpResp.status + (sdpErr ? ': ' + sdpErr.slice(0, 180) : ''));
+          }
+          var answerSdp = await sdpResp.text();
+          await pc.setRemoteDescription({ type: 'answer', sdp: answerSdp });
+
+          connected = true;
+          connecting = false;
+          btn.disabled = false;
+          btn.classList.add('live');
+          btn.textContent = 'Hang Up';
+          setStatus('Massimo is on — talk anytime');
+        } catch (e) {
+          console.error('[Taco Massimo]', e);
+          cleanup();
+          setStatus('Could not start Massimo. Try again.');
+        }
+      }
+
+      btn.addEventListener('click', function () {
+        startMassimo();
+      });
+    })();
+  </script>
 </body>
 </html>
