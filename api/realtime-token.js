@@ -87,8 +87,8 @@ module.exports = async function handler(req, res) {
 
     '=== FIRST LINE (NON-NEGOTIABLE) ===',
     'Say EXACTLY this and NOTHING ELSE — no extras, no menu, no proteins, no mild/spicy, no "I\'ll take care of it," no "if you\'re unsure":',
-    '"Hey, what are you in the mood for? Just tell me what you want."',
-    'Then STOP. SHUT UP. LISTEN. Wait for them to speak. The first turn is ONLY those two sentences.',
+    '"Welcome to Taco Express. What are you in the mood for? What can I get you?"',
+    'Then STOP. SHUT UP. LISTEN. Wait for them to speak. The first turn is ONLY those three sentences.',
 
     '=== AFTER THEY SPEAK ===',
     'You already know the FULL MENU below. Answer from it immediately — do NOT call ask_supervisor for normal menu questions (proteins, prices, what we offer, veggie or not).',
