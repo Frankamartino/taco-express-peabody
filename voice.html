@@ -111,9 +111,97 @@
       var localStream = null;
       var connected = false;
       var connecting = false;
+      var history = [];
+      var pendingCalls = {};
 
       function setStatus(msg) {
         statusEl.textContent = msg || '';
+      }
+
+      function pushHistory(role, text) {
+        if (!text) return;
+        history.push({ role: role, text: String(text).slice(0, 500) });
+        if (history.length > 24) history = history.slice(-24);
+      }
+
+      function dcSend(obj) {
+        if (!dc || dc.readyState !== 'open') return;
+        dc.send(JSON.stringify(obj));
+      }
+
+      async function askSupervisor(question) {
+        var resp = await fetch('/api/supervisor', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question: question, history: history }),
+        });
+        if (!resp.ok) {
+          var errText = await resp.text().catch(function () { return ''; });
+          throw new Error('supervisor ' + resp.status + (errText ? ': ' + errText.slice(0, 160) : ''));
+        }
+        var data = await resp.json();
+        return (data.answer || '').trim();
+      }
+
+      async function handleAskSupervisor(callId, rawArgs) {
+        var question = '';
+        try {
+          var args = typeof rawArgs === 'string' ? JSON.parse(rawArgs || '{}') : (rawArgs || {});
+          question = (args.question || '').trim();
+        } catch (e) {
+          question = String(rawArgs || '').trim();
+        }
+        if (!question) question = 'Help with the customer order.';
+
+        setStatus('Massimo thinking…');
+        var answer = '';
+        try {
+          answer = await askSupervisor(question);
+        } catch (e) {
+          console.error('[Taco Supervisor]', e);
+          answer = 'I am not sure on that detail — please call us at (978) 982-1800 and we will help.';
+        }
+
+        dcSend({
+          type: 'conversation.item.create',
+          item: {
+            type: 'function_call_output',
+            call_id: callId,
+            output: answer,
+          },
+        });
+        dcSend({ type: 'response.create' });
+        setStatus('Massimo is on — talk anytime');
+      }
+
+      function onServerEvent(raw) {
+        var data;
+        try {
+          data = JSON.parse(raw);
+        } catch (e) {
+          return;
+        }
+        if (!data || !data.type) return;
+
+        if (data.type === 'response.function_call_arguments.done') {
+          if (data.name === 'ask_supervisor' && data.call_id) {
+            if (pendingCalls[data.call_id]) return;
+            pendingCalls[data.call_id] = true;
+            handleAskSupervisor(data.call_id, data.arguments || '{}').finally(function () {
+              delete pendingCalls[data.call_id];
+            });
+          }
+          return;
+        }
+
+        if (data.type === 'response.output_audio_transcript.done' && data.transcript) {
+          pushHistory('massimo', data.transcript);
+          return;
+        }
+        if (data.type === 'conversation.item.input_audio_transcription.completed' && data.transcript) {
+          pushHistory('customer', data.transcript);
+          return;
+        }
       }
 
       function cleanup() {
@@ -127,6 +215,8 @@
         localStream = null;
         connected = false;
         connecting = false;
+        history = [];
+        pendingCalls = {};
         btn.disabled = false;
         btn.classList.remove('live');
         btn.textContent = 'Order Now';
@@ -181,9 +271,12 @@
           };
 
           dc = pc.createDataChannel('oai-events');
+          dc.addEventListener('message', function (ev) {
+            onServerEvent(ev.data);
+          });
           dc.addEventListener('open', function () {
             try {
-              dc.send(JSON.stringify({ type: 'response.create' }));
+              dcSend({ type: 'response.create' });
             } catch (e) {}
           });
 
@@ -214,7 +307,7 @@
           btn.disabled = false;
           btn.classList.add('live');
           btn.textContent = 'Hang Up';
-          setStatus('Massimo is on — talk anytime');
+          setStatus('Massimo is on — Realtime 2.1 + GPT-5.6');
         } catch (e) {
           console.error('[Taco Massimo]', e);
           cleanup();

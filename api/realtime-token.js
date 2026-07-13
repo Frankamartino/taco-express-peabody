@@ -1,7 +1,7 @@
 /**
  * Taco Express Peabody — Massimo voice token (COPY site only).
- * Model: gpt-realtime-2.1 (newer than Martino's gpt-realtime)
- * Voice: cedar (same Massimo voice as Martino)
+ * Mic/mouth: gpt-realtime-2.1 + cedar
+ * Brain (via ask_supervisor tool): GPT-5.6
  */
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -30,6 +30,8 @@ module.exports = async function handler(req, res) {
     'Prime Rib Burrito special: hand-cut grilled prime rib, beans, rice, salsa verde — $17.99.',
     'Express single taco (counter): shredded beef, chicken, or pork — $5 tax included.',
     'You take the order by voice. Confirm the order back briefly. Checkout wiring comes next — for now remember what they want and keep the conversation going.',
+    'BRAIN: For anything tricky — exact prices you are unsure about, weird custom requests, allergy questions, comparing options, or hard decisions — call ask_supervisor with a clear question. Wait for the tool result, then speak the answer naturally as Massimo. Do NOT say supervisor, GPT, AI, or model names.',
+    'Simple greetings and clear menu picks: handle yourself without the tool.',
     'Never say you are an AI. Never mention Rosa. You are Massimo.',
   ].join(' ');
 
@@ -38,6 +40,25 @@ module.exports = async function handler(req, res) {
     model,
     output_modalities: ['audio'],
     instructions,
+    tools: [
+      {
+        type: 'function',
+        name: 'ask_supervisor',
+        description:
+          'Ask the GPT-5.6 supervisor brain for help on prices, menu details, allergies, custom requests, or anything you are unsure about. Use before guessing.',
+        parameters: {
+          type: 'object',
+          properties: {
+            question: {
+              type: 'string',
+              description: 'Clear question for the supervisor, including any customer details needed.',
+            },
+          },
+          required: ['question'],
+        },
+      },
+    ],
+    tool_choice: 'auto',
     audio: {
       input: {
         turn_detection: {
@@ -72,8 +93,13 @@ module.exports = async function handler(req, res) {
     if (!data?.value) {
       return res.status(502).json({ error: 'No ephemeral token from OpenAI' });
     }
-    console.log(`[Taco Massimo] token minted model=${model} voice=${voice}`);
-    return res.status(200).json({ value: data.value, model, voice });
+    console.log(`[Taco Massimo] token minted model=${model} voice=${voice} tools=ask_supervisor`);
+    return res.status(200).json({
+      value: data.value,
+      model,
+      voice,
+      supervisor: process.env.OPENAI_SUPERVISOR_MODEL?.trim() || 'gpt-5.6',
+    });
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'Realtime token failed';
     console.error('[Taco Massimo] Token error:', e);
