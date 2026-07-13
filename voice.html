@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Taco Express PB — Voice Order (copy)</title>
+  <title>Taco Express Peabody — Voice Order (copy)</title>
   <meta name="robots" content="noindex, nofollow" />
-  <meta name="description" content="Taco Express Peabody voice order copy — Massimo. Not the main menu site." />
+  <meta name="description" content="Taco Express Peabody voice order copy. Not the main menu site." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
@@ -24,47 +24,34 @@
       color: var(--cream);
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 32px 20px;
-      text-align: center;
+      padding: 28px 20px 40px;
     }
     .copy-note {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
+      text-align: center;
       background: rgba(234, 88, 12, 0.18);
-      border-bottom: 1px solid rgba(234, 88, 12, 0.45);
+      border: 1px solid rgba(234, 88, 12, 0.45);
       color: #fdba74;
-      font-size: 0.72rem;
+      font-size: 0.68rem;
       font-weight: 700;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      padding: 8px 12px;
+      padding: 7px 12px;
+      border-radius: 8px;
+      margin-bottom: 28px;
+    }
+    .top {
+      text-align: center;
     }
     h1 {
       font-family: "Bebas Neue", sans-serif;
-      font-size: clamp(2.8rem, 12vw, 4.5rem);
+      font-size: clamp(2.6rem, 11vw, 4.2rem);
       letter-spacing: 0.06em;
       color: var(--lime);
       line-height: 1;
-      margin-top: 28px;
-    }
-    .domain {
-      margin-top: 10px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--muted);
-      letter-spacing: 0.02em;
-    }
-    .domain a {
-      color: var(--muted);
-      text-decoration: none;
     }
     .outlet {
-      margin-top: 18px;
-      font-size: 0.88rem;
+      margin-top: 14px;
+      font-size: 0.95rem;
       color: var(--muted);
       line-height: 1.55;
     }
@@ -73,79 +60,43 @@
       text-decoration: none;
       font-weight: 700;
     }
-    .voice-box {
-      margin-top: 40px;
-      width: min(360px, 100%);
-      padding: 22px 20px;
-      border-radius: 16px;
-      background: rgba(234, 88, 12, 0.12);
-      border: 1px solid rgba(234, 88, 12, 0.45);
+    .bottom {
+      margin-top: auto;
+      display: flex;
+      justify-content: center;
+      padding-top: 48px;
+      padding-bottom: 12px;
     }
-    .voice-box p {
-      font-size: 0.9rem;
-      color: var(--muted);
-      margin-bottom: 14px;
-    }
-    .voice-box strong { color: var(--cream); }
-    #autoOnBtn {
-      width: 100%;
+    #orderNowBtn {
+      width: min(320px, 100%);
       border: none;
       cursor: pointer;
       font-family: inherit;
       font-weight: 800;
-      font-size: 1.05rem;
-      letter-spacing: 0.08em;
+      font-size: 1.15rem;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      padding: 16px 20px;
+      padding: 18px 28px;
       border-radius: 999px;
       background: var(--terra);
       color: #fff;
     }
-    #autoOnBtn:hover { filter: brightness(1.08); }
-    #autoOnBtn.on {
-      background: var(--lime);
-      color: #14532d;
-    }
-    #status {
-      margin-top: 12px;
-      min-height: 1.2em;
-      font-size: 0.82rem;
-      color: var(--muted);
-    }
+    #orderNowBtn:hover { filter: brightness(1.08); }
   </style>
 </head>
 <body>
   <div class="copy-note">Copy only — not the live menu board</div>
 
-  <h1>Taco Express PB</h1>
-  <p class="domain"><a href="https://www.tacoexpresspeabody.com/">tacoexpresspeabody.com</a></p>
-
-  <p class="outlet">
-    <strong>58 Pulaski Street</strong>, Unit B<br>
-    Peabody, MA 01960<br>
-    <a href="tel:+19789821800">(978) 982-1800</a>
-  </p>
-
-  <div class="voice-box">
-    <p><strong>Massimo</strong> — “Hey, what can I get you?”</p>
-    <button type="button" id="autoOnBtn">Auto On</button>
-    <p id="status"></p>
+  <div class="top">
+    <h1>Taco Express Peabody</h1>
+    <p class="outlet">
+      58 Pulaski Street<br>
+      <a href="tel:+19789821800">(978) 982-1800</a>
+    </p>
   </div>
 
-  <script>
-    (function () {
-      var btn = document.getElementById('autoOnBtn');
-      var status = document.getElementById('status');
-      var on = false;
-      btn.addEventListener('click', function () {
-        on = !on;
-        btn.classList.toggle('on', on);
-        btn.textContent = on ? 'Auto On · Listening' : 'Auto On';
-        status.textContent = on
-          ? 'Massimo ready — voice wiring next.'
-          : '';
-      });
-    })();
-  </script>
+  <div class="bottom">
+    <button type="button" id="orderNowBtn">Order Now</button>
+  </div>
 </body>
 </html>
