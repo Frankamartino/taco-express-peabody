@@ -678,11 +678,16 @@
         };
       }
 
-      function payReadyGaps() {
+      function contactReadyGaps() {
         var gaps = [];
         if (!customer.lastName) gaps.push('lastName');
         if (!customer.email) gaps.push('email');
         if (!customer.phone) gaps.push('phone');
+        return gaps;
+      }
+
+      function payReadyGaps() {
+        var gaps = contactReadyGaps();
         if (!order.tipAsked) gaps.push('tip');
         if (!fulfillment) gaps.push('fulfillment');
         return gaps;
@@ -839,14 +844,46 @@
             replyTool(callId, { ok: false, error: 'method must be cash or card' });
             return;
           }
+          // Cash AND card: kitchen ticket must show email + phone (never skip)
+          var contactGaps = contactReadyGaps();
+          if (contactGaps.length) {
+            replyTool(callId, {
+              ok: false,
+              code: 'missing_fields',
+              missing: contactGaps,
+              error:
+                'Cannot finalize pay yet. Still need on the ticket: ' +
+                contactGaps.join(', ') +
+                '. Ask one at a time, call set_customer each time, then set_payment again.',
+              ticket: ticketSnapshot(),
+            });
+            return;
+          }
+          if (pm === 'cash' && !fulfillment) {
+            replyTool(callId, {
+              ok: false,
+              code: 'missing_fields',
+              missing: ['fulfillment'],
+              error: 'Ask pickup or delivery, call set_fulfillment, then set_payment cash again.',
+              ticket: ticketSnapshot(),
+            });
+            return;
+          }
           order.paymentMethod = pm;
           if (pm === 'cash') {
-            // Counter cash — not Stripe-charged
             order.paid = false;
             order.paymentIntentId = '';
           }
           renderTicket();
-          replyTool(callId, { ok: true, paymentMethod: pm, ticket: ticketSnapshot() });
+          replyTool(callId, {
+            ok: true,
+            paymentMethod: pm,
+            ticket: ticketSnapshot(),
+            speakHint:
+              pm === 'cash'
+                ? 'Say warmly: ticket is sent to the restaurant — they will start making the food right away; it will be ready in about 20 minutes. Pay cash at the counter when you pick up.'
+                : '',
+          });
           return;
         }
 
