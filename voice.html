@@ -99,20 +99,46 @@
     <p id="status" aria-live="polite"></p>
   </div>
 
-  <audio id="remoteAudio" autoplay playsinline></audio>
+  <audio id="remoteAudio" autoplay playsinline webkit-playsinline></audio>
 
   <script>
     (function () {
       var btn = document.getElementById('orderNowBtn');
       var statusEl = document.getElementById('status');
       var remoteAudio = document.getElementById('remoteAudio');
+      remoteAudio.setAttribute('playsinline', 'true');
+      remoteAudio.setAttribute('webkit-playsinline', 'true');
+      remoteAudio.muted = false;
+      remoteAudio.volume = 1;
       var pc = null;
       var dc = null;
       var localStream = null;
+      var audioCtx = null;
       var connected = false;
       var connecting = false;
       var history = [];
       var pendingCalls = {};
+
+      async function unlockSpeaker() {
+        try {
+          var AC = window.AudioContext || window.webkitAudioContext;
+          if (!AC) return;
+          if (!audioCtx) audioCtx = new AC();
+          if (audioCtx.state === 'suspended') await audioCtx.resume();
+        } catch (e) {}
+      }
+
+      async function playRemote(stream) {
+        remoteAudio.srcObject = stream;
+        remoteAudio.muted = false;
+        remoteAudio.volume = 1;
+        try {
+          await unlockSpeaker();
+          await remoteAudio.play();
+        } catch (e) {
+          console.warn('[Taco Massimo] remote play needs gesture', e);
+        }
+      }
 
       function setStatus(msg) {
         statusEl.textContent = msg || '';
@@ -239,6 +265,8 @@
         setStatus('Talking to Massimo…');
 
         try {
+          await unlockSpeaker();
+
           var tokenPromise = fetch('/api/realtime-token', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -251,11 +279,14 @@
             return resp.json();
           });
 
+          // Mic cleanup only — keep AEC so speakers don't feed back.
+          // Prefer phone/headset mics when available for cleaner pickup.
           localStream = await navigator.mediaDevices.getUserMedia({
             audio: {
               echoCancellation: true,
               noiseSuppression: true,
               autoGainControl: true,
+              channelCount: 1,
             },
           });
 
@@ -266,8 +297,7 @@
 
           pc.ontrack = function (ev) {
             var stream = ev.streams && ev.streams[0] ? ev.streams[0] : new MediaStream([ev.track]);
-            remoteAudio.srcObject = stream;
-            remoteAudio.play().catch(function () {});
+            playRemote(stream);
           };
 
           dc = pc.createDataChannel('oai-events');
@@ -281,7 +311,7 @@
                 type: 'response.create',
                 response: {
                   instructions:
-                    'Say EXACTLY and ONLY: "Hey, welcome to Taco Express. What are you in the mood for? What can I get you?" Give "Hey" a little bite — warm and present — then keep the rest smooth and steady, even pitch, no sing-song. Then stop. Shut up. Do not list food. Do not say mild or spicy. Nothing else.',
+                    'Say EXACTLY and ONLY: "Hey, welcome to Taco Express. What are you in the mood for? What can I get you?" Give "Hey" a little bite. Voice must be clean, crisp, close-mic — not muffled. Smooth and natural, no sing-song. Then stop. Shut up. Do not list food. Do not say mild or spicy. Nothing else.',
                 },
               });
             } catch (e) {}
