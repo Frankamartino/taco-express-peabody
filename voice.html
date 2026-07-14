@@ -583,10 +583,41 @@
           pushHistory('massimo', data.transcript);
           return;
         }
-        if (data.type === 'conversation.item.input_audio_transcription.completed' && data.transcript) {
+        if (
+          (data.type === 'conversation.item.input_audio_transcription.completed' ||
+            data.type === 'conversation.item.input_audio_transcription.done') &&
+          data.transcript
+        ) {
           pushHistory('customer', data.transcript);
+          maybeCaptureFirstName(data.transcript);
           return;
         }
+      }
+
+      function maybeCaptureFirstName(transcript) {
+        if (customer.firstName) return;
+        var raw = String(transcript || '').trim();
+        if (!raw) return;
+        var t = raw
+          .replace(/^((hi|hey|hello|yes|yeah|uh|um)[,.\s]+)+/i, '')
+          .replace(/^(i('?m| am)|my name is|this is|it'?s)\s+/i, '')
+          .replace(/[.,!?]+$/g, '')
+          .trim();
+        var words = t.split(/\s+/).filter(Boolean);
+        if (words.length < 1 || words.length > 2) return;
+        if (/taco|burrito|beef|chicken|pork|shrimp|coke|drink|order|spicy|mild|please|thanks|thank/i.test(t)) {
+          return;
+        }
+        var first = words[0].replace(/[^A-Za-z'-]/g, '');
+        if (first.length < 2) return;
+        customer.firstName = first.charAt(0).toUpperCase() + first.slice(1);
+        if (words.length === 2) {
+          var last = words[1].replace(/[^A-Za-z'-]/g, '');
+          if (last.length > 1) {
+            customer.lastName = last.charAt(0).toUpperCase() + last.slice(1);
+          }
+        }
+        renderTicket();
       }
 
       function cleanup() {
