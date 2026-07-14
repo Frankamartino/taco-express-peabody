@@ -1,16 +1,17 @@
 /**
  * GPT-5.6 supervisor brain for Taco Express Massimo (COPY /voice only).
- * Realtime 2.1 talks; this endpoint thinks hard and returns a short answer Massimo can speak.
+ * Menu is authoritative — never invent; never soft-confirm missing items.
  */
 const FULL_MENU = `
 Taco Express Peabody — 58 Pulaski Street, Peabody MA 01960 · (978) 982-1800
 Hours: Mon–Tue CLOSED. Wed–Sat 11AM–8PM. Sun 11AM–6PM.
 
 RULES:
-- One protein per item / plate — never mix proteins on the same order item.
-- Mild or spicy when asked (party platters default medium).
-- Proteins: shredded beef (never ground), shredded chicken, pork, grilled shrimp. Prime rib ONLY on Prime Rib Burrito.
-- NO veggie / vegetable / grilled vegetable / tofu / vegetarian protein. Do not invent. Do not tell them to call to "check" veggie — answer no.
+- One protein per item. Mild or spicy when asked.
+- Proteins: shredded beef (never ground), shredded chicken, pork, grilled shrimp.
+- Prime rib ONLY as Prime Rib Burrito $17.99 — NOT a taco.
+- NOT ON MENU: steak taco, filet taco, filet mignon, veggie/vegetable/tofu. Say not on the menu; suggest closest real item.
+- No cart / Stripe on this voice copy yet — if asked about paying online: confirm total from menu; pay at counter or call (978) 982-1800.
 
 SPECIALS / EXPRESS:
 - Prime Rib Burrito SPECIAL $17.99 — hand-cut grilled prime rib, beans, rice, salsa verde.
@@ -18,7 +19,7 @@ SPECIALS / EXPRESS:
 
 TACOS: Three · Beef/Chicken/Pork $13.49 · Shrimp $14.99
 BURRITOS 12": Prime Rib $17.99 · Beef/Chicken/Pork $13.49 · Shrimp $14.99
-QUESADILLAS loaded 10": Beef/Chicken/Pork $13.99 · Shrimp $14.99 (rice, black OR refried beans, cheese, sour cream)
+QUESADILLAS loaded 10": Beef/Chicken/Pork $13.99 · Shrimp $14.99
 TACO BOWLS: Beef/Chicken/Pork $14.99 · Shrimp $15.50
 BURRITO BOWLS: Beef/Chicken/Pork $14.50 · Shrimp $15.50
 ENCHILADAS (two): Beef/Chicken/Pork $13.99 · Shrimp $15.99
@@ -76,11 +77,10 @@ module.exports = async function handler(req, res) {
 
   const system = [
     'You are the silent supervisor brain for Massimo at Taco Express Peabody.',
-    'Massimo speaks to the customer with Realtime voice. You never speak as yourself.',
-    'Return a short, clear answer Massimo can say out loud (1–3 short sentences max).',
-    'Be accurate on menu, prices, and rules from FULL MENU. If it is on the menu, answer with confidence — never say you cannot confirm beef/chicken/pork/shrimp.',
-    'No veggie protein — say no. Do not invent items. No AI disclaimers.',
-    'Only suggest calling (978) 982-1800 for true unknowns (live stock, platter timing, something not listed).',
+    'Return 1 short sentence Massimo can say out loud. Counter mode — no padding.',
+    'FULL MENU is law. Exact names/prices. If not listed: not on the menu + closest real option.',
+    'Prime rib = burrito special only. No steak/filet taco. No veggie protein.',
+    'No AI disclaimers. Only suggest calling (978) 982-1800 for live stock / platter timing / true unknowns.',
     '',
     'FULL MENU:',
     FULL_MENU,
