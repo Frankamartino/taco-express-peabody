@@ -123,6 +123,23 @@
       font-weight: 800;
       font-size: 0.98rem;
     }
+    .paid-stamp {
+      margin-top: 10px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--lime);
+      font-size: 0.95rem;
+    }
+    .paid-stamp .pi {
+      display: block;
+      margin-top: 4px;
+      font-weight: 400;
+      letter-spacing: 0;
+      text-transform: none;
+      font-size: 0.72rem;
+      opacity: 0.75;
+    }
     .instr {
       margin-top: 12px;
       font-size: 0.78rem;
@@ -189,6 +206,9 @@
   <div class="bottom">
     <button type="button" id="orderNowBtn">Order Now</button>
     <p id="status" aria-live="polite"></p>
+    <p style="font-size:0.75rem;opacity:0.55;text-align:center;margin-top:4px">
+      <a href="/voice-signup" style="color:#84cc16;text-decoration:none;font-weight:600">Save card for voice pay</a>
+    </p>
   </div>
 
   <audio id="remoteAudio" autoplay playsinline></audio>
@@ -213,7 +233,7 @@
       var history = [];
       var pendingCalls = {};
       var taxRate = 0.07;
-      var order = { lines: [], tip: 0, instructions: '' };
+      var order = { lines: [], tip: 0, instructions: '', paid: false, paymentIntentId: '' };
       var customer = { firstName: '', lastName: '', email: '', phone: '' };
       var fulfillment = ''; // pickup | delivery
 
@@ -312,6 +332,13 @@
             '<div class="line total-row"><div class="title">Total</div><div class="qty"></div><div class="price">' +
             money(total) +
             '</div></div>' +
+            (order.paid
+              ? '<div class="paid-stamp">Paid' +
+                (order.paymentIntentId
+                  ? '<span class="pi">' + escapeHtml(order.paymentIntentId) + '</span>'
+                  : '') +
+                '</div>'
+              : '') +
             '</div>';
         }
 
@@ -334,7 +361,7 @@
       }
 
       function resetOrder() {
-        order = { lines: [], tip: 0, instructions: '' };
+        order = { lines: [], tip: 0, instructions: '', paid: false, paymentIntentId: '' };
         renderTicket();
       }
 
@@ -360,6 +387,8 @@
           total: total,
           taxRate: taxRate,
           instructions: order.instructions || '',
+          paid: !!order.paid,
+          paymentIntentId: order.paymentIntentId || '',
         };
       }
 
@@ -560,6 +589,71 @@
           return;
         }
 
+        if (name === 'confirm_and_pay') {
+          if (order.paid) {
+            replyTool(callId, {
+              ok: true,
+              paid: true,
+              alreadyPaid: true,
+              paymentIntentId: order.paymentIntentId || '',
+              ticket: ticketSnapshot(),
+            });
+            return;
+          }
+          if (!order.lines.length) {
+            replyTool(callId, { ok: false, paid: false, error: 'No items on ticket.' });
+            return;
+          }
+          setStatus('Charging card…');
+          fetch('/api/charge-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ticket: ticketSnapshot() }),
+          })
+            .then(function (r) {
+              return r.json().then(function (data) {
+                return { httpOk: r.ok, data: data };
+              });
+            })
+            .then(function (res) {
+              if (res.httpOk && res.data && res.data.paid) {
+                order.paid = true;
+                order.paymentIntentId = res.data.paymentIntentId || '';
+                renderTicket();
+                setStatus('Paid — Taco Voice');
+                replyTool(callId, {
+                  ok: true,
+                  paid: true,
+                  paymentIntentId: order.paymentIntentId,
+                  amount: res.data.amount,
+                  orderId: res.data.orderId || '',
+                  ticket: ticketSnapshot(),
+                });
+              } else {
+                setStatus('Massimo is on — talk anytime');
+                replyTool(callId, {
+                  ok: false,
+                  paid: false,
+                  code: (res.data && res.data.code) || 'charge_failed',
+                  error: (res.data && res.data.error) || 'Charge failed',
+                  ticket: ticketSnapshot(),
+                });
+              }
+              delete pendingCalls[callId];
+            })
+            .catch(function () {
+              setStatus('Massimo is on — talk anytime');
+              replyTool(callId, {
+                ok: false,
+                paid: false,
+                error: 'Network error charging card',
+                ticket: ticketSnapshot(),
+              });
+              delete pendingCalls[callId];
+            });
+          return;
+        }
+
         if (name === 'recall_customer') {
           var recallEmail = String(args.email || customer.email || '').trim();
           callMem0('recall', { email: recallEmail })
@@ -617,10 +711,15 @@
             handleAskSupervisor(callId, data.arguments || '{}').finally(done);
             return;
           }
-          if (fname === 'recall_customer' || fname === 'remember_customer' || fname === 'look_at_screen') {
+          if (
+            fname === 'recall_customer' ||
+            fname === 'remember_customer' ||
+            fname === 'look_at_screen' ||
+            fname === 'confirm_and_pay'
+          ) {
             handleOrderTool(fname, callId, data.arguments || '{}');
             // replyTool is async inside — release lock after short delay if still stuck
-            setTimeout(done, 12000);
+            setTimeout(done, 20000);
             return;
           }
           if (

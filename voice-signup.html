@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Taco Express Voice — Save card</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="description" content="One-time card signup for Taco Express Peabody Voice pay. Separate from Martino Pasta Bar and the main menu site." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --lime: #84cc16;
+      --terra: #ea580c;
+      --white: #ffffff;
+      --charcoal: #1c1917;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      font-family: "DM Sans", system-ui, sans-serif;
+      background: var(--charcoal);
+      color: var(--white);
+      padding: 36px 20px 48px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      font-family: "Bebas Neue", sans-serif;
+      font-size: clamp(2.2rem, 9vw, 3.4rem);
+      letter-spacing: 0.06em;
+      color: var(--lime);
+      text-align: center;
+      line-height: 1;
+    }
+    .sub {
+      margin-top: 12px;
+      max-width: 28rem;
+      text-align: center;
+      opacity: 0.85;
+      line-height: 1.5;
+      font-size: 0.95rem;
+    }
+    .warn {
+      margin-top: 18px;
+      max-width: 28rem;
+      font-size: 0.82rem;
+      line-height: 1.45;
+      opacity: 0.75;
+      text-align: center;
+    }
+    form {
+      margin-top: 28px;
+      width: min(100%, 22rem);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    label { font-size: 0.8rem; font-weight: 600; opacity: 0.9; }
+    input {
+      width: 100%;
+      padding: 14px 14px;
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 10px;
+      background: #0c0a09;
+      color: var(--white);
+      font: inherit;
+      font-size: 1rem;
+    }
+    button {
+      margin-top: 8px;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 800;
+      font-size: 1.05rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 16px 20px;
+      border-radius: 999px;
+      background: var(--terra);
+      color: #fff;
+    }
+    button:disabled { opacity: 0.6; cursor: wait; }
+    #msg {
+      margin-top: 20px;
+      max-width: 28rem;
+      text-align: center;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      min-height: 1.4em;
+      white-space: pre-wrap;
+    }
+    #msg.ok { color: var(--lime); }
+    #msg.err { color: #fca5a5; }
+    a.voice {
+      margin-top: 28px;
+      color: var(--lime);
+      font-weight: 700;
+      text-decoration: none;
+    }
+    code {
+      font-size: 0.78rem;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+  <h1>Voice card signup</h1>
+  <p class="sub">
+    Save a card once for <strong>Taco Express Peabody Voice</strong> hands-free pay.
+    After this, Massimo can charge when you say yes — no taps on the order.
+  </p>
+  <p class="warn">
+    This bill is <strong>Taco Voice only</strong>. Not Martino Pasta Bar. Not the main menu / DoorDash site.
+  </p>
+
+  <form id="signupForm">
+    <label for="name">Name</label>
+    <input id="name" name="name" autocomplete="name" placeholder="Frank Martino" />
+    <label for="email">Email</label>
+    <input id="email" name="email" type="email" required autocomplete="email" placeholder="frankamartino@gmail.com" />
+    <label for="phone">Phone</label>
+    <input id="phone" name="phone" type="tel" autocomplete="tel" placeholder="978-337-3777" />
+    <button type="submit" id="goBtn">Save card with Stripe</button>
+  </form>
+
+  <p id="msg" aria-live="polite"></p>
+  <a class="voice" href="/voice">Back to Voice order</a>
+
+  <script>
+    (function () {
+      var form = document.getElementById('signupForm');
+      var msg = document.getElementById('msg');
+      var goBtn = document.getElementById('goBtn');
+      var params = new URLSearchParams(window.location.search);
+      var setup = params.get('setup');
+      var sessionId = params.get('session_id');
+
+      function setMsg(text, kind) {
+        msg.textContent = text || '';
+        msg.className = kind || '';
+      }
+
+      if (setup === 'cancel') {
+        setMsg('Card signup canceled. You can try again anytime.', 'err');
+      }
+
+      if (setup === 'success' && sessionId) {
+        setMsg('Card saved. Loading customer ids…', 'ok');
+        fetch('/api/setup-card-status?session_id=' + encodeURIComponent(sessionId))
+          .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+          .then(function (res) {
+            if (!res.ok || !res.d.customer_id) {
+              setMsg((res.d && res.d.error) || 'Could not read setup session.', 'err');
+              return;
+            }
+            setMsg(
+              'Card saved for Taco Voice.\n\n' +
+                'In Vercel → taco-express-peabody (NOT Martino) set:\n' +
+                'TACO_VOICE_STRIPE_CUSTOMER_ID=' + res.d.customer_id + '\n' +
+                (res.d.payment_method_id
+                  ? 'TACO_VOICE_STRIPE_PAYMENT_METHOD_ID=' + res.d.payment_method_id + '\n'
+                  : '') +
+                '\nThen hard-refresh /voice and tell Massimo to charge the card on file.',
+              'ok'
+            );
+          })
+          .catch(function () {
+            setMsg('Saved, but status lookup failed. Check Stripe Dashboard for the customer.', 'err');
+          });
+      }
+
+      form.addEventListener('submit', function (ev) {
+        ev.preventDefault();
+        goBtn.disabled = true;
+        setMsg('Opening Stripe…', '');
+        fetch('/api/setup-card', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: document.getElementById('name').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            phone: document.getElementById('phone').value.trim(),
+          }),
+        })
+          .then(function (r) {
+            return r.json().then(function (d) { return { ok: r.ok, d: d }; });
+          })
+          .then(function (res) {
+            if (!res.ok || !res.d.checkout_url) {
+              setMsg((res.d && res.d.error) || 'Could not start signup.', 'err');
+              goBtn.disabled = false;
+              return;
+            }
+            window.location.href = res.d.checkout_url;
+          })
+          .catch(function () {
+            setMsg('Network error starting signup.', 'err');
+            goBtn.disabled = false;
+          });
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -43,3 +43,19 @@ Drop PNG product shots into `images/drinks/` — see `images/drinks/README.txt` 
 5. Add domain `tacoexpresspeabody.com` in Vercel when DNS is ready
 
 **Never** deploy this on the Martino Vercel project (`martino-bar`).
+
+## Three separate products (do not cross-bill)
+
+| Product | Project / surface | Billing |
+|--------|-------------------|---------|
+| **Martino Pasta Bar** | `martino-bar` | Martino Stripe / Ara order — leave alone |
+| **Taco Express Peabody (menu)** | `index.html` / DoorDash | DoorDash — not Stripe voice |
+| **Taco Express Peabody Voice** | `/voice` + `/voice-signup` | **Own** Stripe keys + `TACO_VOICE_*` customer |
+
+### Voice hands-free pay (this repo only)
+
+1. Set on **taco-express-peabody** Vercel: `STRIPE_SECRET_KEY`, then open `/voice-signup` once to save a card.
+2. Paste `TACO_VOICE_STRIPE_CUSTOMER_ID` (+ optional `TACO_VOICE_STRIPE_PAYMENT_METHOD_ID`) into the **same** taco Vercel project.
+3. On `/voice`, finish wrap-up → Massimo asks to charge → say **yes** → ticket shows **PAID**.
+
+Do **not** reuse Martino `cus_` / `pm_` / secrets on this project.

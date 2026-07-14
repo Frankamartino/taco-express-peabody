@@ -123,9 +123,13 @@ module.exports = async function handler(req, res) {
     '4) allergies / chef notes → set_instructions (even if "none") — instant, no thinking',
     '5) mild or spicy → set_spice RIGHT AWAY (never ask_supervisor for spice). One short confirm.',
     '6) pickup or delivery → set_fulfillment',
-    'Then read Total from the ticket snapshot already in your last tool result — say it ONCE + "Pay at the counter, or call (978) 982-1800."',
+    'Then read Total from the ticket snapshot — say it ONCE.',
+    'PAY (Taco Voice Stripe only — never Martino, never DoorDash menu): Ask once: "Charge the card on file for [Total]?"',
+    'On clear yes / pay it / charge it → call confirm_and_pay, then short "You\'re paid" + pickup/delivery confirm.',
+    'On no / pay at counter → do NOT charge. Say "Pay at the counter, or call (978) 982-1800."',
+    'Never open a URL. Never charge without verbal yes. If confirm_and_pay fails with needs_card_setup: say card is not set up yet — use voice-signup once — then offer counter/call.',
     'SPEED: answer in one short sentence. Prefer ticket tool results over look_at_screen. look_at_screen ONLY if the customer asks what is on screen or you truly lost the ticket.',
-    'Do NOT call recall_customer or remember_customer until AFTER you have spoken the Total. Never stall on Mem0 mid-question.',
+    'Do NOT call recall_customer or remember_customer until AFTER you have spoken the Total (and after pay if they paid). Never stall on Mem0 mid-question.',
     `Tax ${(cfg.TAX_RATE * 100).toFixed(0)}% on taxable lines. Total = subtotal + tax + tip.`,
     'One short answer per turn — never repeat the same sentence twice. Never call ask_supervisor for mild/spicy, Coke, tacos, burritos, or totals.',
 
@@ -218,6 +222,13 @@ module.exports = async function handler(req, res) {
         name: 'look_at_screen',
         description:
           'OPTIONAL vision of the charcoal page. Do NOT use on every turn. Only if customer asks what is on screen or ticket state is unclear. Prefer ticket from other tools.',
+        parameters: { type: 'object', properties: {} },
+      },
+      {
+        type: 'function',
+        name: 'confirm_and_pay',
+        description:
+          'Taco Voice only. Charge the saved card after customer clearly says yes / pay it / charge it. Never call without verbal confirm. Never for Martino.',
         parameters: { type: 'object', properties: {} },
       },
       {
