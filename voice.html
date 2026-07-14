@@ -206,9 +206,6 @@
   <div class="bottom">
     <button type="button" id="orderNowBtn">Order Now</button>
     <p id="status" aria-live="polite"></p>
-    <p style="font-size:0.75rem;opacity:0.55;text-align:center;margin-top:4px">
-      <a href="/voice-signup" style="color:#84cc16;text-decoration:none;font-weight:600">Save card for voice pay</a>
-    </p>
   </div>
 
   <audio id="remoteAudio" autoplay playsinline></audio>
@@ -610,12 +607,13 @@
         }
 
         if (name === 'clear_order') {
-          // Keep customer identity; only wipe food lines — and never wipe silently on pay
           resetOrder();
+          resetCustomer();
+          renderTicket();
           replyTool(callId, {
             ok: true,
             ticket: ticketSnapshot(),
-            note: 'Order lines cleared. Customer name/email kept.',
+            note: 'Full reset — lines and customer cleared.',
           });
           return;
         }
@@ -956,6 +954,9 @@
 
       function hangUp() {
         sessionAlive = false;
+        resetOrder();
+        resetCustomer();
+        renderTicket();
         setStatus('Hung up');
         cleanup();
         try {
@@ -967,7 +968,8 @@
         var t = String(transcript || '').toLowerCase();
         if (!t) return;
         var bye =
-          /\b(bye|goodbye|good bye|see you|hang up)\b/i.test(t) ||
+          /\b(bye|goodbye|good bye|see you|hang up|end call|end the call)\b/i.test(t) ||
+          /\b(start over|start all over|start again|all over again)\b/i.test(t) ||
           /\b(thank you|thanks).{0,40}\b(bye|goodbye)\b/i.test(t);
         if (!bye) return;
         if (hangUpTimer) clearTimeout(hangUpTimer);

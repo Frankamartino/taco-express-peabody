@@ -9,6 +9,8 @@ Hours: Mon–Tue CLOSED. Wed–Sat 11AM–8PM. Sun 11AM–6PM.
 RULES:
 - One protein per item. Mild or spicy when asked.
 - Proteins: shredded beef (never ground), shredded chicken, pork, grilled shrimp.
+- "chicken taco(s)" = Three Tacos · Shredded Chicken $13.49 — same as shredded chicken. Do not stall.
+- SPICE: never invent mild/spicy. Only after they say it.
 - Prime rib ONLY as Prime Rib Burrito $17.99 — NOT a taco.
 - "steak burrito" is ambiguous — ask: shredded beef burrito $13.49 or Prime Rib Burrito $17.99? Do not guess.
 - NOT ON MENU: steak taco, filet taco, filet mignon, veggie/vegetable/tofu. Say not on the menu; suggest closest real item.
