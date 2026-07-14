@@ -54,6 +54,7 @@ module.exports = async function handler(req, res) {
       shop: 'taco-express-peabody',
       firstName: String(body.firstName || ''),
       lastName: String(body.lastName || ''),
+      phone: String(body.phone || ''),
     });
     return res.status(200).json({ ok: !!result.ok, email });
   }

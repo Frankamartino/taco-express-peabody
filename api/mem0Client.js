@@ -31,7 +31,7 @@ async function searchMem0ForUser(userId, limit = 8) {
       },
       body: JSON.stringify({
         query:
-          'taco preferences past orders favorites proteins mild spicy drinks allergies usual order',
+          'customer name phone email food allergies preferences past orders favorites usual order pickup delivery',
         filters: { user_id: userId },
         limit,
       }),
