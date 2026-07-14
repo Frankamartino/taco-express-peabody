@@ -1,12 +1,13 @@
 /**
- * Massimo voice — FIXED greeting + checkout config (Taco Express PB /voice).
+ * Massimo voice — FIXED greeting + checkout config (Taco Express /voice).
+ * Spoken brand is "Taco Express" (location pages may still show Peabody / Watertown / etc.).
  */
 module.exports = {
   HOST_NAME: 'Massimo',
-  SHOP_SHORT: 'Taco Express PB',
+  SHOP_SHORT: 'Taco Express',
 
   GREETING_EXACT:
-    'Welcome to Taco Express PB. My name is Massimo. May I have your name?',
+    'Welcome to Taco Express. My name is Massimo. May I have your name?',
 
   AFTER_NAME_HINT:
     'Hey [name], how are you? What are you in the mood for?',
