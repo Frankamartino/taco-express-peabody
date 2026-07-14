@@ -68,6 +68,27 @@
       display: none;
     }
     #ticket.has-items { display: block; }
+    .fulfill-banner {
+      margin: 0 0 10px;
+      font-weight: 800;
+      font-size: 1.15rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      line-height: 1.2;
+      color: #ffffff;
+    }
+    .pay-banner {
+      margin-top: 10px;
+      font-weight: 800;
+      font-size: 1.05rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      line-height: 1.25;
+      color: #ffffff;
+    }
+    .pay-banner.is-paid {
+      color: var(--lime);
+    }
     .cust {
       margin-bottom: 10px;
       font-weight: 600;
@@ -268,6 +289,7 @@
         instructions: '',
         paid: false,
         paymentIntentId: '',
+        paymentMethod: '', // cash | card
       };
       var customer = { firstName: '', lastName: '', email: '', phone: '' };
       var fulfillment = ''; // pickup | delivery
@@ -282,7 +304,12 @@
       }
 
       function ticketVisible() {
-        return order.lines.length > 0 || hasCustomer();
+        return (
+          order.lines.length > 0 ||
+          hasCustomer() ||
+          !!fulfillment ||
+          !!order.paymentMethod
+        );
       }
 
       function taxableSubtotal() {
@@ -296,6 +323,35 @@
         return order.lines.reduce(function (sum, line) {
           return sum + (Number(line.price) || 0);
         }, 0);
+      }
+
+      function payBannerHtml() {
+        var method = String(order.paymentMethod || '').toLowerCase();
+        var label = '';
+        var paidClass = '';
+        if (order.paid) {
+          label = 'Paid with credit card';
+          paidClass = ' is-paid';
+        } else if (method === 'card') {
+          label = 'Pay with credit card';
+        } else if (method === 'cash') {
+          label = 'Pay by cash';
+        } else {
+          return '';
+        }
+        var html =
+          '<div class="pay-banner' +
+          paidClass +
+          '">' +
+          escapeHtml(label);
+        if (order.paid && order.paymentIntentId) {
+          html +=
+            '<span class="pi" style="display:block;margin-top:4px;font-weight:400;letter-spacing:0;text-transform:none;font-size:0.72rem;color:#fff">' +
+            escapeHtml(order.paymentIntentId) +
+            '</span>';
+        }
+        html += '</div>';
+        return html;
       }
 
       function renderTicket() {
@@ -312,7 +368,14 @@
         var total = Math.round((sub + tax + tip) * 100) / 100;
 
         var html = '';
-        if (hasCustomer() || fulfillment) {
+        // Kitchen-first: PICKUP / DELIVERY above the name, larger type
+        if (fulfillment) {
+          html +=
+            '<div class="fulfill-banner">' +
+            escapeHtml(fulfillment === 'delivery' ? 'Delivery' : 'Pickup') +
+            '</div>';
+        }
+        if (hasCustomer()) {
           var nameBits = [customer.firstName, customer.lastName].filter(Boolean).join(' ');
           html += '<div class="cust">';
           if (nameBits) html += '<div>' + escapeHtml(nameBits) + '</div>';
@@ -321,12 +384,6 @@
           }
           if (customer.email) {
             html += '<div class="email">' + escapeHtml(customer.email) + '</div>';
-          }
-          if (fulfillment) {
-            html +=
-              '<div class="email">' +
-              escapeHtml(fulfillment === 'delivery' ? 'Delivery' : 'Pickup') +
-              '</div>';
           }
           html += '</div>';
         }
@@ -367,14 +424,10 @@
             '<div class="line total-row"><div class="title">Total</div><div class="qty"></div><div class="price">' +
             money(total) +
             '</div></div>' +
-            (order.paid
-              ? '<div class="paid-stamp">Paid' +
-                (order.paymentIntentId
-                  ? '<span class="pi">' + escapeHtml(order.paymentIntentId) + '</span>'
-                  : '') +
-                '</div>'
-              : '') +
+            payBannerHtml() +
             '</div>';
+        } else if (order.paymentMethod || order.paid) {
+          html += payBannerHtml();
         }
 
         if (order.instructions && String(order.instructions).trim()) {
@@ -403,6 +456,7 @@
           instructions: '',
           paid: false,
           paymentIntentId: '',
+          paymentMethod: '',
         };
         renderTicket();
       }
@@ -422,6 +476,7 @@
           lines: order.lines,
           customer: customer,
           fulfillment: fulfillment || '',
+          paymentMethod: order.paymentMethod || '',
           subtotal: sub,
           taxable: taxable,
           tax: tax,
@@ -590,6 +645,23 @@
           return;
         }
 
+        if (name === 'set_payment') {
+          var pm = String(args.method || '').trim().toLowerCase();
+          if (pm !== 'cash' && pm !== 'card') {
+            replyTool(callId, { ok: false, error: 'method must be cash or card' });
+            return;
+          }
+          order.paymentMethod = pm;
+          if (pm === 'cash') {
+            // Counter cash — not Stripe-charged
+            order.paid = false;
+            order.paymentIntentId = '';
+          }
+          renderTicket();
+          replyTool(callId, { ok: true, paymentMethod: pm, ticket: ticketSnapshot() });
+          return;
+        }
+
         if (name === 'set_spice') {
           var level = String(args.level || '').trim().toLowerCase();
           if (level !== 'mild' && level !== 'spicy') {
@@ -699,12 +771,14 @@
             .then(function (res) {
               if (res.httpOk && res.data && res.data.paid) {
                 order.paid = true;
+                order.paymentMethod = 'card';
                 order.paymentIntentId = res.data.paymentIntentId || '';
                 renderTicket();
                 setStatus('Paid — Taco Voice');
                 replyTool(callId, {
                   ok: true,
                   paid: true,
+                  paymentMethod: 'card',
                   paymentIntentId: order.paymentIntentId,
                   amount: res.data.amount,
                   orderId: res.data.orderId || '',
@@ -807,6 +881,7 @@
             fname === 'add_order_line' ||
             fname === 'set_customer' ||
             fname === 'set_fulfillment' ||
+            fname === 'set_payment' ||
             fname === 'set_spice' ||
             fname === 'set_tip' ||
             fname === 'set_instructions' ||

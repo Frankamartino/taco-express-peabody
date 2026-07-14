@@ -137,12 +137,12 @@ module.exports = async function handler(req, res) {
     '3) phone if missing → set_customer',
     '4) allergies / chef notes if not yet asked → set_instructions (even if "none")',
     '5) tip — ask once ("Would you like to leave a tip?"); set_tip with dollars, or set_tip 0 if they decline. Do this BEFORE pay.',
-    '6) pickup or delivery if missing → set_fulfillment',
+    '6) pickup or delivery if missing → set_fulfillment (shows large PICKUP or DELIVERY on the ticket for the kitchen)',
     'Mild/spicy during ordering: set_spice right away (never ask_supervisor). Spicy sauce on the side = free house sauce in notes.',
     'Only AFTER lastName + email + phone + tip asked + fulfillment: say Total ONCE, then ask once: "Charge the card on file for [Total]?"',
-    'On clear yes / pay it / charge it → confirm_and_pay, then short "You\'re paid."',
-    'On no / pay at counter → do NOT charge. "Pay at the counter, or call (978) 982-1800."',
-    'On no / pay at counter → do NOT charge. "Pay at the counter, or call (978) 982-1800."',
+    'On clear yes / pay it / charge it → confirm_and_pay (ticket shows PAID WITH CREDIT CARD), then short "You\'re paid."',
+    'On no / pay at counter / cash → call set_payment with method cash FIRST (ticket shows PAY BY CASH). Do NOT charge. "Pay at the counter, or call (978) 982-1800."',
+    'If they clearly choose card but have not charged yet, you may call set_payment with method card — after a successful charge the ticket becomes PAID WITH CREDIT CARD.',
     'Never open a URL. Never charge without verbal yes.',
     'If confirm_and_pay says needs_card_setup / no card on file (first time): say short and plain — "No card on file yet. You can save one once on the Save card for voice pay page — Stripe keeps the number safe, we never see it. Or pay at the counter / call (978) 982-1800." Do not say PCI. Do not dump a speech.',
     'If missing_fields — ask for those fields one at a time, then ask to charge again after verbal yes.',
@@ -205,7 +205,8 @@ module.exports = async function handler(req, res) {
       {
         type: 'function',
         name: 'set_fulfillment',
-        description: 'Set pickup or delivery on the ticket after they choose.',
+        description:
+          'Set pickup or delivery on the ticket after they choose. Shows a large PICKUP or DELIVERY banner at the top for the kitchen.',
         parameters: {
           type: 'object',
           properties: {
@@ -216,6 +217,23 @@ module.exports = async function handler(req, res) {
             },
           },
           required: ['type'],
+        },
+      },
+      {
+        type: 'function',
+        name: 'set_payment',
+        description:
+          'Mark how they will pay on the kitchen ticket. cash = PAY BY CASH (counter). card = credit card path (after confirm_and_pay succeeds it becomes PAID WITH CREDIT CARD). Call set_payment cash when they choose pay at counter / cash.',
+        parameters: {
+          type: 'object',
+          properties: {
+            method: {
+              type: 'string',
+              enum: ['cash', 'card'],
+              description: 'cash or card',
+            },
+          },
+          required: ['method'],
         },
       },
       {
