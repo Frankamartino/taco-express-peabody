@@ -1036,6 +1036,13 @@
         resetCustomer();
         renderTicket();
 
+        // Unlock playback under the click gesture (autoplay after awaits is flaky).
+        try {
+          remoteAudio.muted = false;
+          remoteAudio.volume = 1;
+          remoteAudio.play().catch(function () {});
+        } catch (eUnlock) {}
+
         try {
           var tokenPromise = fetch('/api/realtime-token', {
             method: 'POST',
@@ -1063,12 +1070,9 @@
           });
 
           pc.ontrack = function (ev) {
-            if (!sessionAlive) {
-              try {
-                if (ev.track) ev.track.stop();
-              } catch (e) {}
-              return;
-            }
+            // Never stop the remote track here. Early ontrack (before sessionAlive)
+            // used to kill Massimo's audio for the whole call.
+            if (intentionallyHungUp) return;
             var stream = ev.streams && ev.streams[0] ? ev.streams[0] : new MediaStream([ev.track]);
             remoteAudio.muted = false;
             remoteAudio.srcObject = stream;
@@ -1122,6 +1126,11 @@
             taxRate = Number(tokenPayload.taxRate);
           }
 
+          // Arm BEFORE SDP answer — ontrack fires on setRemoteDescription; if
+          // sessionAlive is still false, older code stopped the remote track (silence).
+          greetingArmed = true;
+          sessionAlive = true;
+
           var sdpResp = await fetch('https://api.openai.com/v1/realtime/calls', {
             method: 'POST',
             body: offer.sdp,
@@ -1134,23 +1143,20 @@
             var sdpErr = await sdpResp.text().catch(function () { return ''; });
             throw new Error('realtime ' + sdpResp.status + (sdpErr ? ': ' + sdpErr.slice(0, 180) : ''));
           }
-          if (!connecting) {
+          if (!sessionAlive || !connecting) {
             cleanup();
             return;
           }
           var answerSdp = await sdpResp.text();
           await pc.setRemoteDescription({ type: 'answer', sdp: answerSdp });
 
-          // Unmute playback before first line
           try {
             remoteAudio.muted = false;
             remoteAudio.volume = 1;
             remoteAudio.play().catch(function () {});
           } catch (ePlay) {}
 
-          sessionAlive = true;
-          greetingArmed = true;
-          // One shot only — if data channel already open, speak now; else open handler will
+          // One shot — if data channel already open, speak now; else open handler will
           speakFixedGreeting();
 
           connected = true;
