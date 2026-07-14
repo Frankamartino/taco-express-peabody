@@ -99,23 +99,23 @@ module.exports = async function handler(req, res) {
     '=== GREETING FLOW (FIXED) ===',
     'FIRST TURN — say EXACTLY this, then STOP and wait for their name:',
     `"${cfg.GREETING_EXACT}"`,
-    'AFTER THEY GIVE THEIR NAME — natural follow-up (use their name). Pattern like:',
+    'AFTER THEY GIVE THEIR FIRST NAME — call set_customer with firstName, then natural follow-up. Pattern like:',
     `"${cfg.AFTER_NAME_HINT}"`,
     'You may lightly vary the after-name line so it stays human — still short, still happy. Then take the order. Do not re-read the full welcome.',
 
     '=== MENU TRUTH (AUTHORITATIVE) ===',
     'FULL MENU below is law. If it exists: exact name, protein, price, modifiers. If it does not: "Not on the menu" + closest real option in one short line. No imagination.',
     'TACOS: "shredded beef taco" / "beef tacos" = Three Tacos · Shredded Beef $13.49 (always the three-pack). Same for chicken/pork/shrimp three-packs.',
-    'ONE-TACO $5 Express ONLY if they say one/single/express/five-dollar taco special — beef, chicken, or pork; tax included; never shrimp on $5.',
+    'ONE-TACO $5 Express ONLY if they say one/single/express/five-dollar taco special — one single taco — beef, chicken, or pork; tax included; never shrimp on $5.',
     'Steak / filet taco → not on the menu. Prime rib → only the Prime Rib Burrito $17.99. Shawarma → not on the menu.',
 
     '=== ORDERS / CHECKOUT TICKET ===',
     'When the customer locks an item, call add_order_line FIRST (same turn), then one short spoken confirm. Use exact menu titles (e.g. "Three Tacos · Shredded Beef").',
-    'For the $5 Express one-taco special: price 5, taxIncluded true, note "tax included".',
-    'add_order_line: title, qty (default 1), price, note (optional), taxIncluded (optional boolean).',
-    'House sauce on the side is FREE — fold into note. set_tip / set_instructions / clear_order as needed.',
-    `Tax on the ticket is ${(cfg.TAX_RATE * 100).toFixed(0)}% on taxable lines only (skip taxIncluded). Total = subtotal + tax + tip.`,
-    'If they say pay: confirm Total once, then: "Pay at the counter, or call (978) 982-1800."',
+    'For the $5 Express one-taco special: price 5, taxIncluded true, note "tax included · one taco".',
+    'NEVER call clear_order for thank you, buy, pay, checkout, "that\'s everything", "I\'ll take it", or confirming the order. clear_order ONLY if they say start over / cancel my order / clear everything.',
+    'When they are ready to buy/pay: KEEP the ticket. Ask for last name if missing, then email if missing — call set_customer. Then confirm Total once: "Pay at the counter, or call (978) 982-1800."',
+    'After email is set, call recall_customer (Mem0). Use memories naturally — never read them as a list. After a completed order intent, call remember_customer with a short note of what they ordered.',
+    `Tax is ${(cfg.TAX_RATE * 100).toFixed(0)}% on taxable lines only. Total = subtotal + tax + tip.`,
 
     '=== FULL MENU ===',
     FULL_MENU,
@@ -155,6 +155,20 @@ module.exports = async function handler(req, res) {
       },
       {
         type: 'function',
+        name: 'set_customer',
+        description:
+          'Save customer first name, last name, and/or email on the ticket. Call after they give each piece. firstName from greeting; lastName + email before pay.',
+        parameters: {
+          type: 'object',
+          properties: {
+            firstName: { type: 'string' },
+            lastName: { type: 'string' },
+            email: { type: 'string' },
+          },
+        },
+      },
+      {
+        type: 'function',
         name: 'set_tip',
         description: 'Set tip amount on the checkout ticket (dollars).',
         parameters: {
@@ -180,8 +194,38 @@ module.exports = async function handler(req, res) {
       {
         type: 'function',
         name: 'clear_order',
-        description: 'Clear the checkout ticket.',
+        description:
+          'ONLY if customer says start over / cancel my order / clear everything. NEVER use for thank you, buy, pay, checkout, or that is everything.',
         parameters: { type: 'object', properties: {} },
+      },
+      {
+        type: 'function',
+        name: 'recall_customer',
+        description:
+          'After email is known — recall Mem0 memories for this customer. Use naturally; do not read aloud as a list.',
+        parameters: {
+          type: 'object',
+          properties: {
+            email: { type: 'string', description: 'Customer email' },
+          },
+          required: ['email'],
+        },
+      },
+      {
+        type: 'function',
+        name: 'remember_customer',
+        description:
+          'Save a short memory after they finish ordering (what they ordered, preferences). Requires email.',
+        parameters: {
+          type: 'object',
+          properties: {
+            email: { type: 'string' },
+            text: { type: 'string', description: 'Short memory note' },
+            firstName: { type: 'string' },
+            lastName: { type: 'string' },
+          },
+          required: ['email', 'text'],
+        },
       },
       {
         type: 'function',

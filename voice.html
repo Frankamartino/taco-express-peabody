@@ -49,31 +49,40 @@
       font-weight: 700;
     }
 
-    /* 80mm thermal preview — receipt columns, no frame */
+    /* 80mm thermal — tighter type */
     .ticket-wrap {
       flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px 0 12px;
-      min-height: 160px;
+      padding: 16px 0 8px;
+      min-height: 140px;
     }
     #ticket {
       width: 80mm;
       max-width: 100%;
       color: var(--white);
-      font-size: 0.95rem;
-      line-height: 1.3;
+      font-size: 0.88rem;
+      line-height: 1.25;
       font-variant-numeric: tabular-nums;
       display: none;
     }
     #ticket.has-items { display: block; }
+    .cust {
+      margin-bottom: 10px;
+      font-weight: 600;
+      line-height: 1.35;
+    }
+    .cust .email {
+      font-weight: 400;
+      font-size: 0.82rem;
+    }
     .line {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 2.4rem 4.6rem;
-      column-gap: 8px;
+      grid-template-columns: minmax(0, 1fr) 2.1rem 4.2rem;
+      column-gap: 6px;
       align-items: baseline;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     .line .title {
       font-weight: 600;
@@ -83,7 +92,7 @@
       white-space: nowrap;
       font-weight: 600;
       text-align: right;
-      letter-spacing: 0.03em;
+      letter-spacing: 0.02em;
     }
     .line .price {
       font-weight: 700;
@@ -92,34 +101,34 @@
     }
     .line-note {
       grid-column: 1 / -1;
-      margin: -2px 0 10px;
-      font-size: 0.85rem;
+      margin: -1px 0 8px;
+      font-size: 0.78rem;
       font-weight: 400;
       color: var(--white);
     }
     .totals {
-      margin-top: 12px;
+      margin-top: 10px;
       padding-top: 2px;
     }
     .totals .line {
-      margin-bottom: 5px;
+      margin-bottom: 4px;
       font-weight: 400;
     }
     .totals .line .title { font-weight: 500; }
     .totals .line.total-row {
-      margin-top: 8px;
+      margin-top: 6px;
     }
     .totals .line.total-row .title,
     .totals .line.total-row .price {
       font-weight: 800;
-      font-size: 1.05rem;
+      font-size: 0.98rem;
     }
     .instr {
-      margin-top: 16px;
-      font-size: 0.85rem;
+      margin-top: 12px;
+      font-size: 0.78rem;
       color: var(--white);
     }
-    .instr .label { font-weight: 700; margin-bottom: 4px; }
+    .instr .label { font-weight: 700; margin-bottom: 3px; }
     .instr .body { white-space: pre-wrap; font-weight: 400; }
 
     .bottom {
@@ -204,10 +213,19 @@
       var pendingCalls = {};
       var taxRate = 0.07;
       var order = { lines: [], tip: 0, instructions: '' };
+      var customer = { firstName: '', lastName: '', email: '' };
 
       function money(n) {
         var x = Math.round((Number(n) || 0) * 100) / 100;
         return '$' + x.toFixed(2);
+      }
+
+      function hasCustomer() {
+        return !!(customer.firstName || customer.lastName || customer.email);
+      }
+
+      function ticketVisible() {
+        return order.lines.length > 0 || hasCustomer();
       }
 
       function taxableSubtotal() {
@@ -224,7 +242,7 @@
       }
 
       function renderTicket() {
-        if (!order.lines.length) {
+        if (!ticketVisible()) {
           ticketEl.classList.remove('has-items');
           ticketEl.innerHTML = '';
           return;
@@ -237,6 +255,16 @@
         var total = Math.round((sub + tax + tip) * 100) / 100;
 
         var html = '';
+        if (hasCustomer()) {
+          var nameBits = [customer.firstName, customer.lastName].filter(Boolean).join(' ');
+          html += '<div class="cust">';
+          if (nameBits) html += '<div>' + escapeHtml(nameBits) + '</div>';
+          if (customer.email) {
+            html += '<div class="email">' + escapeHtml(customer.email) + '</div>';
+          }
+          html += '</div>';
+        }
+
         order.lines.forEach(function (line) {
           var qty = line.qty != null ? line.qty : 1;
           html +=
@@ -256,23 +284,25 @@
             '</div>';
         });
 
-        html +=
-          '<div class="totals">' +
-          '<div class="line"><div class="title">Subtotal</div><div class="qty"></div><div class="price">' +
-          money(sub) +
-          '</div></div>' +
-          '<div class="line"><div class="title">Tax ' +
-          (taxRate * 100).toFixed(0) +
-          '%</div><div class="qty"></div><div class="price">' +
-          money(tax) +
-          '</div></div>' +
-          '<div class="line"><div class="title">Tip</div><div class="qty"></div><div class="price">' +
-          money(tip) +
-          '</div></div>' +
-          '<div class="line total-row"><div class="title">Total</div><div class="qty"></div><div class="price">' +
-          money(total) +
-          '</div></div>' +
-          '</div>';
+        if (order.lines.length) {
+          html +=
+            '<div class="totals">' +
+            '<div class="line"><div class="title">Subtotal</div><div class="qty"></div><div class="price">' +
+            money(sub) +
+            '</div></div>' +
+            '<div class="line"><div class="title">Tax ' +
+            (taxRate * 100).toFixed(0) +
+            '%</div><div class="qty"></div><div class="price">' +
+            money(tax) +
+            '</div></div>' +
+            '<div class="line"><div class="title">Tip</div><div class="qty"></div><div class="price">' +
+            money(tip) +
+            '</div></div>' +
+            '<div class="line total-row"><div class="title">Total</div><div class="qty"></div><div class="price">' +
+            money(total) +
+            '</div></div>' +
+            '</div>';
+        }
 
         if (order.instructions && String(order.instructions).trim()) {
           html +=
@@ -297,6 +327,10 @@
         renderTicket();
       }
 
+      function resetCustomer() {
+        customer = { firstName: '', lastName: '', email: '' };
+      }
+
       function ticketSnapshot() {
         var sub = subtotal();
         var taxable = taxableSubtotal();
@@ -305,6 +339,7 @@
         var total = Math.round((sub + tax + tip) * 100) / 100;
         return {
           lines: order.lines,
+          customer: customer,
           subtotal: sub,
           taxable: taxable,
           tax: tax,
@@ -378,6 +413,23 @@
         setStatus('Massimo is on — talk anytime');
       }
 
+      async function callMem0(action, payload) {
+        var resp = await fetch('/api/mem0', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(Object.assign({ action: action }, payload || {})),
+        });
+        var data = await resp.json().catch(function () { return {}; });
+        if (!resp.ok) {
+          return {
+            ok: false,
+            error: data.error || ('mem0 ' + resp.status),
+            hint: data.hint || '',
+          };
+        }
+        return data;
+      }
+
       function handleOrderTool(name, callId, rawArgs) {
         var args = {};
         try {
@@ -406,6 +458,21 @@
           return;
         }
 
+        if (name === 'set_customer') {
+          if (args.firstName != null && String(args.firstName).trim()) {
+            customer.firstName = String(args.firstName).trim();
+          }
+          if (args.lastName != null && String(args.lastName).trim()) {
+            customer.lastName = String(args.lastName).trim();
+          }
+          if (args.email != null && String(args.email).trim()) {
+            customer.email = String(args.email).trim().toLowerCase();
+          }
+          renderTicket();
+          replyTool(callId, { ok: true, ticket: ticketSnapshot() });
+          return;
+        }
+
         if (name === 'set_tip') {
           var tipAmt = Number(args.amount);
           order.tip = isFinite(tipAmt) && tipAmt >= 0 ? tipAmt : 0;
@@ -422,8 +489,46 @@
         }
 
         if (name === 'clear_order') {
+          // Keep customer identity; only wipe food lines — and never wipe silently on pay
           resetOrder();
-          replyTool(callId, { ok: true, ticket: ticketSnapshot() });
+          replyTool(callId, {
+            ok: true,
+            ticket: ticketSnapshot(),
+            note: 'Order lines cleared. Customer name/email kept.',
+          });
+          return;
+        }
+
+        if (name === 'recall_customer') {
+          var recallEmail = String(args.email || customer.email || '').trim();
+          callMem0('recall', { email: recallEmail })
+            .then(function (data) {
+              replyTool(callId, data);
+              delete pendingCalls[callId];
+            })
+            .catch(function () {
+              replyTool(callId, { ok: false, error: 'Mem0 recall failed' });
+              delete pendingCalls[callId];
+            });
+          return;
+        }
+
+        if (name === 'remember_customer') {
+          var remEmail = String(args.email || customer.email || '').trim();
+          callMem0('remember', {
+            email: remEmail,
+            text: String(args.text || ''),
+            firstName: args.firstName || customer.firstName || '',
+            lastName: args.lastName || customer.lastName || '',
+          })
+            .then(function (data) {
+              replyTool(callId, data);
+              delete pendingCalls[callId];
+            })
+            .catch(function () {
+              replyTool(callId, { ok: false, error: 'Mem0 remember failed' });
+              delete pendingCalls[callId];
+            });
         }
       }
 
@@ -450,8 +555,15 @@
             handleAskSupervisor(callId, data.arguments || '{}').finally(done);
             return;
           }
+          if (fname === 'recall_customer' || fname === 'remember_customer') {
+            handleOrderTool(fname, callId, data.arguments || '{}');
+            // replyTool is async inside — release lock after short delay if still stuck
+            setTimeout(done, 8000);
+            return;
+          }
           if (
             fname === 'add_order_line' ||
+            fname === 'set_customer' ||
             fname === 'set_tip' ||
             fname === 'set_instructions' ||
             fname === 'clear_order'
@@ -511,6 +623,8 @@
         btn.textContent = 'Connecting…';
         setStatus('Talking to Massimo…');
         resetOrder();
+        resetCustomer();
+        renderTicket();
 
         try {
           var tokenPromise = fetch('/api/realtime-token', {
