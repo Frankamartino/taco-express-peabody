@@ -213,7 +213,8 @@
       var pendingCalls = {};
       var taxRate = 0.07;
       var order = { lines: [], tip: 0, instructions: '' };
-      var customer = { firstName: '', lastName: '', email: '' };
+      var customer = { firstName: '', lastName: '', email: '', phone: '' };
+      var fulfillment = ''; // pickup | delivery
 
       function money(n) {
         var x = Math.round((Number(n) || 0) * 100) / 100;
@@ -221,7 +222,7 @@
       }
 
       function hasCustomer() {
-        return !!(customer.firstName || customer.lastName || customer.email);
+        return !!(customer.firstName || customer.lastName || customer.email || customer.phone);
       }
 
       function ticketVisible() {
@@ -255,12 +256,21 @@
         var total = Math.round((sub + tax + tip) * 100) / 100;
 
         var html = '';
-        if (hasCustomer()) {
+        if (hasCustomer() || fulfillment) {
           var nameBits = [customer.firstName, customer.lastName].filter(Boolean).join(' ');
           html += '<div class="cust">';
           if (nameBits) html += '<div>' + escapeHtml(nameBits) + '</div>';
+          if (customer.phone) {
+            html += '<div class="email">' + escapeHtml(customer.phone) + '</div>';
+          }
           if (customer.email) {
             html += '<div class="email">' + escapeHtml(customer.email) + '</div>';
+          }
+          if (fulfillment) {
+            html +=
+              '<div class="email">' +
+              escapeHtml(fulfillment === 'delivery' ? 'Delivery' : 'Pickup') +
+              '</div>';
           }
           html += '</div>';
         }
@@ -306,7 +316,7 @@
 
         if (order.instructions && String(order.instructions).trim()) {
           html +=
-            '<div class="instr"><div class="label">Special instructions</div><div class="body">' +
+            '<div class="instr"><div class="label">Chef notes / allergies</div><div class="body">' +
             escapeHtml(String(order.instructions).trim()) +
             '</div></div>';
         }
@@ -328,7 +338,8 @@
       }
 
       function resetCustomer() {
-        customer = { firstName: '', lastName: '', email: '' };
+        customer = { firstName: '', lastName: '', email: '', phone: '' };
+        fulfillment = '';
       }
 
       function ticketSnapshot() {
@@ -340,6 +351,7 @@
         return {
           lines: order.lines,
           customer: customer,
+          fulfillment: fulfillment || '',
           subtotal: sub,
           taxable: taxable,
           tax: tax,
@@ -468,6 +480,17 @@
           if (args.email != null && String(args.email).trim()) {
             customer.email = String(args.email).trim().toLowerCase();
           }
+          if (args.phone != null && String(args.phone).trim()) {
+            customer.phone = String(args.phone).trim();
+          }
+          renderTicket();
+          replyTool(callId, { ok: true, ticket: ticketSnapshot() });
+          return;
+        }
+
+        if (name === 'set_fulfillment') {
+          var ft = String(args.type || '').trim().toLowerCase();
+          fulfillment = ft === 'delivery' ? 'delivery' : ft === 'pickup' ? 'pickup' : '';
           renderTicket();
           replyTool(callId, { ok: true, ticket: ticketSnapshot() });
           return;
@@ -520,6 +543,7 @@
             text: String(args.text || ''),
             firstName: args.firstName || customer.firstName || '',
             lastName: args.lastName || customer.lastName || '',
+            phone: args.phone || customer.phone || '',
           })
             .then(function (data) {
               replyTool(callId, data);

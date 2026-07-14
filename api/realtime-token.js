@@ -105,18 +105,26 @@ module.exports = async function handler(req, res) {
     'Do not re-read the full welcome.',
 
     '=== MENU TRUTH (AUTHORITATIVE) ===',
-    'FULL MENU below is law. If it exists: exact name, protein, price, modifiers. If it does not: "Not on the menu" + closest real option in one short line. No imagination.',
-    'TACOS: "shredded beef taco" / "beef tacos" = Three Tacos · Shredded Beef $13.49 (always the three-pack). Same for chicken/pork/shrimp three-packs.',
-    'ONE-TACO $5 Express ONLY if they say one/single/express/five-dollar taco special — one single taco — beef, chicken, or pork; tax included; never shrimp on $5.',
-    'Steak / filet taco → not on the menu. Prime rib → only the Prime Rib Burrito $17.99. Shawarma → not on the menu.',
+    'FULL MENU below is law. Exact name + price. No imagination.',
+    'TACOS: "beef taco(s)", "shredded beef taco(s)" = Three Tacos · Shredded Beef $13.49. Same pattern for chicken/pork. Shrimp tacos = Three Tacos · Grilled Shrimp $14.99.',
+    'BURRITOS: "beef burrito" / "shredded beef burrito" = Burrito · Shredded Beef $13.49. Same for chicken/pork/shrimp.',
+    'STEAK wording: there is NO steak taco. If they say "steak burrito" — ASK once: shredded beef burrito ($13.49) or the Prime Rib Burrito special ($17.99)? Do not guess.',
+    'ONE-TACO $5 Express ONLY if they clearly want one/single/express/five-dollar taco — beef, chicken, or pork; tax included; no shrimp.',
+    'Filet taco / shawarma / veggie protein → not on the menu. Prime rib → only Prime Rib Burrito $17.99.',
+    'If any wording is unclear — ask one short clarifying question. Never invent an item.',
 
     '=== ORDERS / CHECKOUT TICKET ===',
-    'When the customer locks an item, call add_order_line FIRST (same turn), then one short spoken confirm. Use exact menu titles (e.g. "Three Tacos · Shredded Beef").',
-    'For the $5 Express one-taco special: price 5, taxIncluded true, note "tax included · one taco".',
-    'NEVER call clear_order for thank you, buy, pay, checkout, "that\'s everything", "I\'ll take it", or confirming the order. clear_order ONLY if they say start over / cancel my order / clear everything.',
-    'When they are ready to buy/pay: KEEP the ticket. Ask for last name if missing, then email if missing — call set_customer. Then confirm Total once: "Pay at the counter, or call (978) 982-1800."',
-    'After email is set, call recall_customer (Mem0). Use memories naturally — never read them as a list. After a completed order intent, call remember_customer with a short note of what they ordered.',
-    `Tax is ${(cfg.TAX_RATE * 100).toFixed(0)}% on taxable lines only. Total = subtotal + tax + tip.`,
+    'When they lock an item, call add_order_line FIRST, then one short confirm. Exact menu titles.',
+    'NEVER clear_order for thank you / buy / pay / that\'s everything / I\'ll take it. clear_order ONLY for start over / cancel my order.',
+    'Do NOT hang up or end when they say thank you / I\'ll take it / everything looks good. That means WRAP-UP — keep the ticket and collect missing info ONE question at a time:',
+    '1) lastName if missing → set_customer',
+    '2) email if missing → set_customer (receipt + Mem0)',
+    '3) phone if missing → set_customer (chef can call on delays)',
+    '4) allergies / chef notes → set_instructions (even if "none")',
+    '5) pickup or delivery → set_fulfillment',
+    'Then say Total once + "Pay at the counter, or call (978) 982-1800."',
+    'After email: recall_customer. When wrap-up complete: remember_customer with name, phone, email, allergies, what they ordered, pickup/delivery.',
+    `Tax ${(cfg.TAX_RATE * 100).toFixed(0)}% on taxable lines. Total = subtotal + tax + tip.`,
 
     '=== FULL MENU ===',
     FULL_MENU,
@@ -158,14 +166,31 @@ module.exports = async function handler(req, res) {
         type: 'function',
         name: 'set_customer',
         description:
-          'REQUIRED when customer gives their name. Call IMMEDIATELY with firstName so it shows on the ticket (e.g. Frank). Later add lastName and email the same way — ticket updates each time. Call BEFORE speaking the greeting follow-up.',
+          'Save customer fields on the ticket. Call immediately when they give each piece: firstName (greeting), lastName, email, phone. Ticket updates each time.',
         parameters: {
           type: 'object',
           properties: {
             firstName: { type: 'string', description: 'First name only, e.g. Frank' },
-            lastName: { type: 'string', description: 'Last name when they give it' },
-            email: { type: 'string', description: 'Email when they give it' },
+            lastName: { type: 'string', description: 'Last name, e.g. Martino' },
+            email: { type: 'string', description: 'Email for receipt' },
+            phone: { type: 'string', description: 'Phone so chef can call on delays' },
           },
+        },
+      },
+      {
+        type: 'function',
+        name: 'set_fulfillment',
+        description: 'Set pickup or delivery on the ticket after they choose.',
+        parameters: {
+          type: 'object',
+          properties: {
+            type: {
+              type: 'string',
+              enum: ['pickup', 'delivery'],
+              description: 'pickup or delivery',
+            },
+          },
+          required: ['type'],
         },
       },
       {
@@ -183,11 +208,12 @@ module.exports = async function handler(req, res) {
       {
         type: 'function',
         name: 'set_instructions',
-        description: 'Set special instructions text on the ticket (plain line, no boxes).',
+        description:
+          'Chef notes / food allergies / special instructions on the ticket. Use after asking about allergies — "none" is fine.',
         parameters: {
           type: 'object',
           properties: {
-            text: { type: 'string', description: 'Special instructions, or empty to clear' },
+            text: { type: 'string', description: 'Allergies or chef notes, or none' },
           },
           required: ['text'],
         },
@@ -203,7 +229,7 @@ module.exports = async function handler(req, res) {
         type: 'function',
         name: 'recall_customer',
         description:
-          'After email is known — recall Mem0 memories for this customer. Use naturally; do not read aloud as a list.',
+          'After email is known — recall Mem0 (name, allergies, past orders). Use naturally; do not read aloud as a list.',
         parameters: {
           type: 'object',
           properties: {
@@ -216,14 +242,15 @@ module.exports = async function handler(req, res) {
         type: 'function',
         name: 'remember_customer',
         description:
-          'Save a short memory after they finish ordering (what they ordered, preferences). Requires email.',
+          'Save Mem0 after wrap-up: name, phone, email, allergies, items ordered, pickup/delivery.',
         parameters: {
           type: 'object',
           properties: {
             email: { type: 'string' },
-            text: { type: 'string', description: 'Short memory note' },
+            text: { type: 'string', description: 'Short memory note with order + prefs + allergies' },
             firstName: { type: 'string' },
             lastName: { type: 'string' },
+            phone: { type: 'string' },
           },
           required: ['email', 'text'],
         },
