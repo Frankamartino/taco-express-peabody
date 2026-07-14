@@ -70,25 +70,50 @@
       display: none;
     }
     #ticket.has-items { display: block; }
-    .fulfill-banner,
+    .fulfill-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      margin: 0 0 10px;
+      max-width: 100%;
+      box-sizing: border-box;
+      font-weight: 800;
+      font-size: 1rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      line-height: 1.2;
+      color: #ffffff;
+    }
+    .fulfill-banner .fb-left {
+      flex: 0 1 auto;
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+    .fulfill-banner .fb-right {
+      flex: 0 1 auto;
+      min-width: 0;
+      text-align: right;
+      font-size: 0.92rem;
+      letter-spacing: 0.02em;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+    .fulfill-banner .fb-right.is-paid {
+      color: var(--lime);
+    }
     .pay-banner {
+      margin-top: 10px;
       max-width: 100%;
       box-sizing: border-box;
       overflow-wrap: anywhere;
       word-break: break-word;
-      /* Larger than body, but still fits 80mm thermal — no wider than the ticket */
       font-size: 1rem;
       letter-spacing: 0.04em;
       font-weight: 800;
       text-transform: uppercase;
       line-height: 1.2;
       color: #ffffff;
-    }
-    .fulfill-banner {
-      margin: 0 0 10px;
-    }
-    .pay-banner {
-      margin-top: 10px;
     }
     .pay-banner.is-paid {
       color: var(--lime);
@@ -329,25 +354,25 @@
         }, 0);
       }
 
-      function payBannerHtml() {
+      function payStatusLabel() {
         var method = String(order.paymentMethod || '').toLowerCase();
-        var label = '';
-        var paidClass = '';
-        if (order.paid) {
-          label = 'Paid with credit card';
-          paidClass = ' is-paid';
-        } else if (method === 'card') {
-          label = 'Pay with credit card';
-        } else if (method === 'cash') {
-          label = 'Pay by cash';
-        } else {
-          return '';
-        }
+        if (order.paid) return { text: '(Paid · Card)', paid: true };
+        if (method === 'card') return { text: '(Card)', paid: false };
+        if (method === 'cash') return { text: '(Cash)', paid: false };
+        return null;
+      }
+
+      function payBannerHtml() {
+        // Full pay line only when payment is set but fulfillment is not
+        // (otherwise pay sits on the top banner next to Pickup/Delivery).
+        if (fulfillment) return '';
+        var st = payStatusLabel();
+        if (!st) return '';
         var html =
           '<div class="pay-banner' +
-          paidClass +
+          (st.paid ? ' is-paid' : '') +
           '">' +
-          escapeHtml(label);
+          escapeHtml(st.text.replace(/^\(|\)$/g, ''));
         if (order.paid && order.paymentIntentId) {
           html +=
             '<span class="pi" style="display:block;margin-top:4px;font-weight:400;letter-spacing:0;text-transform:none;font-size:0.72rem;color:#fff">' +
@@ -355,6 +380,36 @@
             '</span>';
         }
         html += '</div>';
+        return html;
+      }
+
+      function topBannerHtml() {
+        var fulfillLabel = '';
+        if (fulfillment === 'delivery') fulfillLabel = 'Delivery';
+        else if (fulfillment === 'pickup') fulfillLabel = 'Pickup';
+        var st = payStatusLabel();
+        if (!fulfillLabel && !st) return '';
+        var html = '<div class="fulfill-banner">';
+        if (fulfillLabel) {
+          html += '<span class="fb-left">' + escapeHtml(fulfillLabel) + '</span>';
+        } else {
+          html += '<span class="fb-left"></span>';
+        }
+        if (st) {
+          html +=
+            '<span class="fb-right' +
+            (st.paid ? ' is-paid' : '') +
+            '">' +
+            escapeHtml(st.text) +
+            '</span>';
+        }
+        html += '</div>';
+        if (order.paid && order.paymentIntentId && fulfillLabel) {
+          html +=
+            '<div class="email" style="margin:-6px 0 10px;font-size:0.72rem;font-weight:400">' +
+            escapeHtml(order.paymentIntentId) +
+            '</div>';
+        }
         return html;
       }
 
@@ -372,13 +427,8 @@
         var total = Math.round((sub + tax + tip) * 100) / 100;
 
         var html = '';
-        // Kitchen-first: PICKUP / DELIVERY above the name, larger type
-        if (fulfillment) {
-          html +=
-            '<div class="fulfill-banner">' +
-            escapeHtml(fulfillment === 'delivery' ? 'Delivery' : 'Pickup') +
-            '</div>';
-        }
+        // Kitchen-first: PICKUP/DELIVERY left, (Cash)/(Card) right — still inside 80mm
+        html += topBannerHtml();
         if (hasCustomer()) {
           var nameBits = [customer.firstName, customer.lastName].filter(Boolean).join(' ');
           html += '<div class="cust">';
