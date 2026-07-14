@@ -1083,11 +1083,6 @@
             if (!sessionAlive || !dcOpen || !greetingArmed || greetingSpoken) return;
             greetingSpoken = true;
             greetingArmed = false;
-            // Kill any auto-started line so we only get ONE welcome
-            dcSend({ type: 'response.cancel' });
-            try {
-              dcSend({ type: 'output_audio_buffer.clear' });
-            } catch (e) {}
             dcSend({
               type: 'response.create',
               response: {
@@ -1106,7 +1101,6 @@
           });
           dc.addEventListener('open', function () {
             dcOpen = true;
-            // Only greet once everything is armed (avoid race double-speak)
             speakFixedGreeting();
           });
 
@@ -1144,8 +1138,16 @@
           var answerSdp = await sdpResp.text();
           await pc.setRemoteDescription({ type: 'answer', sdp: answerSdp });
 
+          // Unmute playback before first line
+          try {
+            remoteAudio.muted = false;
+            remoteAudio.volume = 1;
+            remoteAudio.play().catch(function () {});
+          } catch (ePlay) {}
+
           sessionAlive = true;
           greetingArmed = true;
+          // One shot only — if data channel already open, speak now; else open handler will
           speakFixedGreeting();
 
           connected = true;
