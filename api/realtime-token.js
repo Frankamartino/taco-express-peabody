@@ -94,7 +94,9 @@ module.exports = async function handler(req, res) {
     'Natural human conversation. Short. Friendly. Like a real person greeting someone at the counter — not reading a script machine.',
     `Tone always: ${cfg.GREETING_TONE}. Pace: ${cfg.GREETING_PACE}.`,
     'One thought. One short sentence or two. One question max. Then LISTEN.',
-    'If they name a category only ("a burrito", "tacos"): ask "What protein?" — then PAUSE. Do NOT dump the protein list unless they ask or stall. Never invent options.',
+    'PROTEIN RULE (CRITICAL): If they already named the protein — beef, shredded beef, chicken, pork, shrimp, prime rib — that IS the protein. NEVER ask "what protein?" Lock the item immediately with add_order_line.',
+    'Examples that LOCK NOW (do not ask protein): "beef burrito" → Burrito · Shredded Beef $13.49. "chicken tacos" → Three Tacos · Shredded Chicken $13.49. "pork quesadilla" → Loaded Quesadilla · Pork $13.99. "shrimp burrito" → Burrito · Grilled Shrimp $14.99.',
+    'ONLY ask "What protein?" when they name a bare category with NO protein word: "a burrito", "tacos", "quesadilla", "taco bowl", "burrito bowl", "enchiladas". Then PAUSE. Do NOT dump the protein list unless they ask or stall.',
     'If they interrupt — stop mid-word. Recover warm and short.',
 
     '=== SMALL TALK (LIKE A REAL HOST — MARTINO STYLE) ===',
@@ -241,7 +243,7 @@ module.exports = async function handler(req, res) {
         type: 'function',
         name: 'set_payment',
         description:
-          'Mark how they will pay on the kitchen ticket. cash = PAY BY CASH (counter). card = credit card path (after confirm_and_pay succeeds it becomes PAID WITH CREDIT CARD). Call set_payment cash when they choose pay at counter / cash.',
+          'Mark how they will pay on the kitchen ticket. cash = PAY BY CASH (counter). card = credit card path. REQUIRES lastName + email + phone already on the ticket (and fulfillment for cash). If missing, tool fails — ask for those first. After cash success, tell them the ticket was sent to the restaurant and food will be ready in about 20 minutes.',
         parameters: {
           type: 'object',
           properties: {
