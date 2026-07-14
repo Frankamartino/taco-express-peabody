@@ -10,6 +10,7 @@ RULES:
 - One protein per item. Mild or spicy when asked.
 - Proteins: shredded beef (never ground), shredded chicken, pork, grilled shrimp.
 - Prime rib ONLY as Prime Rib Burrito $17.99 — NOT a taco.
+- "steak burrito" is ambiguous — ask: shredded beef burrito $13.49 or Prime Rib Burrito $17.99? Do not guess.
 - NOT ON MENU: steak taco, filet taco, filet mignon, veggie/vegetable/tofu. Say not on the menu; suggest closest real item.
 - No cart / Stripe on this voice copy yet — if asked about paying online: confirm total from menu; pay at counter or call (978) 982-1800.
 
