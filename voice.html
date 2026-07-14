@@ -378,9 +378,11 @@
 
       function openVoiceSignupPopup() {
         signupOpenedOnce = true;
+        // Always load a fresh blank form (kiosk — no leftover credentials)
+        var signupUrl = '/voice-signup?fresh=' + Date.now();
         try {
           var win = window.open(
-            '/voice-signup',
+            signupUrl,
             'tacoVoiceSignup',
             'noopener,noreferrer,width=440,height=760'
           );
@@ -392,9 +394,9 @@
             return { ok: true, mode: 'window' };
           }
         } catch (eOpen) {}
-        // Popup blocked → same-page overlay with /voice-signup
-        if (signupFrame && signupFrame.getAttribute('src') !== '/voice-signup') {
-          signupFrame.setAttribute('src', '/voice-signup');
+        // Popup blocked → same-page overlay with blank /voice-signup
+        if (signupFrame) {
+          signupFrame.setAttribute('src', signupUrl);
         }
         if (signupOverlay) {
           signupOverlay.classList.add('open');
@@ -408,6 +410,12 @@
         if (signupOverlay) {
           signupOverlay.classList.remove('open');
           signupOverlay.setAttribute('aria-hidden', 'true');
+        }
+        // Unload iframe so the next open is blank again
+        if (signupFrame) {
+          try {
+            signupFrame.setAttribute('src', 'about:blank');
+          } catch (eB) {}
         }
       }
 
@@ -1354,7 +1362,7 @@
           };
 
           var greetingExact =
-            'Welcome to Taco Express. My name is Massimo. May I have your name?';
+            'Welcome to Taco Express. My name is Massimo. May I have your full name?';
           var dcOpen = false;
           var greetingArmed = false;
           var greetingSpoken = false;

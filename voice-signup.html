@@ -160,13 +160,13 @@
     Your card number goes straight to Stripe. We never see it or keep it.
   </p>
 
-  <form id="infoForm">
+  <form id="infoForm" autocomplete="off">
     <label for="name">Full name</label>
-    <input id="name" name="name" autocomplete="name" value="Frank Martino" required />
+    <input id="name" name="name" type="text" autocomplete="off" autocapitalize="words" spellcheck="false" value="" required />
     <label for="email">Email (Stripe receipt)</label>
-    <input id="email" name="email" type="email" autocomplete="email" value="frankamartino@gmail.com" required />
+    <input id="email" name="email" type="email" autocomplete="off" autocapitalize="off" spellcheck="false" value="" required />
     <label for="phone">Phone</label>
-    <input id="phone" name="phone" type="tel" autocomplete="tel" value="978-337-3777" required />
+    <input id="phone" name="phone" type="tel" autocomplete="off" inputmode="tel" value="" required />
     <button type="submit" id="infoBtn">Continue to card</button>
   </form>
 
@@ -188,14 +188,46 @@
       var backBtn = document.getElementById('backBtn');
       var msg = document.getElementById('msg');
       var subLine = document.getElementById('subLine');
+      var nameEl = document.getElementById('name');
+      var emailEl = document.getElementById('email');
+      var phoneEl = document.getElementById('phone');
       var stripe = null;
       var elements = null;
       var setupIntentId = '';
+
+      // Kiosk safety: never leave credentials on this page for the next guest.
+      function clearCredentials() {
+        try {
+          infoForm.reset();
+        } catch (eR) {}
+        if (nameEl) nameEl.value = '';
+        if (emailEl) emailEl.value = '';
+        if (phoneEl) phoneEl.value = '';
+        try {
+          cardStep.classList.remove('show');
+          infoForm.style.display = 'flex';
+          document.body.classList.remove('done');
+        } catch (eU) {}
+        setupIntentId = '';
+        stripe = null;
+        elements = null;
+        try {
+          var pe = document.getElementById('payment-element');
+          if (pe) pe.innerHTML = '';
+        } catch (eP) {}
+        setMsg('', '');
+      }
 
       function setMsg(text, kind) {
         msg.textContent = text || '';
         msg.className = kind || '';
       }
+
+      clearCredentials();
+      window.addEventListener('pageshow', function () {
+        clearCredentials();
+      });
+      window.addEventListener('pagehide', clearCredentials);
 
       infoForm.addEventListener('submit', function (ev) {
         ev.preventDefault();
@@ -205,9 +237,9 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            name: document.getElementById('name').value.trim(),
-            email: document.getElementById('email').value.trim(),
-            phone: document.getElementById('phone').value.trim(),
+            name: nameEl.value.trim(),
+            email: emailEl.value.trim(),
+            phone: phoneEl.value.trim(),
           }),
         })
           .then(function (r) {
@@ -299,6 +331,10 @@
               'Card saved (LIVE).\n\nOpen Voice order. When Massimo asks to charge, say yes. Stripe will email a receipt.',
               'ok'
             );
+            // Wipe identity fields after save so a walk-away kiosk guest never sees them.
+            if (nameEl) nameEl.value = '';
+            if (emailEl) emailEl.value = '';
+            if (phoneEl) phoneEl.value = '';
             try {
               msg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             } catch (e2) {}
