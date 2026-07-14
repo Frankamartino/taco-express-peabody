@@ -281,9 +281,9 @@
           };
 
           var greetingExact =
-            'Welcome to Taco Express PB. My name is Massimo. What can I get you?';
-          var greetingTone = 'warm, welcoming';
-          var greetingPace = 'steady, neutral';
+            'Welcome to Taco Express PB. My name is Massimo. May I have your name?';
+          var greetingTone = 'happy, pleasant, smiling, warm';
+          var greetingPace = 'steady, natural';
           var dcOpen = false;
           var greetingArmed = false;
 
@@ -294,13 +294,9 @@
               type: 'response.create',
               response: {
                 instructions:
-                  'Say EXACTLY and ONLY with a ' +
-                  greetingTone +
-                  ' tone and a ' +
-                  greetingPace +
-                  ' pace: "' +
+                  'Say EXACTLY and ONLY with a happy pleasant smiling warm tone and a steady natural pace: "' +
                   greetingExact +
-                  '" Then stop. Pause. Shut up. No menu. No proteins. Nothing else.',
+                  '" Then stop. Pause. Listen for their name. Do not ask what they want yet. Nothing else.',
               },
             });
           }
