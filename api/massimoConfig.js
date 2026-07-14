@@ -25,4 +25,25 @@ module.exports = {
 
   /** On-screen ticket matches thermal printer paper width */
   TICKET_WIDTH_MM: 80,
+
+  /**
+   * Built-in guest memory for demos / video (Mem0 may be off).
+   * Match on first+last name (case-insensitive). Keep short.
+   */
+  KNOWN_GUESTS: [
+    {
+      firstName: 'Frank',
+      lastName: 'Martino',
+      email: 'frankamartino@gmail.com',
+      phone: '978-337-3777',
+      notes: [
+        'Regular / owner-friend energy — warm and familiar, not stiff.',
+        'Past order: Three Tacos · Shredded Chicken, Mexican Coke, mild — hands-free card pay.',
+        'Past order: Burrito · Prime Rib (mild), Mexican Coke glass — pickup, cash.',
+        'Past order: Burrito · Shredded Beef — likes extras (guac, pico, chips, salsa, consommé).',
+        'Usually mild spice. Often pickup. Sometimes cash, sometimes card on file.',
+        'No food allergies on file (says none).',
+      ],
+    },
+  ],
 };
