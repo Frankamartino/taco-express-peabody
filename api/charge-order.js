@@ -58,8 +58,8 @@ module.exports = async function handler(req, res) {
   }
 
   const secret = clean(process.env.STRIPE_SECRET_KEY);
-  const customerId = clean(process.env.TACO_VOICE_STRIPE_CUSTOMER_ID);
-  const pmEnv = clean(process.env.TACO_VOICE_STRIPE_PAYMENT_METHOD_ID);
+  let customerId = clean(process.env.TACO_VOICE_STRIPE_CUSTOMER_ID);
+  let pmEnv = clean(process.env.TACO_VOICE_STRIPE_PAYMENT_METHOD_ID);
   const allowEmail = clean(
     process.env.TACO_VOICE_EMAIL_ALLOWLIST || 'frankamartino@gmail.com'
   ).toLowerCase();
@@ -68,15 +68,8 @@ module.exports = async function handler(req, res) {
     return res.status(503).json({
       ok: false,
       code: 'stripe_not_configured',
-      error: 'STRIPE_SECRET_KEY not set on taco-express-peabody (Voice project only).',
-    });
-  }
-  if (!customerId) {
-    return res.status(503).json({
-      ok: false,
-      code: 'needs_card_setup',
       error:
-        'No Taco Voice Stripe customer. Save a card once at /voice-signup, then set TACO_VOICE_STRIPE_CUSTOMER_ID.',
+        'STRIPE_SECRET_KEY not set on taco-express-peabody (Voice). Use live sk_live_ for live cards.',
     });
   }
 
@@ -123,6 +116,26 @@ module.exports = async function handler(req, res) {
       code: 'missing_fields',
       missing: ['phone'],
       error: 'Phone required on ticket before charge.',
+    });
+  }
+
+  // Resolve customer: env override, else Stripe lookup by ticket email (after /voice-signup)
+  if (!customerId) {
+    const search = await stripeGet(
+      secret,
+      'customers?email=' + encodeURIComponent(email) + '&limit=1'
+    );
+    if (search.ok && search.data.data && search.data.data[0]) {
+      customerId = search.data.data[0].id;
+    }
+  }
+
+  if (!customerId) {
+    return res.status(503).json({
+      ok: false,
+      code: 'needs_card_setup',
+      error:
+        'No card on file for this email. Fill the recruit form once at /voice-signup (live card), then try voice pay again.',
     });
   }
 

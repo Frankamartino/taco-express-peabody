@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Taco Express Voice — Save card</title>
+  <title>Taco Express Voice — Recruit / card signup</title>
   <meta name="robots" content="noindex, nofollow" />
-  <meta name="description" content="One-time card signup for Taco Express Peabody Voice pay. Separate from Martino Pasta Bar and the main menu site." />
+  <meta name="description" content="One-time recruit form: save a live card for Taco Express Peabody Voice hands-free pay." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+  <script src="https://js.stripe.com/v3/"></script>
   <style>
     :root {
       --lime: #84cc16;
@@ -21,7 +22,7 @@
       font-family: "DM Sans", system-ui, sans-serif;
       background: var(--charcoal);
       color: var(--white);
-      padding: 36px 20px 48px;
+      padding: 36px 20px 56px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -43,30 +44,39 @@
       font-size: 0.95rem;
     }
     .warn {
-      margin-top: 18px;
+      margin-top: 16px;
       max-width: 28rem;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       line-height: 1.45;
-      opacity: 0.75;
+      opacity: 0.7;
       text-align: center;
     }
-    form {
+    form, .card-step {
       margin-top: 28px;
       width: min(100%, 22rem);
       display: flex;
       flex-direction: column;
       gap: 12px;
     }
+    .card-step { display: none; }
+    .card-step.show { display: flex; }
     label { font-size: 0.8rem; font-weight: 600; opacity: 0.9; }
     input {
       width: 100%;
-      padding: 14px 14px;
+      padding: 14px;
       border: 1px solid rgba(255,255,255,0.25);
       border-radius: 10px;
       background: #0c0a09;
       color: var(--white);
       font: inherit;
       font-size: 1rem;
+    }
+    #payment-element {
+      padding: 12px;
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 10px;
+      background: #0c0a09;
+      min-height: 48px;
     }
     button {
       margin-top: 8px;
@@ -83,6 +93,15 @@
       color: #fff;
     }
     button:disabled { opacity: 0.6; cursor: wait; }
+    button.secondary {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.35);
+      color: var(--white);
+      font-weight: 600;
+      text-transform: none;
+      letter-spacing: 0;
+      font-size: 0.9rem;
+    }
     #msg {
       margin-top: 20px;
       max-width: 28rem;
@@ -100,83 +119,62 @@
       font-weight: 700;
       text-decoration: none;
     }
-    code {
-      font-size: 0.78rem;
-      word-break: break-all;
-    }
   </style>
 </head>
 <body>
-  <h1>Voice card signup</h1>
+  <h1>Voice recruit form</h1>
   <p class="sub">
-    Save a card once for <strong>Taco Express Peabody Voice</strong> hands-free pay.
-    After this, Massimo can charge when you say yes — no taps on the order.
+    One-time signup for <strong>Taco Express Peabody Voice</strong>.
+    Enter your info and a <strong>live</strong> card. After this, Massimo charges by voice — no taps on the order screen.
   </p>
   <p class="warn">
-    This bill is <strong>Taco Voice only</strong>. Not Martino Pasta Bar. Not the main menu / DoorDash site.
+    Taco Voice bill only — not Martino Pasta Bar, not the DoorDash menu site.
+    Use a real live card (test mode lies). ~3.1% Stripe fee is normal.
   </p>
 
-  <form id="signupForm">
-    <label for="name">Name</label>
-    <input id="name" name="name" autocomplete="name" placeholder="Frank Martino" />
-    <label for="email">Email</label>
-    <input id="email" name="email" type="email" required autocomplete="email" placeholder="frankamartino@gmail.com" />
+  <form id="infoForm">
+    <label for="name">Full name</label>
+    <input id="name" name="name" autocomplete="name" value="Frank Martino" required />
+    <label for="email">Email (receipt)</label>
+    <input id="email" name="email" type="email" autocomplete="email" value="frankamartino@gmail.com" required />
     <label for="phone">Phone</label>
-    <input id="phone" name="phone" type="tel" autocomplete="tel" placeholder="978-337-3777" />
-    <button type="submit" id="goBtn">Save card with Stripe</button>
+    <input id="phone" name="phone" type="tel" autocomplete="tel" value="978-337-3777" required />
+    <button type="submit" id="infoBtn">Continue to card</button>
   </form>
 
+  <div class="card-step" id="cardStep">
+    <label>Card (live)</label>
+    <div id="payment-element"></div>
+    <button type="button" id="saveBtn">Save card for voice pay</button>
+    <button type="button" class="secondary" id="backBtn">Back</button>
+  </div>
+
   <p id="msg" aria-live="polite"></p>
-  <a class="voice" href="/voice">Back to Voice order</a>
+  <a class="voice" href="/voice">Go to Voice order</a>
 
   <script>
     (function () {
-      var form = document.getElementById('signupForm');
+      var infoForm = document.getElementById('infoForm');
+      var cardStep = document.getElementById('cardStep');
+      var infoBtn = document.getElementById('infoBtn');
+      var saveBtn = document.getElementById('saveBtn');
+      var backBtn = document.getElementById('backBtn');
       var msg = document.getElementById('msg');
-      var goBtn = document.getElementById('goBtn');
-      var params = new URLSearchParams(window.location.search);
-      var setup = params.get('setup');
-      var sessionId = params.get('session_id');
+      var stripe = null;
+      var elements = null;
+      var setupIntentId = '';
+      var customerId = '';
 
       function setMsg(text, kind) {
         msg.textContent = text || '';
         msg.className = kind || '';
       }
 
-      if (setup === 'cancel') {
-        setMsg('Card signup canceled. You can try again anytime.', 'err');
-      }
-
-      if (setup === 'success' && sessionId) {
-        setMsg('Card saved. Loading customer ids…', 'ok');
-        fetch('/api/setup-card-status?session_id=' + encodeURIComponent(sessionId))
-          .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
-          .then(function (res) {
-            if (!res.ok || !res.d.customer_id) {
-              setMsg((res.d && res.d.error) || 'Could not read setup session.', 'err');
-              return;
-            }
-            setMsg(
-              'Card saved for Taco Voice.\n\n' +
-                'In Vercel → taco-express-peabody (NOT Martino) set:\n' +
-                'TACO_VOICE_STRIPE_CUSTOMER_ID=' + res.d.customer_id + '\n' +
-                (res.d.payment_method_id
-                  ? 'TACO_VOICE_STRIPE_PAYMENT_METHOD_ID=' + res.d.payment_method_id + '\n'
-                  : '') +
-                '\nThen hard-refresh /voice and tell Massimo to charge the card on file.',
-              'ok'
-            );
-          })
-          .catch(function () {
-            setMsg('Saved, but status lookup failed. Check Stripe Dashboard for the customer.', 'err');
-          });
-      }
-
-      form.addEventListener('submit', function (ev) {
+      infoForm.addEventListener('submit', function (ev) {
         ev.preventDefault();
-        goBtn.disabled = true;
-        setMsg('Opening Stripe…', '');
-        fetch('/api/setup-card', {
+        infoBtn.disabled = true;
+        setMsg('Starting live card form…', '');
+        fetch('/api/setup-intent', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -189,16 +187,89 @@
             return r.json().then(function (d) { return { ok: r.ok, d: d }; });
           })
           .then(function (res) {
-            if (!res.ok || !res.d.checkout_url) {
-              setMsg((res.d && res.d.error) || 'Could not start signup.', 'err');
-              goBtn.disabled = false;
+            if (!res.ok || !res.d.clientSecret || !res.d.publishableKey) {
+              setMsg((res.d && res.d.error) || 'Could not start setup. Add STRIPE_SECRET_KEY + STRIPE_PUBLISHABLE_KEY (live) on taco Vercel.', 'err');
+              infoBtn.disabled = false;
               return;
             }
-            window.location.href = res.d.checkout_url;
+            if (!res.d.liveMode) {
+              setMsg('Warning: Stripe is NOT in live mode. Switch to sk_live_ / pk_live_ on taco Vercel, then retry.', 'err');
+            }
+            setupIntentId = res.d.setupIntentId || '';
+            customerId = res.d.customerId || '';
+            stripe = Stripe(res.d.publishableKey);
+            elements = stripe.elements({
+              clientSecret: res.d.clientSecret,
+              appearance: {
+                theme: 'night',
+                variables: { colorPrimary: '#ea580c', colorBackground: '#0c0a09', colorText: '#ffffff' },
+              },
+            });
+            var paymentElement = elements.create('payment');
+            paymentElement.mount('#payment-element');
+            infoForm.style.display = 'none';
+            cardStep.classList.add('show');
+            setMsg(res.d.liveMode ? 'Enter your live card below.' : 'Card form ready (check live mode).', res.d.liveMode ? 'ok' : 'err');
+            infoBtn.disabled = false;
           })
           .catch(function () {
             setMsg('Network error starting signup.', 'err');
-            goBtn.disabled = false;
+            infoBtn.disabled = false;
+          });
+      });
+
+      backBtn.addEventListener('click', function () {
+        cardStep.classList.remove('show');
+        infoForm.style.display = 'flex';
+        setMsg('', '');
+      });
+
+      saveBtn.addEventListener('click', function () {
+        if (!stripe || !elements) return;
+        saveBtn.disabled = true;
+        setMsg('Saving card…', '');
+        stripe
+          .confirmSetup({
+            elements: elements,
+            redirect: 'if_required',
+            confirmParams: {
+              return_url: window.location.origin + '/voice-signup',
+            },
+          })
+          .then(function (result) {
+            if (result.error) {
+              setMsg(result.error.message || 'Card save failed', 'err');
+              saveBtn.disabled = false;
+              return;
+            }
+            var si = result.setupIntent;
+            var id = (si && si.id) || setupIntentId;
+            return fetch('/api/setup-intent-complete', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ setupIntentId: id }),
+            }).then(function (r) {
+              return r.json().then(function (d) { return { ok: r.ok, d: d }; });
+            });
+          })
+          .then(function (res) {
+            if (!res) return;
+            if (!res.ok || !res.d.ok) {
+              setMsg((res.d && res.d.error) || 'Could not confirm card on file.', 'err');
+              saveBtn.disabled = false;
+              return;
+            }
+            setMsg(
+              'Card saved for Taco Voice' +
+                (res.d.livemode ? ' (LIVE)' : ' (not live)') +
+                '.\n\nYou can order on /voice hands-free. When Massimo asks to charge, say yes.\nUse the same email: frankamartino@gmail.com',
+              'ok'
+            );
+            cardStep.classList.remove('show');
+          })
+          .catch(function () {
+            setMsg('Network error confirming card.', 'err');
+            saveBtn.disabled = false;
           });
       });
     })();

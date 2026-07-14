@@ -54,8 +54,8 @@ Drop PNG product shots into `images/drinks/` — see `images/drinks/README.txt` 
 
 ### Voice hands-free pay (this repo only)
 
-1. Set on **taco-express-peabody** Vercel: `STRIPE_SECRET_KEY`, then open `/voice-signup` once to save a card.
-2. Paste `TACO_VOICE_STRIPE_CUSTOMER_ID` (+ optional `TACO_VOICE_STRIPE_PAYMENT_METHOD_ID`) into the **same** taco Vercel project.
-3. On `/voice`, finish wrap-up → Massimo asks to charge → say **yes** → ticket shows **PAID**.
+1. On **taco-express-peabody** Vercel set **live** keys: `STRIPE_SECRET_KEY` (`sk_live_…`) and `STRIPE_PUBLISHABLE_KEY` (`pk_live_…`).
+2. Open `/voice-signup` — recruit form: name, email, phone, then enter a **live** card on the page.
+3. Order on `/voice` with the same email. When Massimo asks to charge, say **yes** (no taps). Charge looks up the card by email in Stripe.
 
 Do **not** reuse Martino `cus_` / `pm_` / secrets on this project.
