@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Taco Express Voice — Recruit / card signup</title>
+  <title>Taco Express Voice — Save card for voice pay</title>
   <meta name="robots" content="noindex, nofollow" />
-  <meta name="description" content="One-time recruit form: save a live card for Taco Express Peabody Voice hands-free pay." />
+  <meta name="description" content="One-time form to save a live card for Taco Express Peabody Voice hands-free pay." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
   <script src="https://js.stripe.com/v3/"></script>
@@ -43,6 +43,15 @@
       line-height: 1.5;
       font-size: 0.95rem;
     }
+    .steps {
+      margin-top: 18px;
+      max-width: 28rem;
+      font-size: 0.85rem;
+      line-height: 1.55;
+      opacity: 0.8;
+      text-align: left;
+    }
+    .steps strong { color: var(--lime); font-weight: 700; }
     .warn {
       margin-top: 16px;
       max-width: 28rem;
@@ -122,20 +131,26 @@
   </style>
 </head>
 <body>
-  <h1>Voice recruit form</h1>
+  <h1>Save card for voice pay</h1>
   <p class="sub">
-    One-time signup for <strong>Taco Express Peabody Voice</strong>.
-    Enter your info and a <strong>live</strong> card. After this, Massimo charges by voice — no taps on the order screen.
+    One-time form for <strong>Taco Express Peabody Voice</strong>.
+    After your card is saved, you order by talking to Massimo — no tapping to pay.
+  </p>
+  <p class="steps">
+    <strong>1.</strong> Name, email, phone → Continue<br>
+    <strong>2.</strong> Card number form appears → Save card<br>
+    <strong>3.</strong> Go to Voice order and say yes when he asks to charge<br><br>
+    Allergies, tip, pickup/delivery — Massimo asks those by voice on the order call. This page is only for putting a card on file.
   </p>
   <p class="warn">
-    Taco Voice bill only — not Martino Pasta Bar, not the DoorDash menu site.
-    Use a real live card (test mode lies). ~3.1% Stripe fee is normal.
+    Taco Voice only — not Martino Pasta Bar, not DoorDash menu.
+    Use a real live card. If Continue fails, Stripe live keys are not on the taco Vercel project yet.
   </p>
 
   <form id="infoForm">
     <label for="name">Full name</label>
     <input id="name" name="name" autocomplete="name" value="Frank Martino" required />
-    <label for="email">Email (receipt)</label>
+    <label for="email">Email (Stripe receipt)</label>
     <input id="email" name="email" type="email" autocomplete="email" value="frankamartino@gmail.com" required />
     <label for="phone">Phone</label>
     <input id="phone" name="phone" type="tel" autocomplete="tel" value="978-337-3777" required />
@@ -143,9 +158,9 @@
   </form>
 
   <div class="card-step" id="cardStep">
-    <label>Card (live)</label>
+    <label>Card number</label>
     <div id="payment-element"></div>
-    <button type="button" id="saveBtn">Save card for voice pay</button>
+    <button type="button" id="saveBtn">Save card</button>
     <button type="button" class="secondary" id="backBtn">Back</button>
   </div>
 
@@ -163,7 +178,6 @@
       var stripe = null;
       var elements = null;
       var setupIntentId = '';
-      var customerId = '';
 
       function setMsg(text, kind) {
         msg.textContent = text || '';
@@ -173,7 +187,7 @@
       infoForm.addEventListener('submit', function (ev) {
         ev.preventDefault();
         infoBtn.disabled = true;
-        setMsg('Starting live card form…', '');
+        setMsg('Opening card form…', '');
         fetch('/api/setup-intent', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -188,15 +202,18 @@
           })
           .then(function (res) {
             if (!res.ok || !res.d.clientSecret || !res.d.publishableKey) {
-              setMsg((res.d && res.d.error) || 'Could not start setup. Add STRIPE_SECRET_KEY + STRIPE_PUBLISHABLE_KEY (live) on taco Vercel.', 'err');
+              setMsg(
+                (res.d && res.d.error) ||
+                  'Stripe is not connected yet.\n\nRex/Frank: add STRIPE_SECRET_KEY (sk_live_) and STRIPE_PUBLISHABLE_KEY (pk_live_) on the taco-express-peabody Vercel project, then refresh this page.',
+                'err'
+              );
               infoBtn.disabled = false;
               return;
             }
             if (!res.d.liveMode) {
-              setMsg('Warning: Stripe is NOT in live mode. Switch to sk_live_ / pk_live_ on taco Vercel, then retry.', 'err');
+              setMsg('Warning: keys are test mode. Use sk_live_ / pk_live_ for a real card.', 'err');
             }
             setupIntentId = res.d.setupIntentId || '';
-            customerId = res.d.customerId || '';
             stripe = Stripe(res.d.publishableKey);
             elements = stripe.elements({
               clientSecret: res.d.clientSecret,
@@ -209,11 +226,11 @@
             paymentElement.mount('#payment-element');
             infoForm.style.display = 'none';
             cardStep.classList.add('show');
-            setMsg(res.d.liveMode ? 'Enter your live card below.' : 'Card form ready (check live mode).', res.d.liveMode ? 'ok' : 'err');
+            setMsg('Enter your card number below, then Save card.', 'ok');
             infoBtn.disabled = false;
           })
           .catch(function () {
-            setMsg('Network error starting signup.', 'err');
+            setMsg('Network error. Try again.', 'err');
             infoBtn.disabled = false;
           });
       });
@@ -255,14 +272,14 @@
           .then(function (res) {
             if (!res) return;
             if (!res.ok || !res.d.ok) {
-              setMsg((res.d && res.d.error) || 'Could not confirm card on file.', 'err');
+              setMsg((res.d && res.d.error) || 'Could not confirm card.', 'err');
               saveBtn.disabled = false;
               return;
             }
             setMsg(
-              'Card saved for Taco Voice' +
-                (res.d.livemode ? ' (LIVE)' : ' (not live)') +
-                '.\n\nYou can order on /voice hands-free. When Massimo asks to charge, say yes.\nUse the same email: frankamartino@gmail.com',
+              'Card saved' +
+                (res.d.livemode ? ' (LIVE)' : '') +
+                '.\n\nOpen Voice order. When Massimo asks to charge, say yes. Stripe will email a receipt.',
               'ok'
             );
             cardStep.classList.remove('show');
