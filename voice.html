@@ -191,17 +191,26 @@
     .card-trust {
       margin-top: 6px;
       max-width: 22rem;
-      font-size: 0.72rem;
+      font-size: 0.78rem;
       line-height: 1.45;
       color: var(--white);
-      opacity: 0.55;
+      opacity: 0.7;
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      align-items: center;
     }
     .card-trust a {
       color: var(--lime);
       text-decoration: none;
-      font-weight: 600;
+      font-weight: 700;
       opacity: 1;
+    }
+    .card-trust-sub {
+      font-size: 0.7rem;
+      opacity: 0.75;
+      font-weight: 400;
     }
   </style>
 </head>
@@ -222,8 +231,8 @@
     <button type="button" id="orderNowBtn">Order Now</button>
     <p id="status" aria-live="polite"></p>
     <p class="card-trust">
-      <a href="/voice-signup">Save card for voice pay</a>
-      — Stripe keeps your card number safe. We never see it or store it.
+      <a href="/voice-signup">First-time customers: sign up for hands-free ordering</a>
+      <span class="card-trust-sub">Stripe keeps your card number safe — we never see it.</span>
     </p>
   </div>
 
