@@ -109,6 +109,23 @@ module.exports = async function handler(req, res) {
     });
   }
 
+  if (!clean(cust.lastName || body.lastName)) {
+    return res.status(400).json({
+      ok: false,
+      code: 'missing_fields',
+      missing: ['lastName'],
+      error: 'Last name required on ticket before charge.',
+    });
+  }
+  if (!phone) {
+    return res.status(400).json({
+      ok: false,
+      code: 'missing_fields',
+      missing: ['phone'],
+      error: 'Phone required on ticket before charge.',
+    });
+  }
+
   const lines = Array.isArray(ticket.lines) ? ticket.lines : [];
   if (!lines.length) {
     return res.status(400).json({ ok: false, code: 'empty_ticket', error: 'No items on ticket.' });

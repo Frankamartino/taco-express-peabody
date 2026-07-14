@@ -233,7 +233,14 @@
       var history = [];
       var pendingCalls = {};
       var taxRate = 0.07;
-      var order = { lines: [], tip: 0, instructions: '', paid: false, paymentIntentId: '' };
+      var order = {
+        lines: [],
+        tip: 0,
+        tipAsked: false,
+        instructions: '',
+        paid: false,
+        paymentIntentId: '',
+      };
       var customer = { firstName: '', lastName: '', email: '', phone: '' };
       var fulfillment = ''; // pickup | delivery
 
@@ -361,7 +368,14 @@
       }
 
       function resetOrder() {
-        order = { lines: [], tip: 0, instructions: '', paid: false, paymentIntentId: '' };
+        order = {
+          lines: [],
+          tip: 0,
+          tipAsked: false,
+          instructions: '',
+          paid: false,
+          paymentIntentId: '',
+        };
         renderTicket();
       }
 
@@ -389,7 +403,18 @@
           instructions: order.instructions || '',
           paid: !!order.paid,
           paymentIntentId: order.paymentIntentId || '',
+          tipAsked: !!order.tipAsked,
         };
+      }
+
+      function payReadyGaps() {
+        var gaps = [];
+        if (!customer.lastName) gaps.push('lastName');
+        if (!customer.email) gaps.push('email');
+        if (!customer.phone) gaps.push('phone');
+        if (!order.tipAsked) gaps.push('tip');
+        if (!fulfillment) gaps.push('fulfillment');
+        return gaps;
       }
 
       function setStatus(msg) {
@@ -566,6 +591,7 @@
         if (name === 'set_tip') {
           var tipAmt = Number(args.amount);
           order.tip = isFinite(tipAmt) && tipAmt >= 0 ? tipAmt : 0;
+          order.tipAsked = true;
           renderTicket();
           replyTool(callId, { ok: true, ticket: ticketSnapshot() });
           return;
@@ -602,6 +628,21 @@
           }
           if (!order.lines.length) {
             replyTool(callId, { ok: false, paid: false, error: 'No items on ticket.' });
+            return;
+          }
+          var gaps = payReadyGaps();
+          if (gaps.length) {
+            replyTool(callId, {
+              ok: false,
+              paid: false,
+              code: 'missing_fields',
+              missing: gaps,
+              error:
+                'Cannot charge yet. Still need: ' +
+                gaps.join(', ') +
+                '. Ask for those one at a time, then confirm_and_pay again after verbal yes.',
+              ticket: ticketSnapshot(),
+            });
             return;
           }
           setStatus('Charging card…');
