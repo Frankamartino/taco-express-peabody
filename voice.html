@@ -56,38 +56,52 @@
       min-height: 180px;
     }
     #ticket {
-      width: min(420px, 100%);
+      width: min(640px, 100%);
       color: var(--white);
-      font-size: 0.98rem;
-      line-height: 1.35;
+      font-size: 1.2rem;
+      line-height: 1.45;
       display: none;
     }
     #ticket.has-items { display: block; }
     .line {
       display: grid;
       grid-template-columns: 1fr auto auto;
-      gap: 10px 14px;
+      gap: 12px 28px;
       align-items: baseline;
-      margin-bottom: 10px;
+      margin-bottom: 14px;
     }
     .line .title { font-weight: 600; }
-    .line .qty { opacity: 0.9; white-space: nowrap; }
-    .line .price { font-weight: 700; white-space: nowrap; text-align: right; min-width: 4.5rem; }
+    .line .qty {
+      opacity: 0.95;
+      white-space: nowrap;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.02em;
+      min-width: 2.5rem;
+      text-align: right;
+    }
+    .line .price {
+      font-weight: 700;
+      white-space: nowrap;
+      text-align: right;
+      min-width: 5.5rem;
+      font-variant-numeric: tabular-nums;
+    }
     .line-note {
       grid-column: 1 / -1;
-      margin: -4px 0 12px;
+      margin: -6px 0 16px;
       padding-left: 0;
-      font-size: 0.88rem;
+      font-size: 1.05rem;
       opacity: 0.8;
       font-weight: 400;
     }
-    .totals { margin-top: 18px; }
-    .totals .line { margin-bottom: 6px; font-weight: 400; }
+    .totals { margin-top: 22px; }
+    .totals .line { margin-bottom: 8px; font-weight: 400; }
     .totals .line.total-row .title,
-    .totals .line.total-row .price { font-weight: 800; font-size: 1.08rem; }
+    .totals .line.total-row .price { font-weight: 800; font-size: 1.35rem; }
     .instr {
-      margin-top: 22px;
-      font-size: 0.9rem;
+      margin-top: 26px;
+      font-size: 1.05rem;
     }
     .instr .label { font-weight: 700; margin-bottom: 4px; }
     .instr .body { opacity: 0.85; white-space: pre-wrap; }
