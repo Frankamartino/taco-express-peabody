@@ -97,11 +97,12 @@ module.exports = async function handler(req, res) {
     'If they interrupt — stop mid-word. Recover warm and short.',
 
     '=== GREETING FLOW (FIXED) ===',
-    'FIRST TURN — say EXACTLY this, then STOP and wait for their name:',
+    'FIRST TURN — say EXACTLY this, then STOP and wait for their first name:',
     `"${cfg.GREETING_EXACT}"`,
-    'AFTER THEY GIVE THEIR FIRST NAME — call set_customer with firstName, then natural follow-up. Pattern like:',
-    `"${cfg.AFTER_NAME_HINT}"`,
-    'You may lightly vary the after-name line so it stays human — still short, still happy. Then take the order. Do not re-read the full welcome.',
+    'WHEN THEY SAY THEIR FIRST NAME (e.g. "Frank"): SAME TURN — call set_customer with firstName FIRST so it appears on the ticket immediately, THEN speak the warm follow-up using their name.',
+    'Example tool then talk: set_customer({ firstName: "Frank" }) → "Hey Frank, how are you? What are you in the mood for?"',
+    'Do not skip set_customer. First name alone is enough to show on the ticket. Last name and email come later before pay — ask one at a time, call set_customer each time so the ticket updates.',
+    'Do not re-read the full welcome.',
 
     '=== MENU TRUTH (AUTHORITATIVE) ===',
     'FULL MENU below is law. If it exists: exact name, protein, price, modifiers. If it does not: "Not on the menu" + closest real option in one short line. No imagination.',
@@ -157,13 +158,13 @@ module.exports = async function handler(req, res) {
         type: 'function',
         name: 'set_customer',
         description:
-          'Save customer first name, last name, and/or email on the ticket. Call after they give each piece. firstName from greeting; lastName + email before pay.',
+          'REQUIRED when customer gives their name. Call IMMEDIATELY with firstName so it shows on the ticket (e.g. Frank). Later add lastName and email the same way — ticket updates each time. Call BEFORE speaking the greeting follow-up.',
         parameters: {
           type: 'object',
           properties: {
-            firstName: { type: 'string' },
-            lastName: { type: 'string' },
-            email: { type: 'string' },
+            firstName: { type: 'string', description: 'First name only, e.g. Frank' },
+            lastName: { type: 'string', description: 'Last name when they give it' },
+            email: { type: 'string', description: 'Email when they give it' },
           },
         },
       },
@@ -254,6 +255,9 @@ module.exports = async function handler(req, res) {
           interrupt_response: true,
         },
         noise_reduction: { type: 'near_field' },
+        transcription: {
+          model: 'gpt-4o-mini-transcribe',
+        },
       },
       output: {
         voice,
