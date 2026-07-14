@@ -971,12 +971,12 @@
           /\b(thank you|thanks).{0,40}\b(bye|goodbye)\b/i.test(t);
         if (!bye) return;
         if (hangUpTimer) clearTimeout(hangUpTimer);
-        var delay = who === 'customer' ? 900 : 1600;
+        // ~5s — customer may still be talking; Massimo audio can lag
         hangUpTimer = setTimeout(function () {
           if (!connected && !sessionAlive) return;
           hangUp();
           setStatus('Call ended');
-        }, delay);
+        }, 5000);
       }
 
       async function startMassimo() {
