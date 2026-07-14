@@ -208,6 +208,8 @@
       padding-top: 24px;
       padding-bottom: 12px;
       flex-shrink: 0;
+      position: relative;
+      z-index: 90; /* above signup overlay so Hang Up always works */
     }
     #orderNowBtn {
       width: min(320px, 100%);
@@ -227,6 +229,13 @@
     #orderNowBtn:disabled {
       opacity: 0.65;
       cursor: wait;
+    }
+    /* Hang Up / Cancel must stay clickable even while connecting */
+    #orderNowBtn.live,
+    #orderNowBtn.canceling {
+      opacity: 1;
+      cursor: pointer;
+      pointer-events: auto;
     }
     #orderNowBtn.live {
       background: var(--lime);
@@ -442,6 +451,7 @@
       var sessionAlive = false;
       var intentionallyHungUp = false;
       var hangUpTimer = null;
+      var connectGen = 0;
       var history = [];
       var pendingCalls = {};
       var taxRate = 0.07;
@@ -1236,6 +1246,7 @@
         try {
           remoteAudio.muted = true;
           remoteAudio.pause();
+          remoteAudio.volume = 0;
           remoteAudio.srcObject = null;
           remoteAudio.removeAttribute('src');
           remoteAudio.load();
@@ -1261,6 +1272,7 @@
             pc.getReceivers().forEach(function (r) {
               if (r.track) {
                 try {
+                  r.stop();
                   r.track.stop();
                 } catch (e5) {}
               }
@@ -1277,6 +1289,8 @@
 
       function cleanup() {
         sessionAlive = false;
+        connecting = false;
+        connected = false;
         if (hangUpTimer) {
           clearTimeout(hangUpTimer);
           hangUpTimer = null;
@@ -1298,26 +1312,48 @@
         pc = null;
         dc = null;
         localStream = null;
-        connected = false;
-        connecting = false;
         history = [];
         pendingCalls = {};
         btn.disabled = false;
         btn.classList.remove('live');
+        btn.classList.remove('canceling');
         btn.textContent = 'Order Now';
       }
 
       function hangUp() {
         intentionallyHungUp = true;
+        connectGen += 1; // invalidate any in-flight startMassimo
         sessionAlive = false;
+        connecting = false;
+        connected = false;
+        try {
+          closeVoiceSignupPopup();
+        } catch (eClose) {}
+        if (hangUpTimer) {
+          clearTimeout(hangUpTimer);
+          hangUpTimer = null;
+        }
         resetOrder();
         resetCustomer();
         renderTicket();
         setStatus('');
         cleanup();
+        // Keep muted until next Order Now unlocks playback
         try {
-          remoteAudio.muted = false;
+          remoteAudio.muted = true;
+          remoteAudio.volume = 0;
         } catch (e) {}
+      }
+
+      function callInProgress() {
+        return !!(
+          connected ||
+          sessionAlive ||
+          connecting ||
+          btn.classList.contains('live') ||
+          btn.classList.contains('canceling') ||
+          pc
+        );
       }
 
       function maybeAutoHangUp(transcript, who) {
@@ -1333,22 +1369,27 @@
         if (hangUpTimer) clearTimeout(hangUpTimer);
         // ~5s after customer farewell — room for Massimo's last line
         hangUpTimer = setTimeout(function () {
-          if (!connected && !sessionAlive) return;
+          if (!callInProgress()) return;
           hangUp();
         }, 5000);
       }
 
       async function startMassimo() {
-        if (connected || sessionAlive || (pc && btn.classList.contains('live'))) {
+        if (callInProgress()) {
           hangUp();
           return;
         }
-        if (connecting) return;
+        var myGen = ++connectGen;
+        function stillThisConnect() {
+          return myGen === connectGen && !intentionallyHungUp;
+        }
         connecting = true;
         sessionAlive = false;
         intentionallyHungUp = false;
-        btn.disabled = true;
-        btn.textContent = 'Connecting…';
+        btn.disabled = false;
+        btn.classList.add('canceling');
+        btn.classList.remove('live');
+        btn.textContent = 'Hang Up';
         setStatus('Talking to Massimo…');
         resetOrder();
         resetCustomer();
@@ -1381,6 +1422,10 @@
               autoGainControl: true,
             },
           });
+          if (!stillThisConnect()) {
+            cleanup();
+            return;
+          }
 
           pc = new RTCPeerConnection();
           localStream.getTracks().forEach(function (track) {
@@ -1390,7 +1435,7 @@
           pc.ontrack = function (ev) {
             // Never stop the remote track here. Early ontrack (before sessionAlive)
             // used to kill Massimo's audio for the whole call.
-            if (intentionallyHungUp) return;
+            if (intentionallyHungUp || myGen !== connectGen) return;
             var stream = ev.streams && ev.streams[0] ? ev.streams[0] : new MediaStream([ev.track]);
             remoteAudio.muted = false;
             remoteAudio.srcObject = stream;
@@ -1405,7 +1450,7 @@
           var greetingSpoken = false;
 
           function speakFixedGreeting() {
-            if (!sessionAlive || !dcOpen || !greetingArmed || greetingSpoken) return;
+            if (!stillThisConnect() || !sessionAlive || !dcOpen || !greetingArmed || greetingSpoken) return;
             greetingSpoken = true;
             greetingArmed = false;
             dcSend({
@@ -1421,19 +1466,24 @@
 
           dc = pc.createDataChannel('oai-events');
           dc.addEventListener('message', function (ev) {
-            if (!sessionAlive) return;
+            if (!sessionAlive || myGen !== connectGen) return;
             onServerEvent(ev.data);
           });
           dc.addEventListener('open', function () {
+            if (!stillThisConnect()) return;
             dcOpen = true;
             speakFixedGreeting();
           });
 
           var offer = await pc.createOffer();
           await pc.setLocalDescription(offer);
+          if (!stillThisConnect()) {
+            cleanup();
+            return;
+          }
 
           var tokenPayload = await tokenPromise;
-          if (!connecting) {
+          if (!stillThisConnect()) {
             cleanup();
             return;
           }
@@ -1461,12 +1511,16 @@
             var sdpErr = await sdpResp.text().catch(function () { return ''; });
             throw new Error('realtime ' + sdpResp.status + (sdpErr ? ': ' + sdpErr.slice(0, 180) : ''));
           }
-          if (!sessionAlive || !connecting) {
+          if (!stillThisConnect()) {
             cleanup();
             return;
           }
           var answerSdp = await sdpResp.text();
           await pc.setRemoteDescription({ type: 'answer', sdp: answerSdp });
+          if (!stillThisConnect()) {
+            cleanup();
+            return;
+          }
 
           try {
             remoteAudio.muted = false;
@@ -1480,18 +1534,21 @@
           connected = true;
           connecting = false;
           btn.disabled = false;
+          btn.classList.remove('canceling');
           btn.classList.add('live');
           btn.textContent = 'Hang Up';
           setStatus('Massimo is on — ticket updates as you order');
         } catch (e) {
           console.error('[Taco Massimo]', e);
-          cleanup();
-          setStatus('Could not start Massimo. Try again.');
+          if (stillThisConnect()) {
+            cleanup();
+            setStatus('Could not start Massimo. Try again.');
+          }
         }
       }
 
       btn.addEventListener('click', function () {
-        if (btn.classList.contains('live') || connected || sessionAlive) {
+        if (callInProgress()) {
           hangUp();
           return;
         }
