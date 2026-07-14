@@ -3,9 +3,11 @@
  * Mic/mouth: gpt-realtime + cedar (matched to Martino Massimo)
  * Brain (via ask_supervisor tool): GPT-5.6
  *
+ * Fixed greeting/tone/pace: api/massimoConfig.js — loaded every session.
  * Audio path matched to Martino: speed 0.92, near_field, plain HTML audio, AGC on.
- * Stage: voice shell + menu truth + counter talk. No Stripe cart yet.
  */
+const cfg = require('./massimoConfig');
+
 const FULL_MENU = `
 Taco Express Peabody — 58 Pulaski Street, Peabody MA 01960 · (978) 982-1800
 Hours: Mon–Tue CLOSED. Wed–Sat 11AM–8PM. Sun 11AM–6PM.
@@ -75,9 +77,8 @@ module.exports = async function handler(req, res) {
   }
 
   const model =
-    process.env.OPENAI_REALTIME_MODEL?.trim() || 'gpt-realtime';
-  // Match Martino Massimo exactly: cedar + speed 0.92 + near_field + semantic_vad
-  const voice = 'cedar';
+    process.env.OPENAI_REALTIME_MODEL?.trim() || cfg.MODEL_DEFAULT;
+  const voice = cfg.VOICE;
 
   const instructions = [
     'You are Massimo — counter host at Taco Express PB / Taco Express Peabody (58 Pulaski Street). Working the line. Not a chat buddy.',
@@ -89,10 +90,11 @@ module.exports = async function handler(req, res) {
     'Examples: "Burrito — what protein?" → hear answer → "Mild or spicy?" → "Anything to drink?" → done.',
     'If they interrupt you — stop mid-word. Recover with one short beat. Move the line.',
 
-    '=== FIRST LINE (NON-NEGOTIABLE) ===',
-    'Say EXACTLY this and NOTHING ELSE — calm, friendly, unhurried (do not rush):',
-    '"Hi. Welcome to Taco Express PB. My name is Massimo. What can I get you?"',
-    'Then STOP. PAUSE. SHUT UP. LISTEN. Wait for them. No menu. No proteins. No "just tell me what you like." No follow-up sentence.',
+    '=== GREETING (FIXED CONFIG — NON-NEGOTIABLE) ===',
+    'On session start (and whenever a greeting is needed), say EXACTLY this — never paraphrase:',
+    `"${cfg.GREETING_EXACT}"`,
+    `Tone: ${cfg.GREETING_TONE}. Pace: ${cfg.GREETING_PACE}.`,
+    'Then STOP. PAUSE. SHUT UP. LISTEN. Wait for them. No menu. No proteins. No follow-up sentence.',
 
     '=== MENU TRUTH (AUTHORITATIVE) ===',
     'FULL MENU below is law. If it exists: exact name, protein, price, modifiers. If it does not: "Not on the menu" + closest real option in one short line. No imagination. No memory search. No calling the shop to check listed items.',
@@ -146,8 +148,7 @@ module.exports = async function handler(req, res) {
       },
       output: {
         voice,
-        // Exact Martino Massimo pacing
-        speed: 0.92,
+        speed: cfg.SPEED,
       },
     },
   };
@@ -169,13 +170,16 @@ module.exports = async function handler(req, res) {
     if (!data?.value) {
       return res.status(502).json({ error: 'No ephemeral token from OpenAI' });
     }
-    console.log(`[Taco Massimo] token minted model=${model} voice=${voice} tools=ask_supervisor`);
+    console.log(`[Taco Massimo] token minted model=${model} voice=${voice} speed=${cfg.SPEED}`);
     return res.status(200).json({
       value: data.value,
       model,
       voice,
-      host: 'Massimo',
-      audioPath: 'webrtc-opus-48k',
+      speed: cfg.SPEED,
+      host: cfg.HOST_NAME,
+      greetingExact: cfg.GREETING_EXACT,
+      greetingTone: cfg.GREETING_TONE,
+      greetingPace: cfg.GREETING_PACE,
       supervisor: process.env.OPENAI_SUPERVISOR_MODEL?.trim() || 'gpt-5.6',
     });
   } catch (e) {

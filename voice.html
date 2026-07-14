@@ -280,20 +280,38 @@
             remoteAudio.play().catch(function () {});
           };
 
+          var greetingExact =
+            'Welcome to Taco Express PB. My name is Massimo. What can I get you?';
+          var greetingTone = 'warm, welcoming';
+          var greetingPace = 'steady, neutral';
+          var dcOpen = false;
+          var greetingArmed = false;
+
+          function speakFixedGreeting() {
+            if (!dcOpen || !greetingArmed) return;
+            greetingArmed = false;
+            dcSend({
+              type: 'response.create',
+              response: {
+                instructions:
+                  'Say EXACTLY and ONLY with a ' +
+                  greetingTone +
+                  ' tone and a ' +
+                  greetingPace +
+                  ' pace: "' +
+                  greetingExact +
+                  '" Then stop. Pause. Shut up. No menu. No proteins. Nothing else.',
+              },
+            });
+          }
+
           dc = pc.createDataChannel('oai-events');
           dc.addEventListener('message', function (ev) {
             onServerEvent(ev.data);
           });
           dc.addEventListener('open', function () {
-            try {
-              dcSend({
-                type: 'response.create',
-                response: {
-                  instructions:
-                    'Say EXACTLY and ONLY, calm and unhurried: "Hi. Welcome to Taco Express PB. My name is Massimo. What can I get you?" Then stop. Pause. Shut up. No menu. No proteins. Do not say just tell me what you like. Nothing else.',
-                },
-              });
-            } catch (e) {}
+            dcOpen = true;
+            speakFixedGreeting();
           });
 
           var offer = await pc.createOffer();
@@ -302,6 +320,10 @@
           var tokenPayload = await tokenPromise;
           var ephemeralKey = (tokenPayload.value || '').trim();
           if (!ephemeralKey) throw new Error('Missing ephemeral token');
+          if (tokenPayload.greetingExact) greetingExact = String(tokenPayload.greetingExact);
+          if (tokenPayload.greetingTone) greetingTone = String(tokenPayload.greetingTone);
+          if (tokenPayload.greetingPace) greetingPace = String(tokenPayload.greetingPace);
+          greetingArmed = true;
 
           var sdpResp = await fetch('https://api.openai.com/v1/realtime/calls', {
             method: 'POST',
@@ -317,13 +339,14 @@
           }
           var answerSdp = await sdpResp.text();
           await pc.setRemoteDescription({ type: 'answer', sdp: answerSdp });
+          speakFixedGreeting();
 
           connected = true;
           connecting = false;
           btn.disabled = false;
           btn.classList.add('live');
           btn.textContent = 'Hang Up';
-          setStatus('Massimo is on — matched to Martino audio path');
+          setStatus('Massimo is on — fixed greeting loaded');
         } catch (e) {
           console.error('[Taco Massimo]', e);
           cleanup();
