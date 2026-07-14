@@ -99,8 +99,7 @@
     <p id="status" aria-live="polite"></p>
   </div>
 
-  <!-- Hidden element kept for autoplay unlock; playback is AudioContext (cleaner path). -->
-  <audio id="remoteAudio" autoplay playsinline webkit-playsinline></audio>
+  <audio id="remoteAudio" autoplay playsinline></audio>
 
   <script>
     (function () {
@@ -109,106 +108,18 @@
       var remoteAudio = document.getElementById('remoteAudio');
       remoteAudio.setAttribute('playsinline', 'true');
       remoteAudio.setAttribute('webkit-playsinline', 'true');
-      remoteAudio.muted = true; // avoid double-play with AudioContext
+      remoteAudio.muted = false;
       remoteAudio.volume = 1;
 
       var pc = null;
       var dc = null;
       var localStream = null;
-      var audioCtx = null;
-      var remoteSource = null;
-      var remoteGain = null;
       var connected = false;
       var connecting = false;
       var history = [];
       var pendingCalls = {};
 
-      /**
-       * WebRTC path inspection notes (Massimo playback):
-       * - Voice: cedar (session). Model: gpt-realtime-2.1.
-       * - Transport: WebRTC Opus (browser negotiates opus/48000).
-       * - PCM format fields on the Realtime session do NOT apply to WebRTC —
-       *   they are for the WebSocket/media-proxy path only.
-       * - Muffling fixes = pipeline (bitrate / AGC / playback graph), not prompts.
-       */
-      function tuneOpusSdp(sdp) {
-        if (!sdp) return sdp;
-        var out = String(sdp)
-          .replace(/useinbandfec=0/g, 'useinbandfec=1')
-          .replace(/usedtx=1/g, 'usedtx=0');
-        // Raise Opus average bitrate on fmtp lines that already describe Opus params
-        out = out.replace(/a=fmtp:(\d+) ([^\r\n]*)/g, function (line, _pt, params) {
-          if (!/useinbandfec|maxplaybackrate|minptime/.test(params)) return line;
-          var next = params;
-          if (/maxaveragebitrate=\d+/.test(next)) {
-            next = next.replace(/maxaveragebitrate=\d+/, 'maxaveragebitrate=128000');
-          } else {
-            next = next + ';maxaveragebitrate=128000';
-          }
-          if (!/stereo=/.test(next)) next = next + ';stereo=0;sprop-stereo=0';
-          return 'a=fmtp:' + _pt + ' ' + next;
-        });
-        return out;
-      }
-
-      async function unlockSpeaker() {
-        try {
-          var AC = window.AudioContext || window.webkitAudioContext;
-          if (!AC) return;
-          if (!audioCtx) audioCtx = new AC();
-          if (audioCtx.state === 'suspended') await audioCtx.resume();
-        } catch (e) {}
-      }
-
-      async function playRemote(stream) {
-        try {
-          await unlockSpeaker();
-          // Keep element attached (iOS/gesture) but muted — real playback via AudioContext
-          remoteAudio.srcObject = stream;
-          remoteAudio.muted = true;
-          remoteAudio.volume = 1;
-          try { await remoteAudio.play(); } catch (e) {}
-
-          if (!audioCtx) return;
-          if (remoteSource) {
-            try { remoteSource.disconnect(); } catch (e) {}
-            remoteSource = null;
-          }
-          if (!remoteGain) {
-            remoteGain = audioCtx.createGain();
-            // Slight presence — not a "clarity prompt," just gain on the render path
-            remoteGain.gain.value = 1.12;
-            remoteGain.connect(audioCtx.destination);
-          }
-          remoteSource = audioCtx.createMediaStreamSource(stream);
-          remoteSource.connect(remoteGain);
-        } catch (e) {
-          console.warn('[Taco Massimo] AudioContext path failed — element fallback', e);
-          remoteAudio.muted = false;
-          try { await remoteAudio.play(); } catch (err) {}
-        }
-      }
-
-      async function bumpSenderBitrate() {
-        if (!pc) return;
-        var senders = pc.getSenders ? pc.getSenders() : [];
-        for (var i = 0; i < senders.length; i++) {
-          var sender = senders[i];
-          if (!sender.track || sender.track.kind !== 'audio') continue;
-          try {
-            var params = sender.getParameters();
-            if (!params.encodings || !params.encodings.length) {
-              params.encodings = [{}];
-            }
-            params.encodings.forEach(function (enc) {
-              enc.maxBitrate = 128000;
-            });
-            await sender.setParameters(params);
-          } catch (e) {
-            console.warn('[Taco Massimo] setParameters bitrate', e);
-          }
-        }
-      }
+      // Playback matches Martino Massimo: plain HTMLAudioElement, no AudioContext gain graph.
 
       function setStatus(msg) {
         statusEl.textContent = msg || '';
@@ -301,8 +212,6 @@
       }
 
       function cleanup() {
-        try { if (remoteSource) remoteSource.disconnect(); } catch (e) {}
-        remoteSource = null;
         try { if (dc) dc.close(); } catch (e) {}
         try { if (pc) pc.close(); } catch (e) {}
         if (localStream) {
@@ -337,8 +246,6 @@
         setStatus('Talking to Massimo…');
 
         try {
-          await unlockSpeaker();
-
           var tokenPromise = fetch('/api/realtime-token', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -351,13 +258,12 @@
             return resp.json();
           });
 
-          // AEC on (speakers+mic). AGC OFF — it softens/muddies presence.
+          // Match Martino mic constraints exactly
           localStream = await navigator.mediaDevices.getUserMedia({
             audio: {
               echoCancellation: true,
               noiseSuppression: true,
-              autoGainControl: false,
-              channelCount: 1,
+              autoGainControl: true,
             },
           });
 
@@ -368,7 +274,10 @@
 
           pc.ontrack = function (ev) {
             var stream = ev.streams && ev.streams[0] ? ev.streams[0] : new MediaStream([ev.track]);
-            playRemote(stream);
+            remoteAudio.srcObject = stream;
+            remoteAudio.muted = false;
+            remoteAudio.volume = 1;
+            remoteAudio.play().catch(function () {});
           };
 
           dc = pc.createDataChannel('oai-events');
@@ -381,15 +290,14 @@
                 type: 'response.create',
                 response: {
                   instructions:
-                    'Say EXACTLY and ONLY, calm not rushed: "Hi. Welcome to Taco Express PB. My name is Massimo. What can I get you? Just tell me what you like." Then stop. Pause. Shut up. No menu. No proteins. Nothing else.',
+                    'Say EXACTLY and ONLY, calm and unhurried: "Hi. Welcome to Taco Express PB. My name is Massimo. What can I get you?" Then stop. Pause. Shut up. No menu. No proteins. Do not say just tell me what you like. Nothing else.',
                 },
               });
             } catch (e) {}
           });
 
           var offer = await pc.createOffer();
-          var offerSdp = tuneOpusSdp(offer.sdp || '');
-          await pc.setLocalDescription({ type: 'offer', sdp: offerSdp });
+          await pc.setLocalDescription(offer);
 
           var tokenPayload = await tokenPromise;
           var ephemeralKey = (tokenPayload.value || '').trim();
@@ -397,7 +305,7 @@
 
           var sdpResp = await fetch('https://api.openai.com/v1/realtime/calls', {
             method: 'POST',
-            body: offerSdp,
+            body: offer.sdp,
             headers: {
               Authorization: 'Bearer ' + ephemeralKey,
               'Content-Type': 'application/sdp',
@@ -407,16 +315,15 @@
             var sdpErr = await sdpResp.text().catch(function () { return ''; });
             throw new Error('realtime ' + sdpResp.status + (sdpErr ? ': ' + sdpErr.slice(0, 180) : ''));
           }
-          var answerSdp = tuneOpusSdp(await sdpResp.text());
+          var answerSdp = await sdpResp.text();
           await pc.setRemoteDescription({ type: 'answer', sdp: answerSdp });
-          await bumpSenderBitrate();
 
           connected = true;
           connecting = false;
           btn.disabled = false;
           btn.classList.add('live');
           btn.textContent = 'Hang Up';
-          setStatus('Massimo is on — counter mode');
+          setStatus('Massimo is on — matched to Martino audio path');
         } catch (e) {
           console.error('[Taco Massimo]', e);
           cleanup();

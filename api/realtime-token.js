@@ -1,8 +1,9 @@
 /**
  * Taco Express Peabody — Massimo voice token (COPY site only).
- * Mic/mouth: gpt-realtime-2.1 + cedar (WebRTC Opus — format knobs are client/SDP)
+ * Mic/mouth: gpt-realtime + cedar (matched to Martino Massimo)
  * Brain (via ask_supervisor tool): GPT-5.6
  *
+ * Audio path matched to Martino: speed 0.92, near_field, plain HTML audio, AGC on.
  * Stage: voice shell + menu truth + counter talk. No Stripe cart yet.
  */
 const FULL_MENU = `
@@ -74,8 +75,8 @@ module.exports = async function handler(req, res) {
   }
 
   const model =
-    process.env.OPENAI_REALTIME_MODEL?.trim() || 'gpt-realtime-2.1';
-  // Male host voice (cedar). WebRTC path = Opus @ 48kHz (browser-negotiated).
+    process.env.OPENAI_REALTIME_MODEL?.trim() || 'gpt-realtime';
+  // Match Martino Massimo exactly: cedar + speed 0.92 + near_field + semantic_vad
   const voice = 'cedar';
 
   const instructions = [
@@ -89,14 +90,14 @@ module.exports = async function handler(req, res) {
     'If they interrupt you — stop mid-word. Recover with one short beat. Move the line.',
 
     '=== FIRST LINE (NON-NEGOTIABLE) ===',
-    'Say EXACTLY this and NOTHING ELSE — calm, friendly, not rushed:',
-    '"Hi. Welcome to Taco Express PB. My name is Massimo. What can I get you? Just tell me what you like."',
-    'Then STOP. PAUSE. SHUT UP. LISTEN. Wait for them. No menu. No proteins. No follow-up sentence.',
+    'Say EXACTLY this and NOTHING ELSE — calm, friendly, unhurried (do not rush):',
+    '"Hi. Welcome to Taco Express PB. My name is Massimo. What can I get you?"',
+    'Then STOP. PAUSE. SHUT UP. LISTEN. Wait for them. No menu. No proteins. No "just tell me what you like." No follow-up sentence.',
 
     '=== MENU TRUTH (AUTHORITATIVE) ===',
     'FULL MENU below is law. If it exists: exact name, protein, price, modifiers. If it does not: "Not on the menu" + closest real option in one short line. No imagination. No memory search. No calling the shop to check listed items.',
     'Steak / filet taco → not on the menu. Closest: Three Tacos · Shredded Beef $13.49, or Prime Rib Burrito $17.99 (only prime-rib item).',
-    'Prime rib → only the Prime Rib Burrito $17.99. Never a prime rib taco.',
+    'Prime rib → only the Prime Rib Burrito $17.99. Never a prime rib taco. Shawarma → not on the menu.',
 
     '=== ORDERS / PAY (THIS STAGE) ===',
     'Confirm the item + price in one short line. Ask mild/spicy only when needed. Ask drink only when order is set.',
@@ -141,12 +142,12 @@ module.exports = async function handler(req, res) {
           create_response: true,
           interrupt_response: true,
         },
-        // near_field = close mic input cleanup for VAD; does not render output voice
         noise_reduction: { type: 'near_field' },
       },
       output: {
         voice,
-        speed: 1.0,
+        // Exact Martino Massimo pacing
+        speed: 0.92,
       },
     },
   };
