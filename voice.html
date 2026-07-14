@@ -46,7 +46,7 @@
       font-weight: 700;
     }
 
-    /* Clean ticket — white on charcoal, no frames, no boxes */
+    /* Receipt alignment without receipt chrome — white on charcoal only */
     .ticket-wrap {
       flex: 1;
       display: flex;
@@ -56,55 +56,67 @@
       min-height: 180px;
     }
     #ticket {
-      width: min(640px, 100%);
+      width: min(680px, 100%);
       color: var(--white);
-      font-size: 1.2rem;
-      line-height: 1.45;
+      font-size: 1.25rem;
+      line-height: 1.4;
+      font-variant-numeric: tabular-nums;
       display: none;
     }
     #ticket.has-items { display: block; }
     .line {
       display: grid;
-      grid-template-columns: 1fr auto auto;
-      gap: 12px 28px;
+      grid-template-columns: minmax(0, 1fr) 3.25rem 6.25rem;
+      column-gap: 20px;
       align-items: baseline;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
-    .line .title { font-weight: 600; }
+    .line .title {
+      font-weight: 600;
+      overflow-wrap: anywhere;
+    }
     .line .qty {
-      opacity: 0.95;
       white-space: nowrap;
-      font-weight: 700;
-      font-variant-numeric: tabular-nums;
-      letter-spacing: 0.02em;
-      min-width: 2.5rem;
+      font-weight: 600;
       text-align: right;
+      letter-spacing: 0.04em;
     }
     .line .price {
       font-weight: 700;
       white-space: nowrap;
       text-align: right;
-      min-width: 5.5rem;
-      font-variant-numeric: tabular-nums;
     }
     .line-note {
       grid-column: 1 / -1;
-      margin: -6px 0 16px;
-      padding-left: 0;
+      margin: -2px 0 14px;
       font-size: 1.05rem;
-      opacity: 0.8;
+      font-weight: 400;
+      color: var(--white);
+    }
+    .totals {
+      margin-top: 20px;
+      padding-top: 4px;
+    }
+    .totals .line {
+      margin-bottom: 8px;
       font-weight: 400;
     }
-    .totals { margin-top: 22px; }
-    .totals .line { margin-bottom: 8px; font-weight: 400; }
-    .totals .line.total-row .title,
-    .totals .line.total-row .price { font-weight: 800; font-size: 1.35rem; }
-    .instr {
-      margin-top: 26px;
-      font-size: 1.05rem;
+    .totals .line .title { font-weight: 500; }
+    .totals .line.total-row {
+      margin-top: 10px;
     }
-    .instr .label { font-weight: 700; margin-bottom: 4px; }
-    .instr .body { opacity: 0.85; white-space: pre-wrap; }
+    .totals .line.total-row .title,
+    .totals .line.total-row .price {
+      font-weight: 800;
+      font-size: 1.4rem;
+    }
+    .instr {
+      margin-top: 28px;
+      font-size: 1.05rem;
+      color: var(--white);
+    }
+    .instr .label { font-weight: 700; margin-bottom: 6px; }
+    .instr .body { white-space: pre-wrap; font-weight: 400; }
 
     .bottom {
       margin-top: auto;
@@ -222,9 +234,7 @@
             '</div>' +
             '<div class="qty">' +
             qty +
-            ' order' +
-            (qty === 1 ? '' : 's') +
-            '</div>' +
+            'x</div>' +
             '<div class="price">' +
             money(line.price) +
             '</div>' +
