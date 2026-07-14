@@ -13,7 +13,8 @@ Taco Express Peabody — 58 Pulaski Street, Peabody MA 01960 · (978) 982-1800
 Hours: Mon–Tue CLOSED. Wed–Sat 11AM–8PM. Sun 11AM–6PM.
 
 RULES (always):
-- FULL MENU below is the ONLY authority. Exact name + price. Never invent. Never "search memory."
+- FULL MENU below is the ONLY authority for food items/prices. Exact name + price. Never invent menu items.
+- Guest memory: use KNOWN GUEST MEMORY in your instructions when the name matches — that is real for this session.
 - One protein per item / plate — never mix proteins on the same order item.
 - Mild or spicy when they choose (party platters default medium).
 - Proteins on the menu: shredded beef (never ground), shredded chicken, pork, grilled shrimp.
@@ -112,12 +113,14 @@ module.exports = async function handler(req, res) {
     'If they say "prove it" / "say something in Mexican/Spanish": say ONE short casual line in Spanish (Mexican Spanish vibe) — friendly, not a speech. Examples you may vary: "Órale, ¿qué se te antoja?" or "Con mucho gusto, amigo." or "Aquí estamos para servirte."',
     'If they ask "what does that mean?": translate it simply in English in one short line, then soft door back to the order ("So — what are you craving?"). Do not dump a Spanish lesson. Do not switch the whole call to Spanish unless they are speaking Spanish.',
 
-    '=== KNOWN GUEST MEMORY (BUILT-IN — USE WHEN NAME MATCHES) ===',
-    'When firstName+lastName match a guest below (ignore case), you REMEMBER them. After set_customer on their name: one warm recognition beat — do NOT dump the whole list.',
-    'Example vibe: "Frank — good to see you. Last time you were into that prime rib burrito… craving that again, or something new?" Then LISTEN.',
-    'If they ask what they usually get / past orders: share one or two favorites briefly from memory. Offer to reorder the usual — only add_order_line after they clearly say yes.',
-    'If they say they have dined here before and the name matches: treat as returning — do NOT open voice signup.',
-    'Fill email/phone from memory onto the ticket with set_customer when you recognize them (confirm lightly if needed: "Still frankamartino at gmail / same phone?").',
+    '=== KNOWN GUEST MEMORY (BUILT-IN — AUTHORITATIVE FOR VIDEO) ===',
+    'This memory is ALWAYS available — do NOT wait for Mem0. Do NOT say "I don\'t remember" / "I have no memory" / "I can\'t recall" when the guest matches.',
+    'When firstName+lastName match a guest below (ignore case), you KNOW them. After set_customer on their name: one warm recognition beat with a real past order — then listen.',
+    'Example: "Frank — good to see you again. Last time you had that prime rib burrito… same again, or something new?"',
+    'If they ask "do you remember me / my usual / past orders / what did I get last time": answer YES and name one or two past orders from memory below. Never claim amnesia for a known guest.',
+    'You may call recall_customer anytime for a known guest (or when they ask about memory) — the ticket tools return these same notes even if Mem0 is off.',
+    'If they say they have dined here before and the name matches: returning guest — do NOT open voice signup.',
+    'Fill email/phone from memory with set_customer when you recognize them (light confirm ok).',
     'KNOWN GUESTS:',
     knownGuestBlock || '- (none)',
 
@@ -206,7 +209,7 @@ module.exports = async function handler(req, res) {
     'If confirm_and_pay says needs_card_setup / no card on file: call open_voice_signup if not already open, then say short — "No card on file yet — signup just opened. Save one once, or pay at the counter / call (978) 982-1800." Do not say PCI. Do not dump a speech.',
     'If missing_fields — ask for those fields one at a time (especially email and phone), then continue.',
     'SPEED: one short sentence. Prefer ticket tool results over look_at_screen.',
-    'Do NOT call recall_customer or remember_customer at all until AFTER pay (or after Total if they pay at counter). If Mem0 is unavailable, ignore it and keep talking — never pause for memory.',
+    'Do NOT call remember_customer until AFTER pay (or after Total if they pay at counter). recall_customer is OK anytime they ask about past orders / memory — especially known guests. If Mem0 is unavailable, use KNOWN GUEST MEMORY above and keep talking — never say you forgot a known guest.',
     `Tax ${(cfg.TAX_RATE * 100).toFixed(0)}% on taxable lines. Total = subtotal + tax + tip.`,
     'One short answer per turn — never repeat the same sentence twice. Never ask_supervisor for mild/spicy, Coke, tacos, burritos, or totals.',
 
@@ -369,13 +372,14 @@ module.exports = async function handler(req, res) {
         type: 'function',
         name: 'recall_customer',
         description:
-          'After email is known — recall Mem0 (name, allergies, past orders). Use naturally; do not read aloud as a list.',
+          'Recall past orders / prefs. Call when they ask if you remember them, their usual, or past orders — and after you recognize a known guest. Works even when Mem0 is offline (built-in guest notes returned).',
         parameters: {
           type: 'object',
           properties: {
-            email: { type: 'string', description: 'Customer email' },
+            email: { type: 'string', description: 'Customer email if known' },
+            firstName: { type: 'string' },
+            lastName: { type: 'string' },
           },
-          required: ['email'],
         },
       },
       {
@@ -461,6 +465,7 @@ module.exports = async function handler(req, res) {
       greetingTone: cfg.GREETING_TONE,
       greetingPace: cfg.GREETING_PACE,
       taxRate: cfg.TAX_RATE,
+      knownGuests: Array.isArray(cfg.KNOWN_GUESTS) ? cfg.KNOWN_GUESTS : [],
       supervisor: process.env.OPENAI_SUPERVISOR_MODEL?.trim() || 'gpt-5.6',
     });
   } catch (e) {

@@ -455,6 +455,7 @@
       var history = [];
       var pendingCalls = {};
       var taxRate = 0.07;
+      var knownGuests = [];
       var order = {
         lines: [],
         tip: 0,
@@ -703,6 +704,55 @@
         return gaps;
       }
 
+      function findKnownGuest(extra) {
+        extra = extra || {};
+        var first = String(extra.firstName || customer.firstName || '')
+          .trim()
+          .toLowerCase();
+        var last = String(extra.lastName || customer.lastName || '')
+          .trim()
+          .toLowerCase();
+        var email = String(extra.email || customer.email || '')
+          .trim()
+          .toLowerCase();
+        var phoneDigits = String(extra.phone || customer.phone || '').replace(/\D/g, '');
+        for (var i = 0; i < knownGuests.length; i++) {
+          var g = knownGuests[i] || {};
+          var gf = String(g.firstName || '')
+            .trim()
+            .toLowerCase();
+          var gl = String(g.lastName || '')
+            .trim()
+            .toLowerCase();
+          var ge = String(g.email || '')
+            .trim()
+            .toLowerCase();
+          var gp = String(g.phone || '').replace(/\D/g, '');
+          if (first && last && gf === first && gl === last) return g;
+          if (email && ge && email === ge) return g;
+          if (phoneDigits.length >= 10 && gp && phoneDigits.slice(-10) === gp.slice(-10)) {
+            return g;
+          }
+        }
+        return null;
+      }
+
+      function knownGuestPayload(g) {
+        if (!g) return null;
+        return {
+          ok: true,
+          knownGuest: true,
+          source: 'built-in',
+          firstName: g.firstName || '',
+          lastName: g.lastName || '',
+          email: g.email || '',
+          phone: g.phone || '',
+          memories: Array.isArray(g.notes) ? g.notes.slice() : [],
+          speakHint:
+            'You DO remember this guest. Say so warmly and mention one past order. Never say you do not remember.',
+        };
+      }
+
       function setStatus(msg) {
         statusEl.textContent = msg || '';
       }
@@ -835,8 +885,20 @@
           if (args.phone != null && String(args.phone).trim()) {
             customer.phone = String(args.phone).trim();
           }
+          var matched = findKnownGuest();
+          if (matched) {
+            if (!customer.email && matched.email) customer.email = String(matched.email);
+            if (!customer.phone && matched.phone) customer.phone = String(matched.phone);
+          }
           renderTicket();
-          replyTool(callId, { ok: true, ticket: ticketSnapshot() });
+          var out = { ok: true, ticket: ticketSnapshot() };
+          if (matched) {
+            var mem = knownGuestPayload(matched);
+            out.knownGuest = true;
+            out.memories = mem.memories;
+            out.speakHint = mem.speakHint;
+          }
+          replyTool(callId, out);
           return;
         }
 
@@ -1063,13 +1125,35 @@
 
         if (name === 'recall_customer') {
           var recallEmail = String(args.email || customer.email || '').trim();
+          var builtIn = findKnownGuest({
+            email: recallEmail,
+            firstName: args.firstName,
+            lastName: args.lastName,
+          });
+          if (builtIn) {
+            replyTool(callId, knownGuestPayload(builtIn));
+            delete pendingCalls[callId];
+            return;
+          }
           callMem0('recall', { email: recallEmail })
             .then(function (data) {
-              replyTool(callId, data);
+              if (
+                (!data || data.skipped || !(data.memories && data.memories.length)) &&
+                findKnownGuest()
+              ) {
+                replyTool(callId, knownGuestPayload(findKnownGuest()));
+              } else {
+                replyTool(callId, data);
+              }
               delete pendingCalls[callId];
             })
             .catch(function () {
-              replyTool(callId, { ok: false, error: 'Mem0 recall failed' });
+              var again = findKnownGuest();
+              if (again) {
+                replyTool(callId, knownGuestPayload(again));
+              } else {
+                replyTool(callId, { ok: false, error: 'Mem0 recall failed' });
+              }
               delete pendingCalls[callId];
             });
           return;
@@ -1492,6 +1576,9 @@
           if (tokenPayload.greetingExact) greetingExact = String(tokenPayload.greetingExact);
           if (tokenPayload.taxRate != null && isFinite(Number(tokenPayload.taxRate))) {
             taxRate = Number(tokenPayload.taxRate);
+          }
+          if (Array.isArray(tokenPayload.knownGuests)) {
+            knownGuests = tokenPayload.knownGuests;
           }
 
           // Arm BEFORE SDP answer — ontrack fires on setRemoteDescription; if
