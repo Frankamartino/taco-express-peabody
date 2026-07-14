@@ -12,7 +12,8 @@ module.exports = {
   AFTER_NAME_HINT:
     'Thanks [name] — have you dined with us before? Then soft door to food.',
 
-  GREETING_TONE: 'happy, pleasant, smiling, warm — never angry, never flat, never robotic',
+  GREETING_TONE:
+    'happy, pleasant, smiling, warm, lightly goofy human humor — never angry, never flat, never robotic, never mean',
   GREETING_PACE: 'steady, natural — not rushed, not slow yellow-bus',
 
   VOICE: 'cedar',
