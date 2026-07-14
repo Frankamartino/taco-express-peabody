@@ -511,20 +511,28 @@
       }
 
       async function callMem0(action, payload) {
-        var resp = await fetch('/api/mem0', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(Object.assign({ action: action }, payload || {})),
-        });
-        var data = await resp.json().catch(function () { return {}; });
-        if (!resp.ok) {
-          return {
-            ok: false,
-            error: data.error || ('mem0 ' + resp.status),
-            hint: data.hint || '',
-          };
+        try {
+          var resp = await fetch('/api/mem0', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(Object.assign({ action: action }, payload || {})),
+          });
+          var data = await resp.json().catch(function () { return {}; });
+          if (!resp.ok) {
+            // Soft-fail — never stall Massimo (503 = Mem0 not configured)
+            return {
+              ok: true,
+              skipped: true,
+              configured: false,
+              memories: [],
+              error: data.error || ('mem0 ' + resp.status),
+              hint: data.hint || '',
+            };
+          }
+          return data;
+        } catch (e) {
+          return { ok: true, skipped: true, configured: false, memories: [], error: 'mem0 network' };
         }
-        return data;
       }
 
       function handleOrderTool(name, callId, rawArgs) {
@@ -1075,13 +1083,18 @@
             if (!sessionAlive || !dcOpen || !greetingArmed || greetingSpoken) return;
             greetingSpoken = true;
             greetingArmed = false;
+            // Kill any auto-started line so we only get ONE welcome
+            dcSend({ type: 'response.cancel' });
+            try {
+              dcSend({ type: 'output_audio_buffer.clear' });
+            } catch (e) {}
             dcSend({
               type: 'response.create',
               response: {
                 instructions:
                   'Say EXACTLY and ONLY with a happy pleasant smiling warm tone and a steady natural pace: "' +
                   greetingExact +
-                  '" Then stop. Pause. Listen for their name. Do not ask what they want yet. Nothing else. Do not repeat yourself.',
+                  '" Then stop. Pause. Listen for their name. Do not ask what they want yet. Nothing else. Do not repeat yourself. Do not say Welcome twice.',
               },
             });
           }
@@ -1093,6 +1106,7 @@
           });
           dc.addEventListener('open', function () {
             dcOpen = true;
+            // Only greet once everything is armed (avoid race double-speak)
             speakFixedGreeting();
           });
 
@@ -1110,8 +1124,6 @@
           if (tokenPayload.taxRate != null && isFinite(Number(tokenPayload.taxRate))) {
             taxRate = Number(tokenPayload.taxRate);
           }
-          greetingArmed = true;
-          sessionAlive = true;
 
           var sdpResp = await fetch('https://api.openai.com/v1/realtime/calls', {
             method: 'POST',
@@ -1125,12 +1137,15 @@
             var sdpErr = await sdpResp.text().catch(function () { return ''; });
             throw new Error('realtime ' + sdpResp.status + (sdpErr ? ': ' + sdpErr.slice(0, 180) : ''));
           }
-          if (!sessionAlive) {
+          if (!connecting) {
             cleanup();
             return;
           }
           var answerSdp = await sdpResp.text();
           await pc.setRemoteDescription({ type: 'answer', sdp: answerSdp });
+
+          sessionAlive = true;
+          greetingArmed = true;
           speakFixedGreeting();
 
           connected = true;
