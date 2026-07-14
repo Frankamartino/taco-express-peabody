@@ -256,6 +256,7 @@
       var connected = false;
       var connecting = false;
       var sessionAlive = false;
+      var intentionallyHungUp = false;
       var hangUpTimer = null;
       var history = [];
       var pendingCalls = {};
@@ -989,6 +990,7 @@
       }
 
       function hangUp() {
+        intentionallyHungUp = true;
         sessionAlive = false;
         resetOrder();
         resetCustomer();
@@ -1026,6 +1028,7 @@
         if (connecting) return;
         connecting = true;
         sessionAlive = false;
+        intentionallyHungUp = false;
         btn.disabled = true;
         btn.textContent = 'Connecting…';
         setStatus('Talking to Massimo…');

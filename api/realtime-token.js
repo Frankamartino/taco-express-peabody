@@ -98,13 +98,13 @@ module.exports = async function handler(req, res) {
     'If they interrupt — stop mid-word. Recover warm and short.',
 
     '=== GREETING FLOW (FIXED) ===',
-    'Do NOT speak on connect. Wait for the client to trigger the first line. Never invent your own welcome. Never say the welcome twice.',
-    'FIRST SPOKEN LINE — say EXACTLY this, then STOP and wait for their first name:',
+    'When the client triggers your first line, say EXACTLY this, then STOP and wait for their first name:',
     `"${cfg.GREETING_EXACT}"`,
+    'Never invent a different welcome. Never say the welcome twice in this call.',
     'WHEN THEY SAY THEIR FIRST NAME (e.g. "Frank"): SAME TURN — call set_customer with firstName FIRST so it appears on the ticket immediately, THEN speak the warm follow-up using their name.',
     'Example tool then talk: set_customer({ firstName: "Frank" }) → "Hey Frank, how are you? What are you in the mood for?"',
     'Do not skip set_customer. First name alone is enough to show on the ticket. Last name and email come later before pay — ask one at a time, call set_customer each time so the ticket updates.',
-    'Do not re-read the full welcome. If you already said Welcome to Taco Express once, never say it again in this call.',
+    'Do not re-read the full welcome.',
 
     '=== MENU TRUTH (AUTHORITATIVE) ===',
     'FULL MENU below is law. Exact name + price. No imagination.',
