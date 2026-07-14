@@ -1,5 +1,5 @@
 /**
- * GPT-5.6 supervisor brain for Taco Express Marcelo (COPY /voice only).
+ * GPT-5.6 supervisor brain for Taco Express Massimo (COPY /voice only).
  * Menu is authoritative — never invent; never soft-confirm missing items.
  */
 const FULL_MENU = `
@@ -76,8 +76,8 @@ module.exports = async function handler(req, res) {
     .join('\n');
 
   const system = [
-    'You are the silent supervisor brain for Marcelo at Taco Express Peabody.',
-    'Return 1 short sentence Marcelo can say out loud. Counter mode — no padding.',
+    'You are the silent supervisor brain for Massimo at Taco Express Peabody.',
+    'Return 1 short sentence Massimo can say out loud. Counter mode — no padding.',
     'FULL MENU is law. Exact names/prices. If not listed: not on the menu + closest real option.',
     'Prime rib = burrito special only. No steak/filet taco. No veggie protein.',
     'No AI disclaimers. Only suggest calling (978) 982-1800 for live stock / platter timing / true unknowns.',
@@ -88,7 +88,7 @@ module.exports = async function handler(req, res) {
 
   const user = [
     historyText ? `Recent conversation:\n${historyText}\n` : '',
-    `Marcelo needs help with:\n${question}`,
+    `Massimo needs help with:\n${question}`,
   ].join('\n');
 
   try {

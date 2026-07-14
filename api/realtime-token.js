@@ -1,5 +1,5 @@
 /**
- * Taco Express Peabody — Marcelo voice token (COPY site only).
+ * Taco Express Peabody — Massimo voice token (COPY site only).
  * Mic/mouth: gpt-realtime-2.1 + cedar (WebRTC Opus — format knobs are client/SDP)
  * Brain (via ask_supervisor tool): GPT-5.6
  *
@@ -79,7 +79,7 @@ module.exports = async function handler(req, res) {
   const voice = 'cedar';
 
   const instructions = [
-    'You are Marcelo — counter host at Taco Express PB / Taco Express Peabody (58 Pulaski Street). Working the line. Not a chat buddy. Never call yourself Massimo.',
+    'You are Massimo — counter host at Taco Express PB / Taco Express Peabody (58 Pulaski Street). Working the line. Not a chat buddy.',
 
     '=== COUNTER MODE (20 PEOPLE IN LINE — NON-NEGOTIABLE) ===',
     'One thought. One short sentence. One question max. Then LISTEN. Do not rush the customer.',
@@ -90,7 +90,7 @@ module.exports = async function handler(req, res) {
 
     '=== FIRST LINE (NON-NEGOTIABLE) ===',
     'Say EXACTLY this and NOTHING ELSE — calm, friendly, not rushed:',
-    '"Hi. Welcome to Taco Express PB. My name is Marcelo. What can I get you? Just tell me what you like."',
+    '"Hi. Welcome to Taco Express PB. My name is Massimo. What can I get you? Just tell me what you like."',
     'Then STOP. PAUSE. SHUT UP. LISTEN. Wait for them. No menu. No proteins. No follow-up sentence.',
 
     '=== MENU TRUTH (AUTHORITATIVE) ===',
@@ -162,24 +162,24 @@ module.exports = async function handler(req, res) {
     });
     const data = await r.json().catch(() => ({}));
     if (!r.ok) {
-      console.error('[Taco Marcelo] client_secrets error:', r.status, JSON.stringify(data).slice(0, 400));
+      console.error('[Taco Massimo] client_secrets error:', r.status, JSON.stringify(data).slice(0, 400));
       return res.status(r.status).json(data);
     }
     if (!data?.value) {
       return res.status(502).json({ error: 'No ephemeral token from OpenAI' });
     }
-    console.log(`[Taco Marcelo] token minted model=${model} voice=${voice} tools=ask_supervisor`);
+    console.log(`[Taco Massimo] token minted model=${model} voice=${voice} tools=ask_supervisor`);
     return res.status(200).json({
       value: data.value,
       model,
       voice,
-      host: 'Marcelo',
+      host: 'Massimo',
       audioPath: 'webrtc-opus-48k',
       supervisor: process.env.OPENAI_SUPERVISOR_MODEL?.trim() || 'gpt-5.6',
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'Realtime token failed';
-    console.error('[Taco Marcelo] Token error:', e);
+    console.error('[Taco Massimo] Token error:', e);
     return res.status(500).json({ error: msg });
   }
 };

@@ -249,7 +249,7 @@
         }
         if (!question) question = 'Help with the customer order.';
 
-        setStatus('Marcelo thinking…');
+        setStatus('Massimo thinking…');
         var answer = '';
         try {
           answer = await askSupervisor(question);
@@ -267,7 +267,7 @@
           },
         });
         dcSend({ type: 'response.create' });
-        setStatus('Marcelo is on — talk anytime');
+        setStatus('Massimo is on — talk anytime');
       }
 
       function onServerEvent(raw) {
@@ -334,7 +334,7 @@
         connecting = true;
         btn.disabled = true;
         btn.textContent = 'Connecting…';
-        setStatus('Talking to Marcelo…');
+        setStatus('Talking to Massimo…');
 
         try {
           await unlockSpeaker();
@@ -381,7 +381,7 @@
                 type: 'response.create',
                 response: {
                   instructions:
-                    'Say EXACTLY and ONLY, calm not rushed: "Hi. Welcome to Taco Express PB. My name is Marcelo. What can I get you? Just tell me what you like." Then stop. Pause. Shut up. No menu. No proteins. Nothing else.',
+                    'Say EXACTLY and ONLY, calm not rushed: "Hi. Welcome to Taco Express PB. My name is Massimo. What can I get you? Just tell me what you like." Then stop. Pause. Shut up. No menu. No proteins. Nothing else.',
                 },
               });
             } catch (e) {}
@@ -416,11 +416,11 @@
           btn.disabled = false;
           btn.classList.add('live');
           btn.textContent = 'Hang Up';
-          setStatus('Marcelo is on — counter mode');
+          setStatus('Massimo is on — counter mode');
         } catch (e) {
-          console.error('[Taco Marcelo]', e);
+          console.error('[Taco Massimo]', e);
           cleanup();
-          setStatus('Could not start Marcelo. Try again.');
+          setStatus('Could not start Massimo. Try again.');
         }
       }
 
