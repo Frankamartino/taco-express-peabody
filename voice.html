@@ -230,6 +230,8 @@
       var localStream = null;
       var connected = false;
       var connecting = false;
+      var sessionAlive = false;
+      var hangUpTimer = null;
       var history = [];
       var pendingCalls = {};
       var taxRate = 0.07;
@@ -428,11 +430,14 @@
       }
 
       function dcSend(obj) {
-        if (!dc || dc.readyState !== 'open') return;
-        dc.send(JSON.stringify(obj));
+        if (!sessionAlive || !dc || dc.readyState !== 'open') return;
+        try {
+          dc.send(JSON.stringify(obj));
+        } catch (e) {}
       }
 
       function replyTool(callId, output) {
+        if (!sessionAlive) return;
         dcSend({
           type: 'conversation.item.create',
           item: {
@@ -785,6 +790,7 @@
 
         if (data.type === 'response.output_audio_transcript.done' && data.transcript) {
           pushHistory('massimo', data.transcript);
+          maybeAutoHangUp(data.transcript, 'massimo');
           return;
         }
         if (
@@ -794,6 +800,7 @@
         ) {
           pushHistory('customer', data.transcript);
           maybeCaptureFirstName(data.transcript);
+          maybeAutoHangUp(data.transcript, 'customer');
           return;
         }
       }
@@ -872,22 +879,69 @@
         });
       }
 
-      function cleanup() {
+      function stopAllMedia() {
         try {
-          if (dc && dc.readyState === 'open') {
-            dc.send(JSON.stringify({ type: 'response.cancel' }));
-            dc.send(JSON.stringify({ type: 'output_audio_buffer.clear' }));
-          }
-        } catch (e) {}
-        try {
+          remoteAudio.muted = true;
           remoteAudio.pause();
           remoteAudio.srcObject = null;
+          remoteAudio.removeAttribute('src');
+          remoteAudio.load();
         } catch (e) {}
-        try { if (dc) dc.close(); } catch (e) {}
-        try { if (pc) pc.close(); } catch (e) {}
         if (localStream) {
-          localStream.getTracks().forEach(function (t) { t.stop(); });
+          localStream.getTracks().forEach(function (t) {
+            try {
+              t.stop();
+            } catch (e2) {}
+          });
         }
+        if (pc) {
+          try {
+            pc.getSenders().forEach(function (s) {
+              if (s.track) {
+                try {
+                  s.track.stop();
+                } catch (e3) {}
+              }
+            });
+          } catch (e4) {}
+          try {
+            pc.getReceivers().forEach(function (r) {
+              if (r.track) {
+                try {
+                  r.track.stop();
+                } catch (e5) {}
+              }
+            });
+          } catch (e6) {}
+          try {
+            pc.onicecandidate = null;
+            pc.ontrack = null;
+            pc.onconnectionstatechange = null;
+            pc.close();
+          } catch (e7) {}
+        }
+      }
+
+      function cleanup() {
+        sessionAlive = false;
+        if (hangUpTimer) {
+          clearTimeout(hangUpTimer);
+          hangUpTimer = null;
+        }
+        try {
+          if (dc && dc.readyState === 'open') {
+            try {
+              dc.send(JSON.stringify({ type: 'response.cancel' }));
+            } catch (e) {}
+            try {
+              dc.send(JSON.stringify({ type: 'output_audio_buffer.clear' }));
+            } catch (e2) {}
+          }
+        } catch (e3) {}
+        try {
+          if (dc) dc.close();
+        } catch (e4) {}
+        stopAllMedia();
         pc = null;
         dc = null;
         localStream = null;
@@ -901,17 +955,38 @@
       }
 
       function hangUp() {
+        sessionAlive = false;
         setStatus('Hung up');
         cleanup();
+        try {
+          remoteAudio.muted = false;
+        } catch (e) {}
+      }
+
+      function maybeAutoHangUp(transcript, who) {
+        var t = String(transcript || '').toLowerCase();
+        if (!t) return;
+        var bye =
+          /\b(bye|goodbye|good bye|see you|hang up)\b/i.test(t) ||
+          /\b(thank you|thanks).{0,40}\b(bye|goodbye)\b/i.test(t);
+        if (!bye) return;
+        if (hangUpTimer) clearTimeout(hangUpTimer);
+        var delay = who === 'customer' ? 900 : 1600;
+        hangUpTimer = setTimeout(function () {
+          if (!connected && !sessionAlive) return;
+          hangUp();
+          setStatus('Call ended');
+        }, delay);
       }
 
       async function startMassimo() {
-        if (connecting) return;
-        if (connected) {
+        if (connected || sessionAlive || (pc && btn.classList.contains('live'))) {
           hangUp();
           return;
         }
+        if (connecting) return;
         connecting = true;
+        sessionAlive = false;
         btn.disabled = true;
         btn.textContent = 'Connecting…';
         setStatus('Talking to Massimo…');
@@ -946,9 +1021,15 @@
           });
 
           pc.ontrack = function (ev) {
+            if (!sessionAlive) {
+              try {
+                if (ev.track) ev.track.stop();
+              } catch (e) {}
+              return;
+            }
             var stream = ev.streams && ev.streams[0] ? ev.streams[0] : new MediaStream([ev.track]);
-            remoteAudio.srcObject = stream;
             remoteAudio.muted = false;
+            remoteAudio.srcObject = stream;
             remoteAudio.volume = 1;
             remoteAudio.play().catch(function () {});
           };
@@ -960,7 +1041,7 @@
           var greetingSpoken = false;
 
           function speakFixedGreeting() {
-            if (!dcOpen || !greetingArmed || greetingSpoken) return;
+            if (!sessionAlive || !dcOpen || !greetingArmed || greetingSpoken) return;
             greetingSpoken = true;
             greetingArmed = false;
             dcSend({
@@ -976,6 +1057,7 @@
 
           dc = pc.createDataChannel('oai-events');
           dc.addEventListener('message', function (ev) {
+            if (!sessionAlive) return;
             onServerEvent(ev.data);
           });
           dc.addEventListener('open', function () {
@@ -987,6 +1069,10 @@
           await pc.setLocalDescription(offer);
 
           var tokenPayload = await tokenPromise;
+          if (!connecting) {
+            cleanup();
+            return;
+          }
           var ephemeralKey = (tokenPayload.value || '').trim();
           if (!ephemeralKey) throw new Error('Missing ephemeral token');
           if (tokenPayload.greetingExact) greetingExact = String(tokenPayload.greetingExact);
@@ -994,6 +1080,7 @@
             taxRate = Number(tokenPayload.taxRate);
           }
           greetingArmed = true;
+          sessionAlive = true;
 
           var sdpResp = await fetch('https://api.openai.com/v1/realtime/calls', {
             method: 'POST',
@@ -1006,6 +1093,10 @@
           if (!sdpResp.ok) {
             var sdpErr = await sdpResp.text().catch(function () { return ''; });
             throw new Error('realtime ' + sdpResp.status + (sdpErr ? ': ' + sdpErr.slice(0, 180) : ''));
+          }
+          if (!sessionAlive) {
+            cleanup();
+            return;
           }
           var answerSdp = await sdpResp.text();
           await pc.setRemoteDescription({ type: 'answer', sdp: answerSdp });
@@ -1025,6 +1116,10 @@
       }
 
       btn.addEventListener('click', function () {
+        if (btn.classList.contains('live') || connected || sessionAlive) {
+          hangUp();
+          return;
+        }
         startMassimo();
       });
     })();
