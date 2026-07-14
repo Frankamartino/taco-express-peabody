@@ -12,21 +12,20 @@
     :root {
       --lime: #84cc16;
       --terra: #ea580c;
-      --cream: #fffbeb;
+      --white: #ffffff;
       --charcoal: #1c1917;
-      --muted: rgba(255, 251, 235, 0.55);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       min-height: 100vh;
       font-family: "DM Sans", system-ui, sans-serif;
       background: var(--charcoal);
-      color: var(--cream);
+      color: var(--white);
       display: flex;
       flex-direction: column;
       padding: 28px 20px 40px;
     }
-    .top { text-align: center; }
+    .top { text-align: center; flex-shrink: 0; }
     h1 {
       font-family: "Bebas Neue", sans-serif;
       font-size: clamp(2.6rem, 11vw, 4.2rem);
@@ -37,7 +36,8 @@
     .outlet {
       margin-top: 14px;
       font-size: 0.95rem;
-      color: var(--muted);
+      color: var(--white);
+      opacity: 0.85;
       line-height: 1.55;
     }
     .outlet a {
@@ -45,14 +45,62 @@
       text-decoration: none;
       font-weight: 700;
     }
+
+    /* Clean ticket — white on charcoal, no frames, no boxes */
+    .ticket-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 0 16px;
+      min-height: 180px;
+    }
+    #ticket {
+      width: min(420px, 100%);
+      color: var(--white);
+      font-size: 0.98rem;
+      line-height: 1.35;
+      display: none;
+    }
+    #ticket.has-items { display: block; }
+    .line {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 10px 14px;
+      align-items: baseline;
+      margin-bottom: 10px;
+    }
+    .line .title { font-weight: 600; }
+    .line .qty { opacity: 0.9; white-space: nowrap; }
+    .line .price { font-weight: 700; white-space: nowrap; text-align: right; min-width: 4.5rem; }
+    .line-note {
+      grid-column: 1 / -1;
+      margin: -4px 0 12px;
+      padding-left: 0;
+      font-size: 0.88rem;
+      opacity: 0.8;
+      font-weight: 400;
+    }
+    .totals { margin-top: 18px; }
+    .totals .line { margin-bottom: 6px; font-weight: 400; }
+    .totals .line.total-row .title,
+    .totals .line.total-row .price { font-weight: 800; font-size: 1.08rem; }
+    .instr {
+      margin-top: 22px;
+      font-size: 0.9rem;
+    }
+    .instr .label { font-weight: 700; margin-bottom: 4px; }
+    .instr .body { opacity: 0.85; white-space: pre-wrap; }
+
     .bottom {
       margin-top: auto;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 12px;
-      padding-top: 48px;
+      padding-top: 24px;
       padding-bottom: 12px;
+      flex-shrink: 0;
     }
     #orderNowBtn {
       width: min(320px, 100%);
@@ -80,7 +128,8 @@
     #status {
       min-height: 1.2em;
       font-size: 0.82rem;
-      color: var(--muted);
+      color: var(--white);
+      opacity: 0.7;
       text-align: center;
     }
   </style>
@@ -94,6 +143,10 @@
     </p>
   </div>
 
+  <div class="ticket-wrap">
+    <div id="ticket" aria-live="polite"></div>
+  </div>
+
   <div class="bottom">
     <button type="button" id="orderNowBtn">Order Now</button>
     <p id="status" aria-live="polite"></p>
@@ -105,6 +158,7 @@
     (function () {
       var btn = document.getElementById('orderNowBtn');
       var statusEl = document.getElementById('status');
+      var ticketEl = document.getElementById('ticket');
       var remoteAudio = document.getElementById('remoteAudio');
       remoteAudio.setAttribute('playsinline', 'true');
       remoteAudio.setAttribute('webkit-playsinline', 'true');
@@ -118,8 +172,110 @@
       var connecting = false;
       var history = [];
       var pendingCalls = {};
+      var taxRate = 0.07;
+      var order = { lines: [], tip: 0, instructions: '' };
 
-      // Playback matches Martino Massimo: plain HTMLAudioElement, no AudioContext gain graph.
+      function money(n) {
+        var x = Math.round((Number(n) || 0) * 100) / 100;
+        return '$' + x.toFixed(2);
+      }
+
+      function subtotal() {
+        return order.lines.reduce(function (sum, line) {
+          return sum + (Number(line.price) || 0);
+        }, 0);
+      }
+
+      function renderTicket() {
+        if (!order.lines.length) {
+          ticketEl.classList.remove('has-items');
+          ticketEl.innerHTML = '';
+          return;
+        }
+        ticketEl.classList.add('has-items');
+        var sub = subtotal();
+        var tax = Math.round(sub * taxRate * 100) / 100;
+        var tip = Math.round((Number(order.tip) || 0) * 100) / 100;
+        var total = Math.round((sub + tax + tip) * 100) / 100;
+
+        var html = '';
+        order.lines.forEach(function (line) {
+          var qty = line.qty != null ? line.qty : 1;
+          html +=
+            '<div class="line">' +
+            '<div class="title">' +
+            escapeHtml(line.title) +
+            '</div>' +
+            '<div class="qty">' +
+            qty +
+            ' order' +
+            (qty === 1 ? '' : 's') +
+            '</div>' +
+            '<div class="price">' +
+            money(line.price) +
+            '</div>' +
+            (line.note
+              ? '<div class="line-note">' + escapeHtml(line.note) + '</div>'
+              : '') +
+            '</div>';
+        });
+
+        html +=
+          '<div class="totals">' +
+          '<div class="line"><div class="title">Subtotal</div><div class="qty"></div><div class="price">' +
+          money(sub) +
+          '</div></div>' +
+          '<div class="line"><div class="title">Tax ' +
+          (taxRate * 100).toFixed(0) +
+          '%</div><div class="qty"></div><div class="price">' +
+          money(tax) +
+          '</div></div>' +
+          '<div class="line"><div class="title">Tip</div><div class="qty"></div><div class="price">' +
+          money(tip) +
+          '</div></div>' +
+          '<div class="line total-row"><div class="title">Total</div><div class="qty"></div><div class="price">' +
+          money(total) +
+          '</div></div>' +
+          '</div>';
+
+        if (order.instructions && String(order.instructions).trim()) {
+          html +=
+            '<div class="instr"><div class="label">Special instructions</div><div class="body">' +
+            escapeHtml(String(order.instructions).trim()) +
+            '</div></div>';
+        }
+
+        ticketEl.innerHTML = html;
+      }
+
+      function escapeHtml(s) {
+        return String(s)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function resetOrder() {
+        order = { lines: [], tip: 0, instructions: '' };
+        renderTicket();
+      }
+
+      function ticketSnapshot() {
+        var sub = subtotal();
+        var tax = Math.round(sub * taxRate * 100) / 100;
+        var tip = Math.round((Number(order.tip) || 0) * 100) / 100;
+        var total = Math.round((sub + tax + tip) * 100) / 100;
+        return {
+          lines: order.lines,
+          subtotal: sub,
+          tax: tax,
+          tip: tip,
+          total: total,
+          taxRate: taxRate,
+          instructions: order.instructions || '',
+        };
+      }
 
       function setStatus(msg) {
         statusEl.textContent = msg || '';
@@ -134,6 +290,18 @@
       function dcSend(obj) {
         if (!dc || dc.readyState !== 'open') return;
         dc.send(JSON.stringify(obj));
+      }
+
+      function replyTool(callId, output) {
+        dcSend({
+          type: 'conversation.item.create',
+          item: {
+            type: 'function_call_output',
+            call_id: callId,
+            output: typeof output === 'string' ? output : JSON.stringify(output),
+          },
+        });
+        dcSend({ type: 'response.create' });
       }
 
       async function askSupervisor(question) {
@@ -168,17 +336,56 @@
           console.error('[Taco Supervisor]', e);
           answer = 'Call us at (978) 982-1800.';
         }
-
-        dcSend({
-          type: 'conversation.item.create',
-          item: {
-            type: 'function_call_output',
-            call_id: callId,
-            output: answer,
-          },
-        });
-        dcSend({ type: 'response.create' });
+        replyTool(callId, answer);
         setStatus('Massimo is on — talk anytime');
+      }
+
+      function handleOrderTool(name, callId, rawArgs) {
+        var args = {};
+        try {
+          args = typeof rawArgs === 'string' ? JSON.parse(rawArgs || '{}') : (rawArgs || {});
+        } catch (e) {
+          args = {};
+        }
+
+        if (name === 'add_order_line') {
+          var title = String(args.title || '').trim();
+          var price = Number(args.price);
+          var qty = args.qty != null ? Number(args.qty) : 1;
+          if (!title || !isFinite(price)) {
+            replyTool(callId, { ok: false, error: 'title and price required' });
+            return;
+          }
+          order.lines.push({
+            title: title,
+            price: price,
+            qty: isFinite(qty) && qty > 0 ? qty : 1,
+            note: args.note ? String(args.note).trim() : '',
+          });
+          renderTicket();
+          replyTool(callId, { ok: true, ticket: ticketSnapshot() });
+          return;
+        }
+
+        if (name === 'set_tip') {
+          var tipAmt = Number(args.amount);
+          order.tip = isFinite(tipAmt) && tipAmt >= 0 ? tipAmt : 0;
+          renderTicket();
+          replyTool(callId, { ok: true, ticket: ticketSnapshot() });
+          return;
+        }
+
+        if (name === 'set_instructions') {
+          order.instructions = args.text != null ? String(args.text) : '';
+          renderTicket();
+          replyTool(callId, { ok: true, ticket: ticketSnapshot() });
+          return;
+        }
+
+        if (name === 'clear_order') {
+          resetOrder();
+          replyTool(callId, { ok: true, ticket: ticketSnapshot() });
+        }
       }
 
       function onServerEvent(raw) {
@@ -191,13 +398,33 @@
         if (!data || !data.type) return;
 
         if (data.type === 'response.function_call_arguments.done') {
-          if (data.name === 'ask_supervisor' && data.call_id) {
-            if (pendingCalls[data.call_id]) return;
-            pendingCalls[data.call_id] = true;
-            handleAskSupervisor(data.call_id, data.arguments || '{}').finally(function () {
-              delete pendingCalls[data.call_id];
-            });
+          var fname = data.name;
+          var callId = data.call_id;
+          if (!fname || !callId) return;
+          if (pendingCalls[callId]) return;
+          pendingCalls[callId] = true;
+          var done = function () {
+            delete pendingCalls[callId];
+          };
+
+          if (fname === 'ask_supervisor') {
+            handleAskSupervisor(callId, data.arguments || '{}').finally(done);
+            return;
           }
+          if (
+            fname === 'add_order_line' ||
+            fname === 'set_tip' ||
+            fname === 'set_instructions' ||
+            fname === 'clear_order'
+          ) {
+            try {
+              handleOrderTool(fname, callId, data.arguments || '{}');
+            } finally {
+              done();
+            }
+            return;
+          }
+          done();
           return;
         }
 
@@ -244,6 +471,7 @@
         btn.disabled = true;
         btn.textContent = 'Connecting…';
         setStatus('Talking to Massimo…');
+        resetOrder();
 
         try {
           var tokenPromise = fetch('/api/realtime-token', {
@@ -258,7 +486,6 @@
             return resp.json();
           });
 
-          // Match Martino mic constraints exactly
           localStream = await navigator.mediaDevices.getUserMedia({
             audio: {
               echoCancellation: true,
@@ -282,13 +509,13 @@
 
           var greetingExact =
             'Welcome to Taco Express PB. My name is Massimo. May I have your name?';
-          var greetingTone = 'happy, pleasant, smiling, warm';
-          var greetingPace = 'steady, natural';
           var dcOpen = false;
           var greetingArmed = false;
+          var greetingSpoken = false;
 
           function speakFixedGreeting() {
-            if (!dcOpen || !greetingArmed) return;
+            if (!dcOpen || !greetingArmed || greetingSpoken) return;
+            greetingSpoken = true;
             greetingArmed = false;
             dcSend({
               type: 'response.create',
@@ -296,7 +523,7 @@
                 instructions:
                   'Say EXACTLY and ONLY with a happy pleasant smiling warm tone and a steady natural pace: "' +
                   greetingExact +
-                  '" Then stop. Pause. Listen for their name. Do not ask what they want yet. Nothing else.',
+                  '" Then stop. Pause. Listen for their name. Do not ask what they want yet. Nothing else. Do not repeat yourself.',
               },
             });
           }
@@ -317,8 +544,9 @@
           var ephemeralKey = (tokenPayload.value || '').trim();
           if (!ephemeralKey) throw new Error('Missing ephemeral token');
           if (tokenPayload.greetingExact) greetingExact = String(tokenPayload.greetingExact);
-          if (tokenPayload.greetingTone) greetingTone = String(tokenPayload.greetingTone);
-          if (tokenPayload.greetingPace) greetingPace = String(tokenPayload.greetingPace);
+          if (tokenPayload.taxRate != null && isFinite(Number(tokenPayload.taxRate))) {
+            taxRate = Number(tokenPayload.taxRate);
+          }
           greetingArmed = true;
 
           var sdpResp = await fetch('https://api.openai.com/v1/realtime/calls', {
@@ -342,7 +570,7 @@
           btn.disabled = false;
           btn.classList.add('live');
           btn.textContent = 'Hang Up';
-          setStatus('Massimo is on — fixed greeting loaded');
+          setStatus('Massimo is on — ticket updates as you order');
         } catch (e) {
           console.error('[Taco Massimo]', e);
           cleanup();

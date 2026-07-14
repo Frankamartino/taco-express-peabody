@@ -102,9 +102,13 @@ module.exports = async function handler(req, res) {
     'Steak / filet taco → not on the menu. Closest: Three Tacos · Shredded Beef $13.49, or Prime Rib Burrito $17.99.',
     'Prime rib → only the Prime Rib Burrito $17.99. Shawarma → not on the menu.',
 
-    '=== ORDERS / PAY (THIS STAGE) ===',
-    'Confirm the item + price in one short line. Ask mild/spicy only when needed. Ask drink only when order is set.',
-    'There is NO cart and NO Stripe checkout on this page yet. If they say pay / checkout / card: confirm order + total, then: "Pay at the counter, or call (978) 982-1800." Do NOT invent a payment workflow.',
+    '=== ORDERS / CHECKOUT TICKET ===',
+    'When the customer locks an item (protein + dish + spice if needed), call add_order_line FIRST (same turn), then one short spoken confirm. The charcoal ticket on screen updates — do not narrate the screen.',
+    'add_order_line fields: title (menu name), qty (default 1), price (number from menu), note (optional under-title detail e.g. "mild · spicy sauce on the side").',
+    'House hot/mild sauce on the side is FREE — price 0 or fold into note on the food line.',
+    'set_tip when they choose a tip amount. set_instructions for special requests (plain text on ticket). clear_order if they start over.',
+    `Tax on the ticket is ${(cfg.TAX_RATE * 100).toFixed(0)}% (Peabody). Total = subtotal + tax + tip.`,
+    'If they say pay / checkout / card: call tools so the ticket is current, then say the Total from the ticket once, then: "Pay at the counter, or call (978) 982-1800." No invented Stripe UI yet.',
 
     '=== FULL MENU ===',
     FULL_MENU,
@@ -119,6 +123,55 @@ module.exports = async function handler(req, res) {
     output_modalities: ['audio'],
     instructions,
     tools: [
+      {
+        type: 'function',
+        name: 'add_order_line',
+        description:
+          'Add one line to the on-screen checkout ticket when the customer confirms an item. Call before speaking the confirm.',
+        parameters: {
+          type: 'object',
+          properties: {
+            title: { type: 'string', description: 'Item name, e.g. Three Tacos · Shredded Beef' },
+            qty: { type: 'number', description: 'Quantity / orders (default 1)' },
+            price: { type: 'number', description: 'Line price from menu' },
+            note: {
+              type: 'string',
+              description: 'Optional detail under the title, e.g. mild · spicy sauce on the side',
+            },
+          },
+          required: ['title', 'price'],
+        },
+      },
+      {
+        type: 'function',
+        name: 'set_tip',
+        description: 'Set tip amount on the checkout ticket (dollars).',
+        parameters: {
+          type: 'object',
+          properties: {
+            amount: { type: 'number', description: 'Tip in dollars' },
+          },
+          required: ['amount'],
+        },
+      },
+      {
+        type: 'function',
+        name: 'set_instructions',
+        description: 'Set special instructions text on the ticket (plain line, no boxes).',
+        parameters: {
+          type: 'object',
+          properties: {
+            text: { type: 'string', description: 'Special instructions, or empty to clear' },
+          },
+          required: ['text'],
+        },
+      },
+      {
+        type: 'function',
+        name: 'clear_order',
+        description: 'Clear the checkout ticket.',
+        parameters: { type: 'object', properties: {} },
+      },
       {
         type: 'function',
         name: 'ask_supervisor',
@@ -181,6 +234,7 @@ module.exports = async function handler(req, res) {
       greetingExact: cfg.GREETING_EXACT,
       greetingTone: cfg.GREETING_TONE,
       greetingPace: cfg.GREETING_PACE,
+      taxRate: cfg.TAX_RATE,
       supervisor: process.env.OPENAI_SUPERVISOR_MODEL?.trim() || 'gpt-5.6',
     });
   } catch (e) {
