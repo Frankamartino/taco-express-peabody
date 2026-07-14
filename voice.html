@@ -192,6 +192,7 @@
   </div>
 
   <audio id="remoteAudio" autoplay playsinline></audio>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
   <script>
     (function () {
@@ -496,6 +497,43 @@
           return;
         }
 
+        if (name === 'set_spice') {
+          var level = String(args.level || '').trim().toLowerCase();
+          if (level !== 'mild' && level !== 'spicy') {
+            replyTool(callId, { ok: false, error: 'level must be mild or spicy' });
+            return;
+          }
+          order.lines.forEach(function (ln) {
+            var note = String(ln.note || '');
+            note = note
+              .replace(/\b(mild|spicy)\b/gi, '')
+              .replace(/\s*[·|]\s*/g, ' · ')
+              .replace(/^[\s·]+|[\s·]+$/g, '')
+              .trim();
+            ln.note = note ? level + ' · ' + note : level;
+          });
+          renderTicket();
+          replyTool(callId, { ok: true, spice: level, ticket: ticketSnapshot() });
+          return;
+        }
+
+        if (name === 'look_at_screen') {
+          captureAndDescribeScreen()
+            .then(function (result) {
+              replyTool(callId, result);
+              delete pendingCalls[callId];
+            })
+            .catch(function (err) {
+              replyTool(callId, {
+                ok: false,
+                error: err && err.message ? err.message : 'vision failed',
+                ticket: ticketSnapshot(),
+              });
+              delete pendingCalls[callId];
+            });
+          return;
+        }
+
         if (name === 'set_tip') {
           var tipAmt = Number(args.amount);
           order.tip = isFinite(tipAmt) && tipAmt >= 0 ? tipAmt : 0;
@@ -579,16 +617,17 @@
             handleAskSupervisor(callId, data.arguments || '{}').finally(done);
             return;
           }
-          if (fname === 'recall_customer' || fname === 'remember_customer') {
+          if (fname === 'recall_customer' || fname === 'remember_customer' || fname === 'look_at_screen') {
             handleOrderTool(fname, callId, data.arguments || '{}');
             // replyTool is async inside — release lock after short delay if still stuck
-            setTimeout(done, 8000);
+            setTimeout(done, 12000);
             return;
           }
           if (
             fname === 'add_order_line' ||
             fname === 'set_customer' ||
             fname === 'set_fulfillment' ||
+            fname === 'set_spice' ||
             fname === 'set_tip' ||
             fname === 'set_instructions' ||
             fname === 'clear_order'
@@ -645,7 +684,65 @@
         renderTicket();
       }
 
+      function captureAndDescribeScreen() {
+        var ticketFallback = ticketSnapshot();
+        function describeWithVision(base64) {
+          return fetch('/api/vision', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: base64 }),
+          }).then(function (r) {
+            return r.json().then(function (data) {
+              if (!r.ok) {
+                return {
+                  ok: false,
+                  error: (data && data.error) || 'vision http ' + r.status,
+                  ticket: ticketFallback,
+                  screenText: '',
+                };
+              }
+              return {
+                ok: true,
+                screenText: (data && data.text) || '',
+                ticket: ticketFallback,
+              };
+            });
+          });
+        }
+
+        if (typeof html2canvas !== 'function') {
+          return Promise.resolve({
+            ok: true,
+            screenText: 'Use structured ticket. ' + JSON.stringify(ticketFallback),
+            ticket: ticketFallback,
+          });
+        }
+
+        return html2canvas(document.documentElement, {
+          backgroundColor: '#1c1917',
+          scale: 0.55,
+          useCORS: true,
+          logging: false,
+          windowWidth: Math.max(document.documentElement.scrollWidth, window.innerWidth),
+          windowHeight: Math.max(document.documentElement.scrollHeight, window.innerHeight),
+        }).then(function (canvas) {
+          var dataUrl = canvas.toDataURL('image/jpeg', 0.65);
+          var base64 = dataUrl.replace(/^data:image\/jpeg;base64,/, '');
+          return describeWithVision(base64);
+        });
+      }
+
       function cleanup() {
+        try {
+          if (dc && dc.readyState === 'open') {
+            dc.send(JSON.stringify({ type: 'response.cancel' }));
+            dc.send(JSON.stringify({ type: 'output_audio_buffer.clear' }));
+          }
+        } catch (e) {}
+        try {
+          remoteAudio.pause();
+          remoteAudio.srcObject = null;
+        } catch (e) {}
         try { if (dc) dc.close(); } catch (e) {}
         try { if (pc) pc.close(); } catch (e) {}
         if (localStream) {
@@ -664,8 +761,8 @@
       }
 
       function hangUp() {
+        setStatus('Hung up');
         cleanup();
-        setStatus('');
       }
 
       async function startMassimo() {

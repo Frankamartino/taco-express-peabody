@@ -120,11 +120,14 @@ module.exports = async function handler(req, res) {
     '1) lastName if missing → set_customer',
     '2) email if missing → set_customer (receipt + Mem0)',
     '3) phone if missing → set_customer (chef can call on delays)',
-    '4) allergies / chef notes → set_instructions (even if "none")',
-    '5) pickup or delivery → set_fulfillment',
-    'Then say Total once + "Pay at the counter, or call (978) 982-1800."',
-    'After email: recall_customer. When wrap-up complete: remember_customer with name, phone, email, allergies, what they ordered, pickup/delivery.',
+    '4) allergies / chef notes → set_instructions (even if "none") — instant, no thinking',
+    '5) mild or spicy → set_spice RIGHT AWAY (never ask_supervisor for spice). One short confirm.',
+    '6) pickup or delivery → set_fulfillment',
+    'Then read Total from the ticket snapshot already in your last tool result — say it ONCE + "Pay at the counter, or call (978) 982-1800."',
+    'SPEED: answer in one short sentence. Prefer ticket tool results over look_at_screen. look_at_screen ONLY if the customer asks what is on screen or you truly lost the ticket.',
+    'Do NOT call recall_customer or remember_customer until AFTER you have spoken the Total. Never stall on Mem0 mid-question.',
     `Tax ${(cfg.TAX_RATE * 100).toFixed(0)}% on taxable lines. Total = subtotal + tax + tip.`,
+    'One short answer per turn — never repeat the same sentence twice. Never call ask_supervisor for mild/spicy, Coke, tacos, burritos, or totals.',
 
     '=== FULL MENU ===',
     FULL_MENU,
@@ -192,6 +195,30 @@ module.exports = async function handler(req, res) {
           },
           required: ['type'],
         },
+      },
+      {
+        type: 'function',
+        name: 'set_spice',
+        description:
+          'When customer chooses mild or spicy for the food already on the ticket. Updates every line note.',
+        parameters: {
+          type: 'object',
+          properties: {
+            level: {
+              type: 'string',
+              enum: ['mild', 'spicy'],
+              description: 'mild or spicy',
+            },
+          },
+          required: ['level'],
+        },
+      },
+      {
+        type: 'function',
+        name: 'look_at_screen',
+        description:
+          'OPTIONAL vision of the charcoal page. Do NOT use on every turn. Only if customer asks what is on screen or ticket state is unclear. Prefer ticket from other tools.',
+        parameters: { type: 'object', properties: {} },
       },
       {
         type: 'function',
