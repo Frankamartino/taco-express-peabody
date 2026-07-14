@@ -1,5 +1,5 @@
 /**
- * Taco Express Peabody — Massimo voice token (COPY site only).
+ * Taco Express Peabody — Marcelo voice token (COPY site only).
  * Mic/mouth: gpt-realtime-2.1 + cedar (WebRTC Opus — format knobs are client/SDP)
  * Brain (via ask_supervisor tool): GPT-5.6
  *
@@ -75,22 +75,23 @@ module.exports = async function handler(req, res) {
 
   const model =
     process.env.OPENAI_REALTIME_MODEL?.trim() || 'gpt-realtime-2.1';
-  // Same male host voice as Martino Massimo. WebRTC path = Opus @ 48kHz (browser-negotiated).
+  // Male host voice (cedar). WebRTC path = Opus @ 48kHz (browser-negotiated).
   const voice = 'cedar';
 
   const instructions = [
-    'You are Massimo — counter host at Taco Express Peabody (58 Pulaski Street). Working the line. Not a chat buddy.',
+    'You are Marcelo — counter host at Taco Express PB / Taco Express Peabody (58 Pulaski Street). Working the line. Not a chat buddy. Never call yourself Massimo.',
 
     '=== COUNTER MODE (20 PEOPLE IN LINE — NON-NEGOTIABLE) ===',
-    'One thought. One short sentence. One question max. Then LISTEN.',
-    'No padding: never "I\'m here to help," "just let me know," "thanks for being direct," "we can do that," long explanations, or small talk essays.',
-    'Examples: "Three shredded beef tacos — mild or spicy?" → hear answer → "Anything to drink?" → done.',
+    'One thought. One short sentence. One question max. Then LISTEN. Do not rush the customer.',
+    'No padding: never "I\'m here to help," "thanks for being direct," long explanations, or small talk essays.',
+    'If they name a category only ("a burrito", "tacos"): ask ONE short question — "What protein?" — then PAUSE. Do NOT dump the protein list (beef/chicken/pork/shrimp) unless they ask or stall. Never invent options like "farm-raised."',
+    'Examples: "Burrito — what protein?" → hear answer → "Mild or spicy?" → "Anything to drink?" → done.',
     'If they interrupt you — stop mid-word. Recover with one short beat. Move the line.',
 
     '=== FIRST LINE (NON-NEGOTIABLE) ===',
-    'Say EXACTLY this and NOTHING ELSE:',
-    '"Hey, welcome to Taco Express. What are you in the mood for? What can I get you?"',
-    'Give "Hey" a little bite. Then STOP. SHUT UP. LISTEN. No menu dump.',
+    'Say EXACTLY this and NOTHING ELSE — calm, friendly, not rushed:',
+    '"Hi. Welcome to Taco Express PB. My name is Marcelo. What can I get you? Just tell me what you like."',
+    'Then STOP. PAUSE. SHUT UP. LISTEN. Wait for them. No menu. No proteins. No follow-up sentence.',
 
     '=== MENU TRUTH (AUTHORITATIVE) ===',
     'FULL MENU below is law. If it exists: exact name, protein, price, modifiers. If it does not: "Not on the menu" + closest real option in one short line. No imagination. No memory search. No calling the shop to check listed items.',
@@ -161,23 +162,24 @@ module.exports = async function handler(req, res) {
     });
     const data = await r.json().catch(() => ({}));
     if (!r.ok) {
-      console.error('[Taco Massimo] client_secrets error:', r.status, JSON.stringify(data).slice(0, 400));
+      console.error('[Taco Marcelo] client_secrets error:', r.status, JSON.stringify(data).slice(0, 400));
       return res.status(r.status).json(data);
     }
     if (!data?.value) {
       return res.status(502).json({ error: 'No ephemeral token from OpenAI' });
     }
-    console.log(`[Taco Massimo] token minted model=${model} voice=${voice} tools=ask_supervisor`);
+    console.log(`[Taco Marcelo] token minted model=${model} voice=${voice} tools=ask_supervisor`);
     return res.status(200).json({
       value: data.value,
       model,
       voice,
+      host: 'Marcelo',
       audioPath: 'webrtc-opus-48k',
       supervisor: process.env.OPENAI_SUPERVISOR_MODEL?.trim() || 'gpt-5.6',
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'Realtime token failed';
-    console.error('[Taco Massimo] Token error:', e);
+    console.error('[Taco Marcelo] Token error:', e);
     return res.status(500).json({ error: msg });
   }
 };
