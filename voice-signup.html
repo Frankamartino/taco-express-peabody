@@ -43,7 +43,21 @@
       line-height: 1.5;
       font-size: 0.95rem;
     }
-    .steps {
+    #msg {
+      margin-top: 18px;
+      max-width: 28rem;
+      width: min(100%, 28rem);
+      text-align: center;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      min-height: 1.4em;
+      white-space: pre-wrap;
+      font-weight: 600;
+    }
+    #msg.ok { color: var(--lime); }
+    #msg.err { color: #fca5a5; }
+    #msg:empty { display: none; }
+    .howto {
       margin-top: 18px;
       max-width: 28rem;
       font-size: 0.85rem;
@@ -51,7 +65,7 @@
       opacity: 0.8;
       text-align: left;
     }
-    .steps strong { color: var(--lime); font-weight: 700; }
+    .howto strong { color: var(--lime); font-weight: 700; }
     .warn {
       margin-top: 16px;
       max-width: 28rem;
@@ -69,6 +83,12 @@
     }
     .card-step { display: none; }
     .card-step.show { display: flex; }
+    body.done .howto,
+    body.done .warn,
+    body.done #infoForm,
+    body.done #cardStep {
+      display: none !important;
+    }
     label { font-size: 0.8rem; font-weight: 600; opacity: 0.9; }
     input {
       width: 100%;
@@ -111,40 +131,33 @@
       letter-spacing: 0;
       font-size: 0.9rem;
     }
-    #msg {
-      margin-top: 20px;
-      max-width: 28rem;
-      text-align: center;
-      font-size: 0.9rem;
-      line-height: 1.5;
-      min-height: 1.4em;
-      white-space: pre-wrap;
-    }
-    #msg.ok { color: var(--lime); }
-    #msg.err { color: #fca5a5; }
     a.voice {
       margin-top: 28px;
       color: var(--lime);
       font-weight: 700;
       text-decoration: none;
+      font-size: 1.05rem;
     }
   </style>
 </head>
 <body>
   <h1>Save card for voice pay</h1>
-  <p class="sub">
+  <p class="sub" id="subLine">
     One-time form for <strong>Taco Express Peabody Voice</strong>.
     After your card is saved, you order by talking to Massimo — no tapping to pay.
   </p>
-  <p class="steps">
+
+  <p id="msg" aria-live="polite"></p>
+
+  <p class="howto" id="howto">
     <strong>1.</strong> Name, email, phone → Continue<br>
     <strong>2.</strong> Card number form appears → Save card<br>
     <strong>3.</strong> Go to Voice order and say yes when he asks to charge<br><br>
     Allergies, tip, pickup/delivery — Massimo asks those by voice on the order call. This page is only for putting a card on file.
   </p>
-  <p class="warn">
+  <p class="warn" id="warn">
     Taco Voice only — not Martino Pasta Bar, not DoorDash menu.
-    Use a real live card. If Continue fails, Stripe live keys are not on the taco Vercel project yet.
+    Use a real live card.
   </p>
 
   <form id="infoForm">
@@ -164,8 +177,7 @@
     <button type="button" class="secondary" id="backBtn">Back</button>
   </div>
 
-  <p id="msg" aria-live="polite"></p>
-  <a class="voice" href="/voice">Go to Voice order</a>
+  <a class="voice" id="voiceLink" href="/voice">Go to Voice order</a>
 
   <script>
     (function () {
@@ -175,6 +187,7 @@
       var saveBtn = document.getElementById('saveBtn');
       var backBtn = document.getElementById('backBtn');
       var msg = document.getElementById('msg');
+      var subLine = document.getElementById('subLine');
       var stripe = null;
       var elements = null;
       var setupIntentId = '';
@@ -204,7 +217,7 @@
             if (!res.ok || !res.d.clientSecret || !res.d.publishableKey) {
               setMsg(
                 (res.d && res.d.error) ||
-                  'Stripe is not connected yet.\n\nRex/Frank: add STRIPE_SECRET_KEY (sk_live_) and STRIPE_PUBLISHABLE_KEY (pk_live_) on the taco-express-peabody Vercel project, then refresh this page.',
+                  'Stripe is not connected yet. Add live keys on taco-express-peabody Vercel, then refresh.',
                 'err'
               );
               infoBtn.disabled = false;
@@ -228,6 +241,9 @@
             cardStep.classList.add('show');
             setMsg('Enter your card number below, then Save card.', 'ok');
             infoBtn.disabled = false;
+            try {
+              msg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } catch (e) {}
           })
           .catch(function () {
             setMsg('Network error. Try again.', 'err');
@@ -276,13 +292,16 @@
               saveBtn.disabled = false;
               return;
             }
+            document.body.classList.add('done');
+            subLine.innerHTML =
+              'Your live card is on file for <strong>Taco Express Peabody Voice</strong>.';
             setMsg(
-              'Card saved' +
-                (res.d.livemode ? ' (LIVE)' : '') +
-                '.\n\nOpen Voice order. When Massimo asks to charge, say yes. Stripe will email a receipt.',
+              'Card saved (LIVE).\n\nOpen Voice order. When Massimo asks to charge, say yes. Stripe will email a receipt.',
               'ok'
             );
-            cardStep.classList.remove('show');
+            try {
+              msg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } catch (e2) {}
           })
           .catch(function () {
             setMsg('Network error confirming card.', 'err');
