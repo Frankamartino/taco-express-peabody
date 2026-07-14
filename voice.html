@@ -49,30 +49,31 @@
       font-weight: 700;
     }
 
-    /* Receipt alignment without receipt chrome — white on charcoal only */
+    /* 80mm thermal preview — receipt columns, no frame */
     .ticket-wrap {
       flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 28px 0 16px;
-      min-height: 180px;
+      padding: 20px 0 12px;
+      min-height: 160px;
     }
     #ticket {
-      width: min(680px, 100%);
+      width: 80mm;
+      max-width: 100%;
       color: var(--white);
-      font-size: 1.25rem;
-      line-height: 1.4;
+      font-size: 0.95rem;
+      line-height: 1.3;
       font-variant-numeric: tabular-nums;
       display: none;
     }
     #ticket.has-items { display: block; }
     .line {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 3.25rem 6.25rem;
-      column-gap: 20px;
+      grid-template-columns: minmax(0, 1fr) 2.4rem 4.6rem;
+      column-gap: 8px;
       align-items: baseline;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
     .line .title {
       font-weight: 600;
@@ -82,7 +83,7 @@
       white-space: nowrap;
       font-weight: 600;
       text-align: right;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.03em;
     }
     .line .price {
       font-weight: 700;
@@ -91,34 +92,34 @@
     }
     .line-note {
       grid-column: 1 / -1;
-      margin: -2px 0 14px;
-      font-size: 1.05rem;
+      margin: -2px 0 10px;
+      font-size: 0.85rem;
       font-weight: 400;
       color: var(--white);
     }
     .totals {
-      margin-top: 20px;
-      padding-top: 4px;
+      margin-top: 12px;
+      padding-top: 2px;
     }
     .totals .line {
-      margin-bottom: 8px;
+      margin-bottom: 5px;
       font-weight: 400;
     }
     .totals .line .title { font-weight: 500; }
     .totals .line.total-row {
-      margin-top: 10px;
+      margin-top: 8px;
     }
     .totals .line.total-row .title,
     .totals .line.total-row .price {
       font-weight: 800;
-      font-size: 1.4rem;
+      font-size: 1.05rem;
     }
     .instr {
-      margin-top: 28px;
-      font-size: 1.05rem;
+      margin-top: 16px;
+      font-size: 0.85rem;
       color: var(--white);
     }
-    .instr .label { font-weight: 700; margin-bottom: 6px; }
+    .instr .label { font-weight: 700; margin-bottom: 4px; }
     .instr .body { white-space: pre-wrap; font-weight: 400; }
 
     .bottom {
@@ -209,6 +210,13 @@
         return '$' + x.toFixed(2);
       }
 
+      function taxableSubtotal() {
+        return order.lines.reduce(function (sum, line) {
+          if (line.taxIncluded) return sum;
+          return sum + (Number(line.price) || 0);
+        }, 0);
+      }
+
       function subtotal() {
         return order.lines.reduce(function (sum, line) {
           return sum + (Number(line.price) || 0);
@@ -223,7 +231,8 @@
         }
         ticketEl.classList.add('has-items');
         var sub = subtotal();
-        var tax = Math.round(sub * taxRate * 100) / 100;
+        var taxable = taxableSubtotal();
+        var tax = Math.round(taxable * taxRate * 100) / 100;
         var tip = Math.round((Number(order.tip) || 0) * 100) / 100;
         var total = Math.round((sub + tax + tip) * 100) / 100;
 
@@ -290,12 +299,14 @@
 
       function ticketSnapshot() {
         var sub = subtotal();
-        var tax = Math.round(sub * taxRate * 100) / 100;
+        var taxable = taxableSubtotal();
+        var tax = Math.round(taxable * taxRate * 100) / 100;
         var tip = Math.round((Number(order.tip) || 0) * 100) / 100;
         var total = Math.round((sub + tax + tip) * 100) / 100;
         return {
           lines: order.lines,
           subtotal: sub,
+          taxable: taxable,
           tax: tax,
           tip: tip,
           total: total,
@@ -388,6 +399,7 @@
             price: price,
             qty: isFinite(qty) && qty > 0 ? qty : 1,
             note: args.note ? String(args.note).trim() : '',
+            taxIncluded: !!args.taxIncluded,
           });
           renderTicket();
           replyTool(callId, { ok: true, ticket: ticketSnapshot() });

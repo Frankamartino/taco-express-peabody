@@ -20,4 +20,7 @@ module.exports = {
 
   /** Peabody meals tax for this voice checkout ticket */
   TAX_RATE: 0.07,
+
+  /** On-screen ticket matches thermal printer paper width */
+  TICKET_WIDTH_MM: 80,
 };

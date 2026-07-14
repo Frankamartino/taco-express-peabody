@@ -20,11 +20,17 @@ RULES (always):
 - Prime rib exists ONLY as: Burrito · Prime Rib / Prime Rib Burrito SPECIAL $17.99 (hand-cut grilled prime rib, beans, rice, salsa verde). NOT a taco. NOT filet.
 - NOT ON MENU (say so in one short line — offer closest real item if useful): steak taco, filet taco, filet mignon, veggie/vegetable/grilled veggie/tofu, any protein mix on one plate, anything not listed below.
 
+TACO MAPPING (CRITICAL — never get this wrong):
+- If customer says "shredded beef taco(s)", "beef taco(s)", "chicken taco(s)", "pork taco(s)", "shrimp taco(s)", or just orders a taco with a protein WITHOUT saying "one", "single", "express", or "five dollar" → they mean the THREE-TACO plate.
+  Titles/prices: Three Tacos · Shredded Beef $13.49 | Three Tacos · Shredded Chicken $13.49 | Three Tacos · Pork $13.49 | Three Tacos · Grilled Shrimp $14.99
+  Never ring "1 shredded beef taco" as a $5 or as qty of a single taco for $13.49.
+- Express ONE-TACO SPECIAL ($5 tax included): ONLY when they clearly ask for one taco / single taco / express taco / five-dollar taco / taco special (the $5 deal). Proteins: beef, chicken, or pork ONLY (no shrimp on the $5). Title: "One taco · [protein]" price 5, taxIncluded true, note "tax included".
+
 SPECIALS / EXPRESS:
 - Prime Rib Burrito SPECIAL $17.99 — hand-cut grilled prime rib, beans, rice, salsa verde.
-- One taco your choice (Express, counter) $5 tax included — shredded beef, chicken, or pork only. No DoorDash.
+- One taco your choice (Express) $5 tax included — shredded beef, chicken, or pork only. No DoorDash. No shrimp.
 
-TACOS:
+TACOS (three per order — DEFAULT when they say taco + protein):
 - Three Tacos · Shredded Beef $13.49
 - Three Tacos · Shredded Chicken $13.49
 - Three Tacos · Pork $13.49
@@ -99,16 +105,17 @@ module.exports = async function handler(req, res) {
 
     '=== MENU TRUTH (AUTHORITATIVE) ===',
     'FULL MENU below is law. If it exists: exact name, protein, price, modifiers. If it does not: "Not on the menu" + closest real option in one short line. No imagination.',
-    'Steak / filet taco → not on the menu. Closest: Three Tacos · Shredded Beef $13.49, or Prime Rib Burrito $17.99.',
-    'Prime rib → only the Prime Rib Burrito $17.99. Shawarma → not on the menu.',
+    'TACOS: "shredded beef taco" / "beef tacos" = Three Tacos · Shredded Beef $13.49 (always the three-pack). Same for chicken/pork/shrimp three-packs.',
+    'ONE-TACO $5 Express ONLY if they say one/single/express/five-dollar taco special — beef, chicken, or pork; tax included; never shrimp on $5.',
+    'Steak / filet taco → not on the menu. Prime rib → only the Prime Rib Burrito $17.99. Shawarma → not on the menu.',
 
     '=== ORDERS / CHECKOUT TICKET ===',
-    'When the customer locks an item (protein + dish + spice if needed), call add_order_line FIRST (same turn), then one short spoken confirm. The charcoal ticket on screen updates — do not narrate the screen.',
-    'add_order_line fields: title (menu name), qty (default 1), price (number from menu), note (optional under-title detail e.g. "mild · spicy sauce on the side").',
-    'House hot/mild sauce on the side is FREE — price 0 or fold into note on the food line.',
-    'set_tip when they choose a tip amount. set_instructions for special requests (plain text on ticket). clear_order if they start over.',
-    `Tax on the ticket is ${(cfg.TAX_RATE * 100).toFixed(0)}% (Peabody). Total = subtotal + tax + tip.`,
-    'If they say pay / checkout / card: call tools so the ticket is current, then say the Total from the ticket once, then: "Pay at the counter, or call (978) 982-1800." No invented Stripe UI yet.',
+    'When the customer locks an item, call add_order_line FIRST (same turn), then one short spoken confirm. Use exact menu titles (e.g. "Three Tacos · Shredded Beef").',
+    'For the $5 Express one-taco special: price 5, taxIncluded true, note "tax included".',
+    'add_order_line: title, qty (default 1), price, note (optional), taxIncluded (optional boolean).',
+    'House sauce on the side is FREE — fold into note. set_tip / set_instructions / clear_order as needed.',
+    `Tax on the ticket is ${(cfg.TAX_RATE * 100).toFixed(0)}% on taxable lines only (skip taxIncluded). Total = subtotal + tax + tip.`,
+    'If they say pay: confirm Total once, then: "Pay at the counter, or call (978) 982-1800."',
 
     '=== FULL MENU ===',
     FULL_MENU,
@@ -137,6 +144,10 @@ module.exports = async function handler(req, res) {
             note: {
               type: 'string',
               description: 'Optional detail under the title, e.g. mild · spicy sauce on the side',
+            },
+            taxIncluded: {
+              type: 'boolean',
+              description: 'True for Express one-taco $5 (tax already in price). Omit/false for normal items.',
             },
           },
           required: ['title', 'price'],
