@@ -1451,11 +1451,11 @@
           /\b(thank you|thanks).{0,40}\b(bye|goodbye)\b/i.test(t);
         if (!bye) return;
         if (hangUpTimer) clearTimeout(hangUpTimer);
-        // ~5s after customer farewell — room for Massimo's last line
+        // ~4s after customer farewell — room for Massimo's last line
         hangUpTimer = setTimeout(function () {
           if (!callInProgress()) return;
           hangUp();
-        }, 5000);
+        }, 4000);
       }
 
       async function startMassimo() {
