@@ -39,7 +39,7 @@ module.exports = {
       notes: [
         'Regular / owner-friend energy — warm and familiar, not stiff.',
         'Past order: Three Tacos · Shredded Chicken, Mexican Coke, mild — hands-free card pay.',
-        'Past order: Burrito · Prime Rib (mild), Mexican Coke glass — pickup, cash.',
+        'Past order: Burrito · Ribeye (mild), Mexican Coke glass — pickup, cash.',
         'Past order: Burrito · Shredded Beef — likes extras (guac, pico, chips, salsa, consommé).',
         'Usually mild spice. Often pickup. Sometimes cash, sometimes card on file.',
         'No food allergies on file (says none).',
