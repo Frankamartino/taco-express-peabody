@@ -44,13 +44,17 @@ Drop PNG product shots into `images/drinks/` — see `images/drinks/README.txt` 
 
 **Never** deploy this on the Martino Vercel project (`martino-bar`).
 
-## Three separate products (do not cross-bill)
+## One Taco Express site (two order paths)
 
-| Product | Project / surface | Billing |
-|--------|-------------------|---------|
-| **Martino Pasta Bar** | `martino-bar` | Martino Stripe / Ara order — leave alone |
-| **Taco Express Peabody (menu)** | `index.html` / DoorDash | DoorDash — not Stripe voice |
-| **Taco Express Peabody Voice** | `/voice` + `/voice-signup` | **Own** Stripe keys + `TACO_VOICE_*` customer |
+Same domain / repo: **menu + photos** (`/`) and **Massimo voice** (`/voice`, `/voice-signup`).
+
+| Surface | Job | Billing |
+|--------|-----|---------|
+| **`/`** | Menu board, photos, DoorDash **Order Now** | DoorDash |
+| **`/voice`** | Talk to Massimo, ticket, cash or saved card | **Own** Stripe keys (not Martino) |
+| **Martino Pasta Bar** | Separate repo (`martino-bar`) | Leave alone |
+
+Header / Order section / footer on the photo site link to `/voice`.
 
 ### Voice hands-free pay (this repo only)
 

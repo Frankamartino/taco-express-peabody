@@ -1,5 +1,5 @@
 /**
- * Taco Express Peabody — Massimo voice token (COPY site only).
+ * Taco Express Peabody — Massimo voice token (/voice on tacoexpresspeabody.com).
  * Mic/mouth: gpt-realtime + cedar (matched to Martino Massimo)
  * Brain (via ask_supervisor tool): GPT-5.6
  *

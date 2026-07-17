@@ -1,5 +1,5 @@
 /**
- * GPT-5.6 supervisor brain for Taco Express Massimo (COPY /voice only).
+ * GPT-5.6 supervisor brain for Taco Express Massimo (/voice).
  * Menu is authoritative — never invent; never soft-confirm missing items.
  */
 const FULL_MENU = `
@@ -8,13 +8,13 @@ Hours: Mon–Tue CLOSED. Wed–Sat 11AM–8PM. Sun 11AM–6PM.
 
 RULES:
 - One protein per item. Mild or spicy when asked.
-- Proteins: shredded beef (never ground), shredded chicken, pork, grilled shrimp.
+- Proteins: shredded beef (never ground), shredded chicken, pork, grilled shrimp, ribeye (burrito special).
 - "chicken taco(s)" = Three Tacos · Shredded Chicken $13.49 — same as shredded chicken. Do not stall.
 - SPICE: never invent mild/spicy. Only after they say it.
 - Ribeye ONLY as Ribeye Burrito $17.99 — NOT a taco. Say ribeye (not prime rib). "prime rib" speech → same burrito.
 - "steak burrito" / bare "beef burrito" is ambiguous — ask: shredded beef burrito $13.49 or Ribeye Burrito $17.99? Do not guess.
 - NOT ON MENU: steak taco, filet taco, filet mignon, veggie/vegetable/tofu. Say not on the menu; suggest closest real item.
-- No cart / Stripe on this voice copy yet — if asked about paying online: confirm total from menu; pay at counter or call (978) 982-1800.
+- Pay: cash at counter, or saved card on /voice (Stripe). DoorDash is separate (website Order Now).
 
 TACO MAPPING: "beef/chicken/pork/shrimp taco(s)" = THREE-taco plate ($13.49 / $14.99 shrimp). One-taco $5 Express ONLY if they say one/single/express/five-dollar — beef/chicken/pork only, tax included. Never invent a single shredded beef taco at $13.49.
 

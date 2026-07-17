@@ -1,5 +1,5 @@
 /**
- * Mem0 long-term memory for Taco Express PB voice (COPY /voice).
+ * Mem0 long-term memory for Taco Express Peabody voice (/voice).
  * User key = email (normalized). Requires MEM0_API_KEY on Vercel.
  */
 const MEM0_BASE = 'https://api.mem0.ai';

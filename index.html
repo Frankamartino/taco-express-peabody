@@ -123,6 +123,48 @@
       color: var(--cream);
     }
     .call-btn-secondary:hover { border-color: var(--muted); }
+    .voice-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      border: 1px solid var(--lime);
+      color: var(--lime);
+      font-weight: 700;
+      font-size: 0.88rem;
+      padding: 11px 18px;
+      border-radius: 999px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .voice-btn:hover { background: rgba(132, 204, 22, 0.12); }
+    .voice-btn-block {
+      display: inline-flex;
+      margin-top: 14px;
+    }
+    .order-paths {
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+      max-width: 520px;
+    }
+    .order-path {
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--card);
+    }
+    .order-path h3 {
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 1.35rem;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+    .order-path p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin: 0 0 10px;
+    }
     .order-strip {
       display: flex;
       flex-wrap: wrap;
@@ -403,6 +445,7 @@
         </a>
       </div>
       <div class="header-actions">
+        <a class="voice-btn" href="/voice">Order by Voice</a>
         <a class="order-btn order-online" href="https://order.online/business/taco-express-peabody--58-pulaski-st--unit-b-22509311" target="_blank" rel="noopener noreferrer">Order Now</a>
         <a class="call-btn call-btn-secondary" href="tel:+19789821800">Call (978) 982-1800</a>
       </div>
@@ -420,6 +463,7 @@
       <a href="#platters">Party Platters</a>
       <a href="#drinks">Drinks</a>
       <a href="#order">Order</a>
+      <a href="/voice">Voice</a>
       <a href="#hours">Hours</a>
     </nav>
   </header>
@@ -911,7 +955,24 @@
     <section id="order">
       <p class="section-label">Order</p>
       <h2>How to order</h2>
-      <p class="section-intro">This menu is for browsing prices and photos. To pay and check out, use <strong>Order Now</strong> at the top of the page or the button at the bottom as you scroll. For party platter timing or mix-and-match trays, call the shop.</p>
+      <p class="section-intro">Browse prices and photos here — then pick how you want to order.</p>
+      <div class="order-paths">
+        <div class="order-path">
+          <h3>Order by voice</h3>
+          <p>Talk to Massimo — build your ticket hands-free. Cash at the counter or a saved card. Great for the ribeye burrito special.</p>
+          <a class="voice-btn voice-btn-block" href="/voice">Talk to Massimo</a>
+        </div>
+        <div class="order-path">
+          <h3>Order online</h3>
+          <p>DoorDash delivery &amp; pickup — use <strong>Order Now</strong> at the top or the floating button.</p>
+          <a class="order-btn order-online" href="https://order.online/business/taco-express-peabody--58-pulaski-st--unit-b-22509311" target="_blank" rel="noopener noreferrer">Order Now</a>
+        </div>
+        <div class="order-path">
+          <h3>Party platters</h3>
+          <p>Mix-and-match taco trays — call ahead so they’re hot when you arrive.</p>
+          <a class="call-btn call-btn-secondary" href="tel:+19789821800">Call (978) 982-1800</a>
+        </div>
+      </div>
     </section>
 
     <section id="hours">
@@ -937,6 +998,7 @@
   <footer>
     <p class="brand-footer">Taco Express Peabody</p>
     <p style="margin-top:6px;"><a href="https://tacoexpresspeabody.com">tacoexpresspeabody.com</a></p>
+    <p style="margin-top:8px;"><a href="/voice">Order by voice with Massimo</a></p>
     <p style="margin-top:12px;">© Taco Express Peabody</p>
   </footer>
   <script>
