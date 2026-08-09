@@ -40,6 +40,7 @@ module.exports = {
         'Regular / owner-friend energy — warm and familiar, not stiff.',
         'Past order: Three Tacos · Shredded Chicken, Mexican Coke, mild — hands-free card pay.',
         'Past order: Burrito · Shredded Beef — likes extras (guac, pico, chips, salsa).',
+        'Enchilada story Frank locked in: braised shredded beef like a rich stew, soft tortillas, sauce, melted Mexican-blend cheese, sour cream or pico — pure comfort out of the oven. Watching for queso Oaxaca (Market Basket) for creamier inside — do not offer cheese choices.',
         'Usually mild spice. Often pickup. Sometimes cash, sometimes card on file.',
         'No food allergies on file (says none).',
       ],
