@@ -1102,7 +1102,16 @@
                   amount: res.data.amount,
                   orderId: res.data.orderId || '',
                   ticket: ticketSnapshot(),
+                  hangUpHint:
+                    'Say short paid + pickup line (~20 min), warm goodbye, then STOP. Call ends automatically.',
                 });
+                // Backup hang-up after Massimo's closing lines — don't leave dead air
+                if (hangUpTimer) clearTimeout(hangUpTimer);
+                hangUpTimer = setTimeout(function () {
+                  if (!callInProgress()) return;
+                  if (!order.paid) return;
+                  hangUp();
+                }, 14000);
               } else {
                 var failCode = (res.data && res.data.code) || 'charge_failed';
                 if (failCode === 'needs_card_setup') {
@@ -1451,14 +1460,31 @@
       }
 
       function maybeAutoHangUp(transcript, who) {
-        // Only the customer ending the call — do not cut on Massimo saying "see you soon"
-        if (who !== 'customer') return;
         var t = String(transcript || '').toLowerCase();
         if (!t) return;
+
+        // After paid: Massimo's closing goodbye ends the call (was leaving dead air)
+        if (who === 'massimo' && order.paid) {
+          var massimoDone =
+            /\b(see you soon|have a great|take care|catch you|arrivederci|my pleasure)\b/i.test(t) ||
+            /\b(ready for pickup|start making your food)\b/i.test(t);
+          if (massimoDone) {
+            if (hangUpTimer) clearTimeout(hangUpTimer);
+            hangUpTimer = setTimeout(function () {
+              if (!callInProgress()) return;
+              hangUp();
+            }, 3500);
+          }
+          return;
+        }
+
+        if (who !== 'customer') return;
         var bye =
           /\b(bye|goodbye|good bye|hang up|end call|end the call)\b/i.test(t) ||
           /\b(start over|start all over|start again|all over again)\b/i.test(t) ||
-          /\b(thank you|thanks).{0,40}\b(bye|goodbye)\b/i.test(t);
+          /\b(thank you|thanks).{0,40}\b(bye|goodbye)\b/i.test(t) ||
+          // After paid, plain thanks / ok thanks is enough to hang up
+          (order.paid && /\b(thank you|thanks|ok thanks|okay thanks|appreciate it)\b/i.test(t));
         if (!bye) return;
         if (hangUpTimer) clearTimeout(hangUpTimer);
         // ~4s after customer farewell — room for Massimo's last line
