@@ -6,7 +6,7 @@ This is the Taco Express Peabody site only — own repo, own Vercel project, own
 - **Domain:** https://www.tacoexpresspeabody.com
 - **Phone:** (978) 982-1800
 - **Address:** 58 Pulaski St, Peabody, MA 01960
-- **Ordering:** DoorDash (delivery & pickup) + Massimo voice (`/voice`) + phone
+- **Ordering:** DoorDash (delivery & pickup) + Diego voice (`/voice`) + phone
 
 ## Online ordering
 
@@ -41,21 +41,21 @@ Drop PNG product shots into `images/drinks/` — see `images/drinks/README.txt` 
 
 ## One Taco Express site (two order paths)
 
-Same domain / repo: **menu + photos** (`/`) and **Massimo voice** (`/voice`, `/voice-signup`).
+Same domain / repo: **menu + photos** (`/`) and **Diego voice** (`/voice`, `/voice-signup`).
 
 | Surface | Job | Billing |
 |--------|-----|---------|
 | **`/`** | Menu board, photos, DoorDash | DoorDash |
-| **`/voice`** | Talk to Massimo, ticket, cash or saved card | Stripe on **this** Vercel project |
+| **`/voice`** | Talk to Diego, ticket, cash or saved card | Stripe on **this** Vercel project |
 
 Header / Order section / footer on the photo site link to `/voice`.
 
-Canonical voice menu lives in `api/tacoMenu.js` (Massimo + supervisor). Keep it matched to DoorDash.
+Canonical voice menu lives in `api/tacoMenu.js` (Diego + supervisor). Keep it matched to DoorDash.
 
 ### Voice hands-free pay (this repo only)
 
 1. On the **taco-express-peabody** Vercel project set **live** keys: `STRIPE_SECRET_KEY` (`sk_live_…`) and `STRIPE_PUBLISHABLE_KEY` (`pk_live_…`).
 2. Open `/voice-signup` — name, email, phone, then enter a **live** card on the page.
-3. Order on `/voice` with the same email. When Massimo asks to charge, say **yes** (no taps). Charge looks up the card by email in Stripe.
+3. Order on `/voice` with the same email. When Diego asks to charge, say **yes** (no taps). Charge looks up the card by email in Stripe.
 
 Do **not** reuse another restaurant’s `cus_` / `pm_` / secrets on this project.

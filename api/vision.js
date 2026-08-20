@@ -1,5 +1,5 @@
 /**
- * Screen vision for Massimo — describe the charcoal ticket / full page JPEG.
+ * Screen vision for Diego — describe the charcoal ticket / full page JPEG.
  * Uses the same OPENAI_API_KEY as Realtime (gpt-4o-mini).
  */
 module.exports = async function handler(req, res) {

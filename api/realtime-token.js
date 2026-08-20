@@ -1,5 +1,5 @@
 /**
- * Taco Express Peabody — Massimo voice token (/voice on tacoexpresspeabody.com).
+ * Taco Express Peabody — Diego voice token (/voice on tacoexpresspeabody.com).
  * Mic/mouth: gpt-realtime + cedar
  * Brain (via ask_supervisor tool): GPT-5.6
  *
@@ -42,7 +42,11 @@ module.exports = async function handler(req, res) {
     .join('\n');
 
   const instructions = [
-    'You are Massimo — happy, pleasant counter host at Taco Express (this location: 58 Pulaski Street, Peabody). You sound like you are smiling. Never angry, never irritated, never robotic.',
+    'You are Diego — happy, pleasant counter host at Taco Express (this location: 58 Pulaski Street, Peabody). You sound like you are smiling. Never angry, never irritated, never robotic.',
+    'Your name is Diego. Never call yourself Massimo. Never take a pasta order.',
+    'If they say Massimo / hey Massimo / are you Massimo / where is Massimo: say EXACTLY this one short beat, then help with tacos: "' +
+      cfg.MASSIMO_HANDOFF +
+      '" Then listen.',
     'When you say the shop name out loud, say "Taco Express" only — never "PB", never spell Peabody in the greeting. Other towns may get their own Taco Express pages later.',
 
     '=== PERSONALITY / HUMOR ===',
@@ -80,7 +84,7 @@ module.exports = async function handler(req, res) {
     'Banter stays small: one friendly reply, maybe one short follow-up, then listen. When they are ready for food, take the order fast.',
     'While they are actively ordering: SPEED — tools first, one short sentence max. Save longer chat for when they are not mid-order.',
     'Never invent live facts (exact weather, scores, news). If you do not know: honest and light — "I am not sure on that one — what sounds good to eat?" — then back to food when natural.',
-    'Stay kind. No politics lectures, no long speeches, no AI talk. You are Massimo at Taco Express — human, warm, briefly funny, brief.',
+    'Stay kind. No politics lectures, no long speeches, no AI talk. You are Diego at Taco Express — human, warm, briefly funny, brief.',
 
     '=== GREETING FLOW (FIXED — COUNTER HOST) ===',
     'Natural walk-up flow. Warm. Human. One beat at a time.',
@@ -382,13 +386,13 @@ module.exports = async function handler(req, res) {
     });
     const data = await r.json().catch(() => ({}));
     if (!r.ok) {
-      console.error('[Taco Massimo] client_secrets error:', r.status, JSON.stringify(data).slice(0, 400));
+      console.error('[Taco Diego] client_secrets error:', r.status, JSON.stringify(data).slice(0, 400));
       return res.status(r.status).json(data);
     }
     if (!data?.value) {
       return res.status(502).json({ error: 'No ephemeral token from OpenAI' });
     }
-    console.log(`[Taco Massimo] token minted model=${model} voice=${voice} speed=${cfg.SPEED}`);
+    console.log(`[Taco Diego] token minted model=${model} voice=${voice} speed=${cfg.SPEED}`);
     return res.status(200).json({
       value: data.value,
       model,
@@ -404,7 +408,7 @@ module.exports = async function handler(req, res) {
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'Realtime token failed';
-    console.error('[Taco Massimo] Token error:', e);
+    console.error('[Taco Diego] Token error:', e);
     return res.status(500).json({ error: msg });
   }
 };

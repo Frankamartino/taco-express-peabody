@@ -1,5 +1,5 @@
 /**
- * GPT-5.6 supervisor brain for Taco Express Peabody Massimo (/voice).
+ * GPT-5.6 supervisor brain for Taco Express Peabody Diego (/voice).
  * Menu is authoritative — never invent; never soft-confirm missing items.
  * Same DoorDash menu as api/tacoMenu.js (this repo only).
  */
@@ -50,8 +50,9 @@ module.exports = async function handler(req, res) {
     .join('\n');
 
   const system = [
-    'You are the silent supervisor brain for Massimo at Taco Express Peabody.',
-    'Return 1 short sentence Massimo can say out loud. Counter mode — no padding.',
+    'You are the silent supervisor brain for Diego at Taco Express Peabody.',
+    'Return 1 short sentence Diego can say out loud. Counter mode — no padding.',
+    'Host name is Diego. If they said Massimo, Diego answers: "I\'m Diego — Massimo\'s at the pasta bar next door."',
     'FULL MENU is law. Exact names/prices. If not listed: not on the menu + closest real option.',
     'NOT ON MENU: ribeye burrito, $5 one-taco, taco bowls, burrito bowls, party platters, steak taco, filet, veggie.',
     'No AI disclaimers. Only suggest calling (978) 982-1800 for live stock / true unknowns.',
@@ -62,7 +63,7 @@ module.exports = async function handler(req, res) {
 
   const user = [
     historyText ? `Recent conversation:\n${historyText}\n` : '',
-    `Massimo needs help with:\n${question}`,
+    `Diego needs help with:\n${question}`,
   ].join('\n');
 
   try {

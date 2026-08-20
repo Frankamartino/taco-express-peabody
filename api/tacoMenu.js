@@ -1,5 +1,5 @@
 /**
- * Taco Express Peabody — one DoorDash menu for Massimo voice + supervisor.
+ * Taco Express Peabody — one DoorDash menu for Diego voice + supervisor.
  * This GitHub repo only (taco-express-peabody). Do not load another restaurant's menu.
  */
 const FULL_MENU = `

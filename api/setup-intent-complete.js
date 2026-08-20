@@ -83,6 +83,6 @@ module.exports = async function handler(req, res) {
     paymentMethodId,
     livemode: !!si.livemode,
     readyForVoicePay: true,
-    hint: 'Card is on file for Taco Voice. Say yes when Massimo asks to charge — no taps on /voice.',
+    hint: 'Card is on file for Taco Voice. Say yes when Diego asks to charge — no taps on /voice.',
   });
 };
