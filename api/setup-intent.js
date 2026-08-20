@@ -1,6 +1,6 @@
 /**
  * Taco Express Peabody VOICE only — SetupIntent for on-page card recruit form.
- * Not Martino. Not the DoorDash menu site.
+ * Taco Express Peabody Voice only. Not the DoorDash menu site.
  */
 function clean(v) {
   return String(v || '')

@@ -3,11 +3,9 @@ Add-on side photos (auto-loaded by index.html):
   brown-rice.jpg
   black-beans.jpg
   refried-beans.jpg
-  salsa.jpg          — chunky salsa (4 oz cup + chips)
+  salsa.jpg
   pico-de-gallo.jpg
-  tortilla-chips.jpg — house-made tortilla chips
+  tortilla-chips.jpg
   guacamole.jpg
 
-Extras section: Salsa, Pico de Gallo, Tortilla Chips, Guacamole, Consommé (ask at counter).
-
-  consomme.jpg       — beef consommé from shredded-beef pot (birria/barbacoa-style)
+DoorDash extras on the site: Extra Beef / Chicken / Pork / Shrimp, Extra Rice, Extra Black Beans, Extra Cheese, Extra Sour Cream.

@@ -1,6 +1,6 @@
 /**
  * After Stripe Checkout setup success — return customer + payment_method for Taco Voice env.
- * VOICE billing only. Never Martino. Never main menu site.
+ * VOICE billing only — taco-express-peabody Vercel project. Never the DoorDash menu site.
  */
 function clean(v) {
   return String(v || '')
@@ -68,6 +68,6 @@ module.exports = async function handler(req, res) {
     customer_id: customerId,
     payment_method_id: paymentMethodId,
     email: session.customer_email || session.customer_details?.email || '',
-    hint: 'Paste TACO_VOICE_STRIPE_CUSTOMER_ID and TACO_VOICE_STRIPE_PAYMENT_METHOD_ID into the taco-express-peabody Vercel project only. Do not put these on Martino Pasta Bar.',
+    hint: 'Paste TACO_VOICE_STRIPE_CUSTOMER_ID and TACO_VOICE_STRIPE_PAYMENT_METHOD_ID into the taco-express-peabody Vercel project only.',
   });
 };

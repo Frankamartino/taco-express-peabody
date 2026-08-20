@@ -26,4 +26,4 @@ Drop drink product-shot PNGs here. Expected filenames:
 
 If a file is missing, the site shows a text placeholder until you add it.
 
-These images are for Taco Express only — do not copy from Martino Pasta Bar.
+These images are for Taco Express Peabody only.

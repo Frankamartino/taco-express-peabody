@@ -1,6 +1,6 @@
 # Taco Express Peabody — local photo install (Rex)
 
-**This project only.** Not Martino Pasta Bar.
+**This project only** — GitHub `taco-express-peabody`.
 
 ## Quick status
 
@@ -10,17 +10,19 @@ Open `drop-photos.html` in a browser (or run `npx serve .` and visit `/drop-phot
 
 | File | Menu item |
 |------|-----------|
+| `images/menu/quesadilla.jpg` | Loaded quesadilla (shared card) |
 | `images/menu/tacos-beef.jpg` | Three Tacos · Shredded Beef |
 | `images/menu/tacos-chicken.jpg` | Three Tacos · Shredded Chicken |
+| `images/menu/tacos-pork.jpg` | Three Tacos · Pork |
 | `images/menu/tacos-shrimp.jpg` | Three Tacos · Grilled Shrimp |
 | `images/menu/burrito-beef.jpg` | Burrito · Shredded Beef |
 | `images/menu/burrito-chicken.jpg` | Burrito · Shredded Chicken |
+| `images/menu/burrito-pork.png` | Burrito · Pork |
 | `images/menu/burrito-shrimp.jpg` | Burrito · Grilled Shrimp |
 | `images/menu/enchiladas-beef.jpg` | Two Enchiladas · Shredded Beef |
 | `images/menu/enchiladas-chicken.jpg` | Two Enchiladas · Shredded Chicken |
-| `images/platters/platter.jpg` | Party platter hero card |
-
-**No photo** for shrimp enchiladas — gray placeholder stays on the menu.
+| `images/menu/enchiladas-pork.jpg` | Two Enchiladas · Pork |
+| `images/menu/enchiladas-shrimp.jpg` | Two Enchiladas · Grilled Shrimp |
 
 Drinks are already in `images/drinks/`.
 
@@ -53,7 +55,7 @@ Open http://localhost:3000 — beef tacos should show a photo; missing files kee
 
 ## Deploy
 
-Push to GitHub → Vercel project `taco-express-peabody` (never Martino).
+Push to GitHub → Vercel project `taco-express-peabody` (this repo only).
 
 ## Cloudinary photo enhance (paid)
 

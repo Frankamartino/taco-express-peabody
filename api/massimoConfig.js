@@ -1,6 +1,6 @@
 /**
  * Massimo voice — FIXED greeting + checkout config (Taco Express /voice).
- * Spoken brand is "Taco Express" (location pages may still show Peabody / Watertown / etc.).
+ * Spoken brand is "Taco Express". This repo is the Peabody shop only.
  */
 module.exports = {
   HOST_NAME: 'Massimo',
