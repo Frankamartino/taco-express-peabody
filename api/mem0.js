@@ -1,5 +1,5 @@
 /**
- * Mem0 API for Taco Massimo — recall / remember by email.
+ * Mem0 API for Taco Diego — recall / remember by email.
  * POST { action: "recall"|"remember", email, text? }
  */
 const {

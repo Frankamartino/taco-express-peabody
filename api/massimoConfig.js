@@ -1,13 +1,17 @@
 /**
- * Massimo voice — FIXED greeting + checkout config (Taco Express /voice).
- * Spoken brand is "Taco Express" (location pages may still show Peabody / Watertown / etc.).
+ * Diego voice — FIXED greeting + checkout config (Taco Express /voice).
+ * Spoken brand is "Taco Express". This repo is the Peabody shop only.
  */
 module.exports = {
-  HOST_NAME: 'Massimo',
+  HOST_NAME: 'Diego',
   SHOP_SHORT: 'Taco Express',
 
   GREETING_EXACT:
-    'Welcome to Taco Express. My name is Massimo. May I have your full name?',
+    'Welcome to Taco Express. My name is Diego. May I have your full name?',
+
+  /** If they call him Massimo — one beat, then back to the taco order. */
+  MASSIMO_HANDOFF:
+    "I'm Diego — Massimo's at the pasta bar next door.",
 
   AFTER_NAME_HINT:
     'Thanks [name] — have you dined with us before? Then soft door to food.',

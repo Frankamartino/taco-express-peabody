@@ -1,6 +1,6 @@
 /**
  * Taco Express Peabody VOICE only — hands-free off_session charge.
- * Fresh stack for /voice — do not share Stripe with Martino Pasta Bar or the DoorDash menu site.
+ * Fresh stack for /voice on this repo only — do not share Stripe with another restaurant or the DoorDash menu site.
  *
  * Env (taco-express-peabody Vercel project ONLY):
  *   STRIPE_SECRET_KEY

@@ -1,6 +1,6 @@
 /**
  * Taco Express Peabody VOICE only — create Stripe Checkout Session in setup mode
- * so a customer can save a card once (signup). Never shared with Martino Pasta Bar.
+ * so a customer can save a card once (signup). Taco Express Peabody Voice only.
  *
  * Env (taco-express-peabody Vercel ONLY):
  *   STRIPE_SECRET_KEY
@@ -137,6 +137,6 @@ module.exports = async function handler(req, res) {
     session_id: session.id,
     customer_id: customerId,
     shop: 'taco-express-peabody-voice',
-    note: 'After success, set TACO_VOICE_STRIPE_CUSTOMER_ID (and optional PM) on taco Vercel only — never Martino.',
+    note: 'After success, set TACO_VOICE_STRIPE_CUSTOMER_ID (and optional PM) on the taco-express-peabody Vercel project only.',
   });
 };

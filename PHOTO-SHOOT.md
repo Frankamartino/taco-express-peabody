@@ -1,66 +1,60 @@
 # Taco Express Peabody — Photo Shoot Checklist
 
-Shot list for the upcoming photo shoot. Save each photo with the **exact filename** listed
-so it drops straight into the website with no code changes needed (just replace/add the file).
+Shot list for DoorDash categories on tacoexpresspeabody.com. Save each photo with the **exact filename** listed
+so it drops straight into the website with no code changes needed.
 
 - Format: **JPG**, landscape, shot on a **consistent background/surface** for every dish so the 2×2 grid looks uniform.
-- Bowls: shoot at a **slight top-down angle** so the layered rice / beans / protein shows.
-- Get the **consommé + taco dip action shot** — it sells.
-- Buy the correct serving bowls/trays first (Restaurant Depot / Sysco) so bowl shots look right.
+- This shop’s live menu: quesadillas, three tacos, burritos, two enchiladas, sides, extras, fryer, beverages.
+- Not on DoorDash right now (do not shoot for the site): ribeye burrito, taco bowls, burrito bowls, $5 one-taco, party platters.
 
 ---
 
-## Still missing (cards currently show "Photo coming soon")
+## On the live menu (reshoot if a stand-in still looks wrong)
+
+### Quesadillas  →  `images/menu/`
+- [ ] Loaded quesadilla (shared card) → `quesadilla.jpg`
+
+### Tacos  →  `images/menu/`
+- [x] Three Tacos · Shredded Beef → `tacos-beef.jpg`
+- [x] Three Tacos · Shredded Chicken → `tacos-chicken.jpg`
+- [x] Three Tacos · Pork → `tacos-pork.jpg`
+- [x] Three Tacos · Grilled Shrimp → `tacos-shrimp.jpg`
 
 ### Burritos  →  `images/menu/`
-- [ ] Burrito · Ribeye (Special) → `burrito-ribeye.jpg`  *(hand-cut grilled ribeye, beans, rice, salsa verde)*
-
-### Taco Bowls  →  `images/menu/`
-- [ ] Taco Bowl · Shredded Beef → `taco-bowl-beef.jpg`
-- [ ] Taco Bowl · Shredded Chicken → `taco-bowl-chicken.jpg`
-- [ ] Taco Bowl · Pork → `taco-bowl-pork.jpg`
-- [ ] Taco Bowl · Grilled Shrimp → `taco-bowl-shrimp.jpg`
-
-### Burrito Bowls  →  `images/menu/`
-- [ ] Burrito Bowl · Shredded Beef → `burrito-bowl-beef.jpg`
-- [ ] Burrito Bowl · Shredded Chicken → `burrito-bowl-chicken.jpg`
-- [ ] Burrito Bowl · Pork → `burrito-bowl-pork.jpg`
-- [ ] Burrito Bowl · Grilled Shrimp → `burrito-bowl-shrimp.jpg`
+- [x] Burrito · Shredded Beef → `burrito-beef.jpg`
+- [x] Burrito · Shredded Chicken → `burrito-chicken.jpg`
+- [x] Burrito · Pork → `burrito-pork.png`
+- [x] Burrito · Grilled Shrimp → `burrito-shrimp.jpg`
 
 ### Enchiladas  →  `images/menu/`
-- [ ] Two Enchiladas · Pork → `enchiladas-pork.jpg`  *(beef, chicken, shrimp already have photos)*
+- [x] Two Enchiladas · Shredded Beef → `enchiladas-beef.jpg`
+- [x] Two Enchiladas · Shredded Chicken → `enchiladas-chicken.jpg`
+- [x] Two Enchiladas · Pork → `enchiladas-pork.jpg`
+- [x] Two Enchiladas · Grilled Shrimp → `enchiladas-shrimp.jpg`
 
-### Extras / Add-ons  →  `images/sides/`
-- [ ] House-Made Hot & Mild Sauce (the little cups) → `house-sauce.jpg`
-- [ ] Extra Shredded Beef → `extra-beef.jpg`
-- [ ] Extra Shredded Chicken → `extra-chicken.jpg`
-- [ ] Extra Pork → `extra-pork.jpg`
-- [ ] Extra Grilled Shrimp → `extra-shrimp.jpg`
-- [ ] Extra Rice → `extra-rice.jpg`
-- [ ] Extra Black Beans → `extra-black-beans.jpg`
-- [ ] Extra Cheese → `extra-cheese.jpg`
-- [ ] Extra Sour Cream → `extra-sour-cream.jpg`
-- [ ] Extra Guacamole → `extra-guacamole.jpg`
+### Sides  →  `images/sides/`
+- [x] Seasoned Brown Rice → `brown-rice.jpg`
+- [x] Black Beans → `black-beans.jpg`
+- [x] Refried Beans → `refried-beans.jpg`
+- [x] Salsa → `salsa.jpg`
+- [x] Pico de Gallo → `pico-de-gallo.jpg`
+- [x] Tortilla Chips → `tortilla-chips.jpg`
+- [x] Guacamole → `guacamole.jpg`
 
-### Party Platter  →  `images/platters/`
-- [ ] Aluminum tray platter (real photo) → `platter.jpg`  *(replaces the current placeholder)*
-
----
-
-## Stand-ins worth reshooting (they work now, but aren't the real thing)
-
-- [ ] Pork tacos — currently reusing the chicken taco photo → `images/menu/tacos-pork.jpg`
-- [ ] (Optional) Single taco — the "One taco, your choice" card has no photo now. If you get one → `images/menu/single-taco.jpg`
+### Fryer  →  `images/fryer/`
+- [x] French Fries → `french-fries.jpg`
+- [x] Onion Rings → `onion-rings.jpg`
+- [x] Chicken Fingers (6) → `chicken-fingers.jpg`
+- [x] Jumbo Wings (6) → `wings.jpg`
 
 ---
 
 ## Nice-to-haves (marketing / social / DoorDash)
 
 - [ ] Storefront / hero shot
-- [ ] Full spread of everything together
-- [ ] Consommé + taco dip action shot
+- [ ] Full spread of quesadillas, tacos, burritos & enchiladas together
+- [ ] Dedicated quesadilla shot per protein (today all four cards share `quesadilla.jpg`)
 
 ---
 
-**After the shoot:** drop the files into the folders above using these exact names, then ping me
-and I'll wire up any cards that need the `<img>` swapped in (bowls, extras, platter, single taco).
+**After the shoot:** drop the files into the folders above using these exact names.

@@ -1,5 +1,3 @@
-Party platter photo:
+Party platter photo (not on the live DoorDash site right now):
 
   platter.jpg
-
-Referenced from the Party Platters section. index.html auto-loads when present.

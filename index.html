@@ -6,6 +6,8 @@
   <title>Taco Express Peabody — Quesadillas, Tacos, Burritos, Enchiladas · tacoexpresspeabody.com</title>
   <meta name="description" content="Taco Express Peabody — quesadillas, tacos, burritos, enchiladas, sides, fryer favorites &amp; beverages. Beef, chicken, pork or shrimp. 58 Pulaski St, Peabody MA. Call (978) 982-1800." />
   <link rel="canonical" href="https://tacoexpresspeabody.com/" />
+  <link rel="icon" href="images/taco-express-logo.jpg" type="image/jpeg" />
+  <link rel="apple-touch-icon" href="images/taco-express-logo.jpg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
@@ -63,11 +65,12 @@
       color: inherit;
     }
     .brand-logo {
-      width: 52px;
-      height: 52px;
-      border-radius: 10px;
-      object-fit: contain;
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      object-fit: cover;
       flex-shrink: 0;
+      background: #fff;
     }
     .brand h1 {
       font-family: "Bebas Neue", sans-serif;
@@ -206,6 +209,15 @@
       padding: 36px 0 28px;
       border-bottom: 1px solid var(--border);
     }
+    .hero-logo {
+      width: 168px;
+      height: 168px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      margin: 0 auto 18px;
+      background: #fff;
+    }
     .hero h2 {
       font-family: "Bebas Neue", sans-serif;
       font-size: clamp(2rem, 6vw, 3.2rem);
@@ -266,20 +278,6 @@
       border-radius: 10px;
       background: rgba(255,255,255,0.06);
       display: block;
-    }
-    .hero-banner-wrap {
-      margin: 0 auto 20px;
-      max-width: 720px;
-      border-radius: 14px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-      background: #000;
-    }
-    .hero-banner-wrap img {
-      width: 100%;
-      display: block;
-      aspect-ratio: 16 / 9;
-      object-fit: cover;
     }
     .card .img-placeholder {
       width: 100%;
@@ -436,7 +434,7 @@
     <div class="header-inner">
       <div class="brand">
         <a class="brand-link" href="https://www.tacoexpresspeabody.com/">
-          <img class="brand-logo" src="images/taco-express-logo.png" width="52" height="52" alt="" />
+          <img class="brand-logo" src="images/taco-express-logo.jpg" width="64" height="64" alt="Taco Express Peabody" />
           <div>
             <h1>Taco Express Peabody</h1>
             <p class="brand-domain">tacoexpresspeabody.com</p>
@@ -445,7 +443,7 @@
         </a>
       </div>
       <div class="header-actions">
-        <a class="voice-btn" href="/voice">Order by Voice</a>
+        <a class="voice-btn" href="/voice">Talk to Diego</a>
         <a class="order-btn order-online" href="https://order.online/business/taco-express-peabody--58-pulaski-st--unit-b-22509311" target="_blank" rel="noopener noreferrer">DoorDash</a>
         <a class="call-btn call-btn-secondary" href="tel:+19789821800">Call (978) 982-1800</a>
       </div>
@@ -466,9 +464,7 @@
 
   <main class="wrap">
     <div class="hero">
-      <div class="hero-banner-wrap">
-        <img src="images/taco-express-header.png" width="1400" height="400" alt="Taco Express Peabody" />
-      </div>
+      <img class="hero-logo" src="images/taco-express-logo.jpg" width="168" height="168" alt="Taco Express Peabody" />
       <h2>Quesadillas, tacos, burritos &amp; enchiladas — made fresh.</h2>
       <p class="hero-slogan">Braised / shredded meats — never ground. Shrimp seasoned &amp; grilled.</p>
     </div>
@@ -746,8 +742,8 @@
       <div class="order-paths">
         <div class="order-path">
           <h3>Order by voice</h3>
-          <p>Talk to Massimo — build your ticket hands-free. Cash at the counter or a saved card.</p>
-          <a class="voice-btn voice-btn-block" href="/voice">Talk to Massimo</a>
+          <p>Talk to Diego — build your ticket hands-free. Cash at the counter or a saved card.</p>
+          <a class="voice-btn voice-btn-block" href="/voice">Talk to Diego</a>
         </div>
         <div class="order-path">
           <h3>Order online</h3>
@@ -785,7 +781,7 @@
   <footer>
     <p class="brand-footer">Taco Express Peabody</p>
     <p style="margin-top:6px;"><a href="https://tacoexpresspeabody.com">tacoexpresspeabody.com</a></p>
-    <p style="margin-top:8px;"><a href="/voice">Order by voice with Massimo</a></p>
+    <p style="margin-top:8px;"><a href="/voice">Talk to Diego</a></p>
     <p style="margin-top:12px;">© Taco Express Peabody</p>
   </footer>
   <script>

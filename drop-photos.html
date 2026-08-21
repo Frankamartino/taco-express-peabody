@@ -61,19 +61,23 @@
   <p class="note">
     Install from <code>taco-express-photos.zip</code> in Downloads. Example PowerShell for beef tacos:<br>
     <code>Copy-Item "$env:TEMP\taco-express-photos-extract\images\menu\tacos-beef.jpg" "images\menu\tacos-beef.jpg"</code>
-    (extract zip first with <code>Expand-Archive</code>). Shrimp enchiladas intentionally have no photo.
+    (extract zip first with <code>Expand-Archive</code>). Live DoorDash menu only — quesadillas, tacos, burritos, enchiladas.
   </p>
   <script>
     var PHOTOS = [
+      { path: "images/menu/quesadilla.jpg", label: "Loaded quesadilla (shared card)" },
       { path: "images/menu/tacos-beef.jpg", label: "Three Tacos · Shredded Beef" },
       { path: "images/menu/tacos-chicken.jpg", label: "Three Tacos · Shredded Chicken" },
+      { path: "images/menu/tacos-pork.jpg", label: "Three Tacos · Pork" },
       { path: "images/menu/tacos-shrimp.jpg", label: "Three Tacos · Grilled Shrimp" },
       { path: "images/menu/burrito-beef.jpg", label: "Burrito · Shredded Beef" },
       { path: "images/menu/burrito-chicken.jpg", label: "Burrito · Shredded Chicken" },
+      { path: "images/menu/burrito-pork.png", label: "Burrito · Pork" },
       { path: "images/menu/burrito-shrimp.jpg", label: "Burrito · Grilled Shrimp" },
       { path: "images/menu/enchiladas-beef.jpg", label: "Two Enchiladas · Shredded Beef" },
       { path: "images/menu/enchiladas-chicken.jpg", label: "Two Enchiladas · Shredded Chicken" },
-      { path: "images/platters/platter.jpg", label: "Party platter card" }
+      { path: "images/menu/enchiladas-pork.jpg", label: "Two Enchiladas · Pork" },
+      { path: "images/menu/enchiladas-shrimp.jpg", label: "Two Enchiladas · Grilled Shrimp" }
     ];
 
     var tbody = document.getElementById("rows");

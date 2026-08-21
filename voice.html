@@ -3,9 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Taco Express Peabody — Order by Voice with Massimo</title>
+  <title>Taco Express Peabody — Order by Voice with Diego</title>
   <link rel="canonical" href="https://www.tacoexpresspeabody.com/voice" />
-  <meta name="description" content="Order Taco Express Peabody by voice with Massimo — ribeye burrito, tacos, burritos & more. 58 Pulaski St, Peabody MA. (978) 982-1800." />
+  <link rel="icon" href="images/taco-express-logo.jpg" type="image/jpeg" />
+  <link rel="apple-touch-icon" href="images/taco-express-logo.jpg" />
+  <meta name="description" content="Order Taco Express Peabody by voice with Diego — quesadillas, tacos, burritos & enchiladas. 58 Pulaski St, Peabody MA. (978) 982-1800." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
@@ -29,6 +31,15 @@
       padding: 28px 20px 40px;
     }
     .top { text-align: center; flex-shrink: 0; }
+    .voice-logo {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      margin: 0 auto 12px;
+      background: #fff;
+    }
     h1 {
       font-family: "Bebas Neue", sans-serif;
       font-size: clamp(2.6rem, 11vw, 4.2rem);
@@ -344,6 +355,7 @@
 </head>
 <body>
   <div class="top">
+    <img class="voice-logo" src="images/taco-express-logo.jpg" width="96" height="96" alt="Taco Express Peabody" />
     <h1>Taco Express Peabody</h1>
     <p class="outlet">
       58 Pulaski Street<br>
@@ -357,7 +369,7 @@
   </div>
 
   <div class="bottom">
-    <button type="button" id="orderNowBtn">Talk to Massimo</button>
+    <button type="button" id="orderNowBtn">Talk to Diego</button>
     <p id="status" aria-live="polite"></p>
     <p class="card-trust">
       <a href="/voice-signup" id="signupLink">First-time customers: sign up for hands-free ordering</a>
@@ -409,7 +421,7 @@
             try {
               win.focus();
             } catch (eF) {}
-            setStatus('Signup page opened — save card once, then come back to Massimo');
+            setStatus('Signup page opened — save card once, then come back to Diego');
             return { ok: true, mode: 'window' };
           }
         } catch (eOpen) {}
@@ -817,7 +829,7 @@
         }
         if (!question) question = 'Help with the customer order.';
 
-        setStatus('Massimo thinking…');
+        setStatus('Diego thinking…');
         var answer = '';
         try {
           answer = await askSupervisor(question);
@@ -826,7 +838,7 @@
           answer = 'Call us at (978) 982-1800.';
         }
         replyTool(callId, answer);
-        setStatus('Massimo is on — talk anytime');
+        setStatus('Diego is on — talk anytime');
       }
 
       async function callMem0(action, payload) {
@@ -838,7 +850,7 @@
           });
           var data = await resp.json().catch(function () { return {}; });
           if (!resp.ok) {
-            // Soft-fail — never stall Massimo (503 = Mem0 not configured)
+            // Soft-fail — never stall Diego (503 = Mem0 not configured)
             return {
               ok: true,
               skipped: true,
@@ -1105,7 +1117,7 @@
                   hangUpHint:
                     'Say short paid + pickup line (~20 min), warm goodbye, then STOP. Call ends automatically.',
                 });
-                // Backup hang-up after Massimo's closing lines — don't leave dead air
+                // Backup hang-up after Diego's closing lines — don't leave dead air
                 if (hangUpTimer) clearTimeout(hangUpTimer);
                 hangUpTimer = setTimeout(function () {
                   if (!callInProgress()) return;
@@ -1117,7 +1129,7 @@
                 if (failCode === 'needs_card_setup') {
                   openVoiceSignupPopup();
                 }
-                setStatus('Massimo is on — talk anytime');
+                setStatus('Diego is on — talk anytime');
                 replyTool(callId, {
                   ok: false,
                   paid: false,
@@ -1130,7 +1142,7 @@
               delete pendingCalls[callId];
             })
             .catch(function () {
-              setStatus('Massimo is on — talk anytime');
+              setStatus('Diego is on — talk anytime');
               replyTool(callId, {
                 ok: false,
                 paid: false,
@@ -1255,8 +1267,8 @@
         }
 
         if (data.type === 'response.output_audio_transcript.done' && data.transcript) {
-          pushHistory('massimo', data.transcript);
-          maybeAutoHangUp(data.transcript, 'massimo');
+          pushHistory('diego', data.transcript);
+          maybeAutoHangUp(data.transcript, 'diego');
           return;
         }
         if (
@@ -1420,12 +1432,12 @@
         btn.disabled = false;
         btn.classList.remove('live');
         btn.classList.remove('canceling');
-        btn.textContent = 'Talk to Massimo';
+        btn.textContent = 'Talk to Diego';
       }
 
       function hangUp() {
         intentionallyHungUp = true;
-        connectGen += 1; // invalidate any in-flight startMassimo
+        connectGen += 1; // invalidate any in-flight startDiego
         sessionAlive = false;
         connecting = false;
         connected = false;
@@ -1463,12 +1475,12 @@
         var t = String(transcript || '').toLowerCase();
         if (!t) return;
 
-        // After paid: Massimo's closing goodbye ends the call (was leaving dead air)
-        if (who === 'massimo' && order.paid) {
-          var massimoDone =
+        // After paid: Diego's closing goodbye ends the call (was leaving dead air)
+        if (who === 'diego' && order.paid) {
+          var diegoDone =
             /\b(see you soon|have a great|take care|catch you|arrivederci|my pleasure)\b/i.test(t) ||
             /\b(ready for pickup|start making your food)\b/i.test(t);
-          if (massimoDone) {
+          if (diegoDone) {
             if (hangUpTimer) clearTimeout(hangUpTimer);
             hangUpTimer = setTimeout(function () {
               if (!callInProgress()) return;
@@ -1487,14 +1499,14 @@
           (order.paid && /\b(thank you|thanks|ok thanks|okay thanks|appreciate it)\b/i.test(t));
         if (!bye) return;
         if (hangUpTimer) clearTimeout(hangUpTimer);
-        // ~4s after customer farewell — room for Massimo's last line
+        // ~4s after customer farewell — room for Diego's last line
         hangUpTimer = setTimeout(function () {
           if (!callInProgress()) return;
           hangUp();
         }, 4000);
       }
 
-      async function startMassimo() {
+      async function startDiego() {
         if (callInProgress()) {
           hangUp();
           return;
@@ -1510,7 +1522,7 @@
         btn.classList.add('canceling');
         btn.classList.remove('live');
         btn.textContent = 'Hang Up';
-        setStatus('Talking to Massimo…');
+        setStatus('Talking to Diego…');
         resetOrder();
         resetCustomer();
         renderTicket();
@@ -1554,7 +1566,7 @@
 
           pc.ontrack = function (ev) {
             // Never stop the remote track here. Early ontrack (before sessionAlive)
-            // used to kill Massimo's audio for the whole call.
+            // used to kill Diego's audio for the whole call.
             if (intentionallyHungUp || myGen !== connectGen) return;
             var stream = ev.streams && ev.streams[0] ? ev.streams[0] : new MediaStream([ev.track]);
             remoteAudio.muted = false;
@@ -1564,7 +1576,7 @@
           };
 
           var greetingExact =
-            'Welcome to Taco Express. My name is Massimo. May I have your full name?';
+            'Welcome to Taco Express. My name is Diego. May I have your full name?';
           var dcOpen = false;
           var greetingArmed = false;
           var greetingSpoken = false;
@@ -1660,12 +1672,12 @@
           btn.classList.remove('canceling');
           btn.classList.add('live');
           btn.textContent = 'Hang Up';
-          setStatus('Massimo is on — ticket updates as you order');
+          setStatus('Diego is on — ticket updates as you order');
         } catch (e) {
-          console.error('[Taco Massimo]', e);
+          console.error('[Taco Diego]', e);
           if (stillThisConnect()) {
             cleanup();
-            setStatus('Could not start Massimo. Try again.');
+            setStatus('Could not start Diego. Try again.');
           }
         }
       }
@@ -1675,7 +1687,7 @@
           hangUp();
           return;
         }
-        startMassimo();
+        startDiego();
       });
     })();
   </script>
