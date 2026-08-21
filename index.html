@@ -65,9 +65,10 @@
     .brand-logo {
       width: 52px;
       height: 52px;
-      border-radius: 10px;
-      object-fit: contain;
+      border-radius: 50%;
+      object-fit: cover;
       flex-shrink: 0;
+      background: #000;
     }
     .brand h1 {
       font-family: "Bebas Neue", sans-serif;
@@ -267,20 +268,6 @@
       background: rgba(255,255,255,0.06);
       display: block;
     }
-    .hero-banner-wrap {
-      margin: 0 auto 20px;
-      max-width: 720px;
-      border-radius: 14px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-      background: #000;
-    }
-    .hero-banner-wrap img {
-      width: 100%;
-      display: block;
-      aspect-ratio: 16 / 9;
-      object-fit: cover;
-    }
     .card .img-placeholder {
       width: 100%;
       aspect-ratio: 4 / 3;
@@ -436,7 +423,6 @@
     <div class="header-inner">
       <div class="brand">
         <a class="brand-link" href="https://www.tacoexpresspeabody.com/">
-          <img class="brand-logo" src="images/taco-express-logo.png" width="52" height="52" alt="" />
           <div>
             <h1>Taco Express Peabody</h1>
             <p class="brand-domain">tacoexpresspeabody.com</p>
@@ -466,9 +452,6 @@
 
   <main class="wrap">
     <div class="hero">
-      <div class="hero-banner-wrap">
-        <img src="images/taco-express-header.png" width="1400" height="400" alt="Taco Express Peabody" />
-      </div>
       <h2>Quesadillas, tacos, burritos &amp; enchiladas — made fresh.</h2>
       <p class="hero-slogan">Braised / shredded meats — never ground. Shrimp seasoned &amp; grilled.</p>
     </div>
