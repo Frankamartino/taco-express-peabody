@@ -4,10 +4,6 @@
 const TAX_RATE = 0.07;
 
 const MENU_ITEMS = [
-  { id: 'quesadilla-beef', section: 'quesadillas', title: 'Beef', name: 'Loaded Quesadillas Beef', priceCents: 1399 },
-  { id: 'quesadilla-chicken', section: 'quesadillas', title: 'Chicken', name: 'Loaded Quesadillas Chicken', priceCents: 1399 },
-  { id: 'quesadilla-pork', section: 'quesadillas', title: 'Pork', name: 'Loaded Quesadillas Pork', priceCents: 1399 },
-  { id: 'quesadilla-shrimp', section: 'quesadillas', title: 'Shrimp', name: 'Loaded Quesadillas Shrimp', priceCents: 1499 },
   { id: 'tacos-beef', section: 'tacos', title: 'Beef', name: 'Three Tacos · Shredded Beef', priceCents: 1349 },
   { id: 'tacos-chicken', section: 'tacos', title: 'Chicken', name: 'Three Tacos · Shredded Chicken', priceCents: 1349 },
   { id: 'tacos-pork', section: 'tacos', title: 'Pork', name: 'Three Tacos · Shredded Pork', priceCents: 1349 },
@@ -20,6 +16,10 @@ const MENU_ITEMS = [
   { id: 'enchilada-chicken', section: 'enchiladas', title: 'Chicken', name: 'Two Enchiladas · Shredded Chicken', priceCents: 1399 },
   { id: 'enchilada-pork', section: 'enchiladas', title: 'Pork', name: 'Two Enchiladas · Pork', priceCents: 1399 },
   { id: 'enchilada-shrimp', section: 'enchiladas', title: 'Shrimp', name: 'Two Enchiladas · Grilled Shrimp', priceCents: 1599 },
+  { id: 'quesadilla-beef', section: 'quesadillas', title: 'Beef', name: 'Loaded Quesadillas Beef', priceCents: 1399 },
+  { id: 'quesadilla-chicken', section: 'quesadillas', title: 'Chicken', name: 'Loaded Quesadillas Chicken', priceCents: 1399 },
+  { id: 'quesadilla-pork', section: 'quesadillas', title: 'Pork', name: 'Loaded Quesadillas Pork', priceCents: 1399 },
+  { id: 'quesadilla-shrimp', section: 'quesadillas', title: 'Shrimp', name: 'Loaded Quesadillas Shrimp', priceCents: 1499 },
   { id: 'side-rice', section: 'sides', title: 'Seasoned Brown Rice', name: 'Seasoned Brown Rice', priceCents: 349 },
   { id: 'side-black-beans', section: 'sides', title: 'Black Beans', name: 'Black Beans', priceCents: 349 },
   { id: 'side-refried-beans', section: 'sides', title: 'Refried Beans', name: 'Refried Beans', priceCents: 349 },

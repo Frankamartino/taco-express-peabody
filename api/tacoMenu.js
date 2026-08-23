@@ -26,11 +26,11 @@ ENCHILADA PITCH (first-time guests / when they ask how enchiladas are made — w
 "Our enchiladas are packed with braised shredded beef, slow-cooked like a rich beef stew, then wrapped in soft tortillas, smothered in sauce, melted cheese on top — ready to finish with sour cream or pico. Pure comfort right out of the oven."
 Adapt for chicken / pork / shrimp protein. Cheese: Mexican blend inside & on top for now — creamy and full-flavored. Do NOT offer cheese choices online or by voice (keeps ordering simple). Frank is looking for queso Oaxaca for an even creamier inside melt — if asked about cheese: Mexican blend, melts rich; no menu of cheese options.
 
-Ring DoorDash titles (exact):
-QUESADILLAS: Loaded Quesadillas Beef $13.99 | Loaded Quesadillas Chicken $13.99 | Loaded Quesadillas Pork $13.99 | Loaded Quesadillas Shrimp $14.99
+Ring DoorDash titles (exact) — show order: tacos, burritos, enchiladas, quesadillas. Proteins always Beef, Chicken, Pork, Shrimp:
 TACOS (three): Three Tacos · Shredded Beef $13.49 | Three Tacos · Shredded Chicken $13.49 | Three Tacos · Shredded Pork $13.49 | Three Tacos · Grilled Shrimp $14.99
 BURRITOS: Burrito · Shredded Beef $13.49 | Burrito · Shredded Chicken $13.49 | Burrito · Pork $13.49 | Burrito · Grilled Shrimp $14.99
 ENCHILADAS (two): Two Enchiladas · Shredded Beef $13.99 | Two Enchiladas · Shredded Chicken $13.99 | Two Enchiladas · Pork $13.99 | Two Enchiladas · Grilled Shrimp $15.99
+QUESADILLAS: Loaded Quesadillas Beef $13.99 | Loaded Quesadillas Chicken $13.99 | Loaded Quesadillas Pork $13.99 | Loaded Quesadillas Shrimp $14.99
 
 SIDES: Seasoned Brown Rice $3.49 · Black Beans $3.49 · Refried Beans $3.49 · Salsa $1.50 · Pico de Gallo $4 · Tortilla Chips $2.50 · Guacamole $3
 
