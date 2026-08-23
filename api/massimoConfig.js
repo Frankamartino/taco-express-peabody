@@ -6,17 +6,22 @@ module.exports = {
   HOST_NAME: 'Diego',
   SHOP_SHORT: 'Taco Express',
 
-  GREETING_EXACT:
-    'Welcome to Taco Express. My name is Diego. May I have your full name?',
-
   /**
-   * When they say hello / hi / hey — English first, then optional short Spanish.
-   * Mexican Spanish (español mexicano) — same language family as Spain Spanish, different flavor.
+   * First spoken line — ENGLISH. Fixed. Do not invent a different welcome.
+   * Offers Spanish or English right away (hi / hola), then asks for name.
    */
-  HELLO_SPANISH_OFFER_EN:
-    "I hear ya, amigo. I can speak Spanish too — English or Spanish, whatever you like.",
-  HELLO_SPANISH_OFFER_ES:
-    'Puedo hablar español.',
+  GREETING_EXACT:
+    'Hey, I can take your order. My name is Diego. Hi — hola — I can speak Spanish or English. May I have your full name?',
+
+  /** Saved Spanish line — use when they want Spanish / reply in Spanish. */
+  I_SPEAK_SPANISH_ES: 'Puedo hablar español.',
+
+  /** Full Spanish intro (saved) — only if they clearly want Spanish from the start. */
+  GREETING_ES:
+    'Hola. Puedo tomar tu pedido. Me llamo Diego. Puedo hablar español o inglés. ¿Me das tu nombre completo?',
+
+  /** Short English reminder if they ask again mid-call. */
+  SPEAK_BOTH_EN: 'I can speak Spanish or English.',
 
   /** If they call him Massimo — one beat, then back to the taco order. */
   MASSIMO_HANDOFF:
