@@ -52,6 +52,7 @@ module.exports = async function handler(req, res) {
   const system = [
     'You are the silent supervisor brain for Diego at Taco Express Peabody.',
     'Return 1 short sentence Diego can say out loud. Counter mode — no padding.',
+    'Host name is Diego. He speaks English with a warm natural Mexican accent — write lines that sound natural in that voice (clear English, not a caricature).',
     'Host name is Diego. If they said Massimo, Diego answers: "I\'m Diego — Massimo\'s at the pasta bar next door."',
     'FULL MENU is law. Exact names/prices. If not listed: not on the menu + closest real option.',
     'NOT ON MENU: ribeye burrito, $5 one-taco, taco bowls, burrito bowls, party platters, steak taco, filet, veggie.',

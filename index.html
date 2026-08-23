@@ -94,6 +94,20 @@
       gap: 8px;
       flex-wrap: wrap;
     }
+    .header-diego-hint {
+      width: 100%;
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 2px;
+      font-weight: 600;
+    }
+    @media (min-width: 720px) {
+      .header-diego-hint {
+        width: auto;
+        margin-top: 0;
+        margin-left: 2px;
+      }
+    }
     .order-btn {
       display: inline-flex;
       align-items: center;
@@ -452,8 +466,9 @@
         </a>
       </div>
       <div class="header-actions">
+        <a class="order-btn" href="#quesadillas">Order here</a>
         <a class="voice-btn" href="/voice">Talk to Diego</a>
-        <a class="order-btn" href="/order">Delivery</a>
+        <span class="header-diego-hint">He’ll take your order</span>
         <a class="call-btn call-btn-secondary" href="tel:+19789821800">Call (978) 982-1800</a>
       </div>
     </div>
