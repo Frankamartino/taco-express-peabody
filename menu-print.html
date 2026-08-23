@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Taco Express Peabody — Print Menu (2-sided)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    @page { size: letter; margin: 0.4in; }
+    body {
+      font-family: Georgia, "Times New Roman", serif;
+      color: #1a1a1a;
+      background: #e8e8e8;
+      line-height: 1.35;
+    }
+    .no-print {
+      max-width: 8.5in;
+      margin: 16px auto 8px;
+      padding: 0 12px;
+      font-family: system-ui, sans-serif;
+      font-size: 0.9rem;
+      color: #333;
+    }
+    .no-print button {
+      font: inherit;
+      font-weight: 700;
+      padding: 10px 18px;
+      border: 0;
+      border-radius: 8px;
+      background: #ea580c;
+      color: #fff;
+      cursor: pointer;
+    }
+    .sheet {
+      width: 8.5in;
+      min-height: 11in;
+      margin: 12px auto;
+      padding: 0.5in 0.55in 0.45in;
+      background: #fff;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.14);
+      display: flex;
+      flex-direction: column;
+    }
+    .sheet-front { page-break-after: always; }
+    .sheet-back { page-break-before: always; }
+    header {
+      text-align: center;
+      border-bottom: 3px solid #ea580c;
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+    }
+    header h1 {
+      font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+      font-size: 2.35rem;
+      letter-spacing: 0.05em;
+      font-weight: 400;
+      line-height: 1;
+    }
+    header .tag {
+      font-size: 0.85rem;
+      color: #555;
+      margin-top: 6px;
+    }
+    header .addr {
+      font-size: 0.88rem;
+      margin-top: 8px;
+      font-weight: 700;
+    }
+    .page-label {
+      font-family: system-ui, sans-serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #888;
+      text-align: right;
+      margin-bottom: 6px;
+    }
+    h2 {
+      font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+      font-size: 1.2rem;
+      letter-spacing: 0.07em;
+      color: #ea580c;
+      border-bottom: 2px solid #1a1a1a;
+      margin: 16px 0 8px;
+      padding-bottom: 3px;
+      font-weight: 400;
+    }
+    .sheet-front h2:first-of-type { margin-top: 0; }
+    .blurb {
+      font-size: 0.78rem;
+      color: #555;
+      font-style: italic;
+      margin-bottom: 8px;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 20px;
+    }
+    .protein {
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 8px 10px;
+      break-inside: avoid;
+    }
+    .protein .who {
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 4px;
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      font-size: 0.88rem;
+      padding: 2px 0;
+    }
+    .row .name { font-weight: 600; }
+    .row .dots {
+      flex: 1;
+      border-bottom: 1px dotted #bbb;
+      height: 0.9em;
+      margin: 0 4px;
+    }
+    .row .price { font-weight: 700; white-space: nowrap; }
+    .row.dinner {
+      font-size: 0.8rem;
+      color: #333;
+      padding-left: 6px;
+    }
+    .list .row { font-size: 0.92rem; padding: 4px 0; }
+    .note-box {
+      margin-top: 14px;
+      padding: 10px 12px;
+      border: 2px solid #ea580c;
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
+    .note-box strong { color: #ea580c; }
+    .grow { flex: 1; }
+    footer {
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 2px solid #1a1a1a;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #444;
+    }
+    footer strong { color: #1a1a1a; }
+    .back-hero {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .back-hero h1 {
+      font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+      font-size: 1.6rem;
+      letter-spacing: 0.06em;
+      font-weight: 400;
+    }
+    @media print {
+      body { background: #fff; }
+      .no-print { display: none !important; }
+      .sheet {
+        margin: 0;
+        box-shadow: none;
+        width: auto;
+        min-height: 0;
+        height: auto;
+        padding: 0;
+      }
+      .sheet-front { page-break-after: always; }
+      .sheet-back { page-break-before: always; }
+    }
+  </style>
+</head>
+<body>
+  <div class="no-print">
+    <p>
+      <button type="button" onclick="window.print()">Print double-sided menu</button>
+      &nbsp; Use <strong>2-sided / duplex</strong> · flip on long edge · letter size.
+    </p>
+    <p style="margin-top:8px">
+      <a href="/">← Back to site</a> ·
+      <a href="/menu-print">tacoexpresspeabody.com/menu-print</a>
+      · Front = mains · Back = sides, extras, fryer, drinks
+    </p>
+  </div>
+
+  <!-- ========== FRONT ========== -->
+  <div class="sheet sheet-front">
+    <p class="page-label">Front</p>
+    <header>
+      <h1>TACO EXPRESS</h1>
+      <p class="tag">Braised / shredded meats — never ground · Mild or spicy</p>
+      <p class="addr">58 Pulaski St, Peabody MA &nbsp;·&nbsp; (978) 982-1800 &nbsp;·&nbsp; tacoexpresspeabody.com</p>
+    </header>
+
+    <h2>TACOS · THREE</h2>
+    <p class="blurb">Same protein on every taco. Dinner plate = item + seasoned rice + beans (+$7).</p>
+    <div class="grid-2">
+      <div class="protein">
+        <div class="who">Beef</div>
+        <div class="row"><span class="name">Three tacos</span><span class="dots"></span><span class="price">$13.49</span></div>
+        <div class="row dinner"><span class="name">Dinner plate</span><span class="dots"></span><span class="price">$20.49</span></div>
+      </div>
+      <div class="protein">
+        <div class="who">Chicken</div>
+        <div class="row"><span class="name">Three tacos</span><span class="dots"></span><span class="price">$13.49</span></div>
+        <div class="row dinner"><span class="name">Dinner plate</span><span class="dots"></span><span class="price">$20.49</span></div>
+      </div>
+      <div class="protein">
+        <div class="who">Pork</div>
+        <div class="row"><span class="name">Three tacos</span><span class="dots"></span><span class="price">$13.49</span></div>
+        <div class="row dinner"><span class="name">Dinner plate</span><span class="dots"></span><span class="price">$20.49</span></div>
+      </div>
+      <div class="protein">
+        <div class="who">Shrimp</div>
+        <div class="row"><span class="name">Three tacos</span><span class="dots"></span><span class="price">$21.99</span></div>
+        <div class="row dinner"><span class="name">Dinner plate</span><span class="dots"></span><span class="price">$28.99</span></div>
+      </div>
+    </div>
+
+    <h2>BURRITOS · 12"</h2>
+    <p class="blurb">One flour tortilla. Dinner plate = burrito + rice + beans (+$7).</p>
+    <div class="grid-2">
+      <div class="protein">
+        <div class="who">Beef</div>
+        <div class="row"><span class="name">Burrito</span><span class="dots"></span><span class="price">$13.49</span></div>
+        <div class="row dinner"><span class="name">Dinner plate</span><span class="dots"></span><span class="price">$20.49</span></div>
+      </div>
+      <div class="protein">
+        <div class="who">Chicken</div>
+        <div class="row"><span class="name">Burrito</span><span class="dots"></span><span class="price">$13.49</span></div>
+        <div class="row dinner"><span class="name">Dinner plate</span><span class="dots"></span><span class="price">$20.49</span></div>
+      </div>
+      <div class="protein">
+        <div class="who">Pork</div>
+        <div class="row"><span class="name">Burrito</span><span class="dots"></span><span class="price">$13.49</span></div>
+        <div class="row dinner"><span class="name">Dinner plate</span><span class="dots"></span><span class="price">$20.49</span></div>
+      </div>
+      <div class="protein">
+        <div class="who">Shrimp</div>
+        <div class="row"><span class="name">Burrito</span><span class="dots"></span><span class="price">$21.99</span></div>
+        <div class="row dinner"><span class="name">Dinner plate</span><span class="dots"></span><span class="price">$28.99</span></div>
+      </div>
+    </div>
+
+    <h2>ENCHILADAS · TWO</h2>
+    <p class="blurb">Same protein on both. Sauced &amp; baked. Dinner +$7.</p>
+    <div class="grid-2">
+      <div class="protein">
+        <div class="who">Beef · Chicken · Pork</div>
+        <div class="row"><span class="name">Two enchiladas</span><span class="dots"></span><span class="price">$13.99</span></div>
+        <div class="row dinner"><span class="name">Dinner plate</span><span class="dots"></span><span class="price">$20.99</span></div>
+      </div>
+      <div class="protein">
+        <div class="who">Shrimp</div>
+        <div class="row"><span class="name">Two enchiladas</span><span class="dots"></span><span class="price">$21.99</span></div>
+        <div class="row dinner"><span class="name">Dinner plate</span><span class="dots"></span><span class="price">$28.99</span></div>
+      </div>
+    </div>
+
+    <h2>LOADED QUESADILLAS</h2>
+    <p class="blurb">10" folded &amp; toasted — rice, beans, protein, cheese, sour cream. Dinner +$7.</p>
+    <div class="grid-2">
+      <div class="protein">
+        <div class="who">Beef · Chicken · Pork</div>
+        <div class="row"><span class="name">Quesadilla</span><span class="dots"></span><span class="price">$13.99</span></div>
+        <div class="row dinner"><span class="name">Dinner plate</span><span class="dots"></span><span class="price">$20.99</span></div>
+      </div>
+      <div class="protein">
+        <div class="who">Shrimp</div>
+        <div class="row"><span class="name">Quesadilla</span><span class="dots"></span><span class="price">$21.99</span></div>
+        <div class="row dinner"><span class="name">Dinner plate</span><span class="dots"></span><span class="price">$28.99</span></div>
+      </div>
+    </div>
+
+    <div class="note-box">
+      <strong>Dinner plate</strong> = your item + seasoned rice + beans (+$7). Same idea as the sit-down places — sides on the plate.
+    </div>
+
+    <footer>
+      <strong>Continued on back →</strong> Sides · Extras · Fryer · Drinks · Beer &amp; wine
+    </footer>
+  </div>
+
+  <!-- ========== BACK ========== -->
+  <div class="sheet sheet-back">
+    <p class="page-label">Back</p>
+    <div class="back-hero">
+      <h1>TACO EXPRESS · MORE</h1>
+      <p class="tag" style="margin-top:4px;color:#555;font-size:0.85rem">58 Pulaski St · (978) 982-1800</p>
+    </div>
+
+    <div class="grid-2 grow">
+      <section>
+        <h2>SIDES</h2>
+        <div class="list">
+          <div class="row"><span class="name">Seasoned brown rice</span><span class="dots"></span><span class="price">$3.49</span></div>
+          <div class="row"><span class="name">Black beans</span><span class="dots"></span><span class="price">$3.49</span></div>
+          <div class="row"><span class="name">Refried beans</span><span class="dots"></span><span class="price">$3.49</span></div>
+          <div class="row"><span class="name">Salsa</span><span class="dots"></span><span class="price">$1.50</span></div>
+          <div class="row"><span class="name">Pico de gallo</span><span class="dots"></span><span class="price">$4.00</span></div>
+          <div class="row"><span class="name">Tortilla chips</span><span class="dots"></span><span class="price">$2.50</span></div>
+          <div class="row"><span class="name">Guacamole</span><span class="dots"></span><span class="price">$3.00</span></div>
+        </div>
+
+        <h2>EXTRAS</h2>
+        <div class="list">
+          <div class="row"><span class="name">Extra beef</span><span class="dots"></span><span class="price">$4.00</span></div>
+          <div class="row"><span class="name">Extra chicken</span><span class="dots"></span><span class="price">$4.00</span></div>
+          <div class="row"><span class="name">Extra pork</span><span class="dots"></span><span class="price">$4.00</span></div>
+          <div class="row"><span class="name">Extra shrimp (3)</span><span class="dots"></span><span class="price">$5.00</span></div>
+          <div class="row"><span class="name">Extra rice</span><span class="dots"></span><span class="price">$2.00</span></div>
+          <div class="row"><span class="name">Extra black beans</span><span class="dots"></span><span class="price">$2.00</span></div>
+          <div class="row"><span class="name">Extra cheese</span><span class="dots"></span><span class="price">$1.50</span></div>
+          <div class="row"><span class="name">Extra sour cream</span><span class="dots"></span><span class="price">$1.00</span></div>
+        </div>
+      </section>
+
+      <section>
+        <h2>FRYER</h2>
+        <div class="list">
+          <div class="row"><span class="name">French fries</span><span class="dots"></span><span class="price">$4.99</span></div>
+          <div class="row"><span class="name">Onion rings</span><span class="dots"></span><span class="price">$5.99</span></div>
+          <div class="row"><span class="name">Chicken fingers (6)</span><span class="dots"></span><span class="price">$12.00</span></div>
+          <div class="row"><span class="name">Jumbo wings (6)</span><span class="dots"></span><span class="price">$13.00</span></div>
+        </div>
+
+        <h2>DRINKS</h2>
+        <div class="list">
+          <div class="row"><span class="name">12 oz cans</span><span class="dots"></span><span class="price">$2.99</span></div>
+          <div class="row"><span class="name">Mexican Coke (glass)</span><span class="dots"></span><span class="price">$3.99</span></div>
+          <div class="row"><span class="name">Aquafina</span><span class="dots"></span><span class="price">$2.99</span></div>
+          <div class="row"><span class="name">San Pellegrino</span><span class="dots"></span><span class="price">$3.49</span></div>
+        </div>
+
+        <div class="note-box" style="margin-top:18px">
+          <strong>Beer &amp; wine</strong> — we have a full liquor license. Ask what’s cold. Margaritas &amp; cocktails are an easy next step when you’re ready to push the bar.
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      <strong>Wed–Sat 11AM–8PM · Sun 11AM–6PM · Mon–Tue closed</strong><br />
+      Order online · tacoexpresspeabody.com &nbsp;·&nbsp; Voice order · /voice<br />
+      DoorDash · Uber Eats · Grubhub
+    </footer>
+  </div>
+</body>
+</html>
