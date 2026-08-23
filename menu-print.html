@@ -6,20 +6,34 @@
   <title>Taco Express Peabody — Print Menu (2-sided)</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    @page { size: letter; margin: 0.4in; }
+    @page { size: letter; margin: 0.35in; }
+    :root {
+      --terra: #ea580c;
+      --terra-deep: #c2410c;
+      --lime: #65a30d;
+      --green: #14532d;
+      --cream: #fff7ed;
+      --ink: #1c1917;
+    }
     body {
       font-family: Georgia, "Times New Roman", serif;
-      color: #1a1a1a;
-      background: #e8e8e8;
+      color: var(--ink);
+      background: #d6d3d1;
       line-height: 1.35;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      color-adjust: exact;
     }
     .no-print {
       max-width: 8.5in;
       margin: 16px auto 8px;
-      padding: 0 12px;
+      padding: 12px 14px;
       font-family: system-ui, sans-serif;
       font-size: 0.9rem;
       color: #333;
+      background: #fff;
+      border: 2px solid var(--terra);
+      border-radius: 10px;
     }
     .no-print button {
       font: inherit;
@@ -27,79 +41,99 @@
       padding: 10px 18px;
       border: 0;
       border-radius: 8px;
-      background: #ea580c;
+      background: var(--terra);
       color: #fff;
       cursor: pointer;
+    }
+    .no-print .tip {
+      margin-top: 10px;
+      padding: 8px 10px;
+      background: #ecfccb;
+      border-left: 4px solid var(--lime);
+      font-size: 0.84rem;
     }
     .sheet {
       width: 8.5in;
       min-height: 11in;
       margin: 12px auto;
-      padding: 0.5in 0.55in 0.45in;
+      padding: 0;
       background: #fff;
       box-shadow: 0 2px 16px rgba(0,0,0,0.14);
       display: flex;
       flex-direction: column;
+      overflow: hidden;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
+    .sheet-inner { padding: 0.4in 0.5in 0.35in; flex: 1; display: flex; flex-direction: column; }
     .sheet-front { page-break-after: always; }
     .sheet-back { page-break-before: always; }
-    header {
+    .brand-bar {
+      background: var(--green);
+      color: #ecfccb;
       text-align: center;
-      border-bottom: 3px solid #ea580c;
-      padding-bottom: 12px;
-      margin-bottom: 14px;
+      padding: 14px 16px 12px;
     }
-    header h1 {
+    .brand-bar h1 {
       font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
-      font-size: 2.35rem;
-      letter-spacing: 0.05em;
+      font-size: 2.4rem;
+      letter-spacing: 0.06em;
       font-weight: 400;
       line-height: 1;
+      color: #fff;
     }
-    header .tag {
-      font-size: 0.85rem;
-      color: #555;
+    .brand-bar .tag {
+      font-size: 0.82rem;
       margin-top: 6px;
+      color: #bbf7d0;
     }
-    header .addr {
-      font-size: 0.88rem;
+    .brand-bar .addr {
+      font-size: 0.86rem;
       margin-top: 8px;
       font-weight: 700;
+      color: #fff;
+    }
+    .accent-stripe {
+      height: 8px;
+      background: linear-gradient(90deg, var(--terra) 0%, var(--lime) 50%, var(--terra) 100%);
     }
     .page-label {
       font-family: system-ui, sans-serif;
       font-size: 0.65rem;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: #888;
+      color: var(--terra);
       text-align: right;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
+      font-weight: 700;
     }
     h2 {
       font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
-      font-size: 1.2rem;
+      font-size: 1.15rem;
       letter-spacing: 0.07em;
-      color: #ea580c;
-      border-bottom: 2px solid #1a1a1a;
-      margin: 16px 0 8px;
-      padding-bottom: 3px;
+      color: #fff;
+      background: var(--terra);
+      margin: 14px 0 8px;
+      padding: 5px 10px;
       font-weight: 400;
+      border-radius: 4px;
     }
-    .sheet-front h2:first-of-type { margin-top: 0; }
+    .sheet-front .sheet-inner > h2:first-of-type { margin-top: 0; }
     .blurb {
       font-size: 0.78rem;
-      color: #555;
+      color: #57534e;
       font-style: italic;
       margin-bottom: 8px;
     }
     .grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px 20px;
+      gap: 10px 16px;
     }
     .protein {
-      border: 1px solid #ddd;
-      border-radius: 6px;
+      border: 2px solid #fdba74;
+      background: var(--cream);
+      border-radius: 8px;
       padding: 8px 10px;
       break-inside: avoid;
     }
@@ -107,6 +141,7 @@
       font-weight: 700;
       font-size: 0.95rem;
       margin-bottom: 4px;
+      color: var(--green);
     }
     .row {
       display: flex;
@@ -119,44 +154,57 @@
     .row .name { font-weight: 600; }
     .row .dots {
       flex: 1;
-      border-bottom: 1px dotted #bbb;
+      border-bottom: 1px dotted #a8a29e;
       height: 0.9em;
       margin: 0 4px;
     }
-    .row .price { font-weight: 700; white-space: nowrap; }
+    .row .price {
+      font-weight: 800;
+      white-space: nowrap;
+      color: var(--terra-deep);
+    }
     .row.dinner {
       font-size: 0.8rem;
-      color: #333;
+      color: #44403c;
       padding-left: 6px;
     }
+    .row.dinner .price { color: var(--lime); }
     .list .row { font-size: 0.92rem; padding: 4px 0; }
     .note-box {
-      margin-top: 14px;
+      margin-top: 12px;
       padding: 10px 12px;
-      border: 2px solid #ea580c;
-      border-radius: 6px;
+      border: 2px solid var(--lime);
+      background: #ecfccb;
+      border-radius: 8px;
       font-size: 0.85rem;
     }
-    .note-box strong { color: #ea580c; }
+    .note-box strong { color: var(--green); }
+    .note-box.orange {
+      border-color: var(--terra);
+      background: #ffedd5;
+    }
+    .note-box.orange strong { color: var(--terra-deep); }
     .grow { flex: 1; }
     footer {
       margin-top: auto;
-      padding-top: 12px;
-      border-top: 2px solid #1a1a1a;
+      padding: 10px 12px;
+      background: var(--green);
+      color: #ecfccb;
       text-align: center;
-      font-size: 0.8rem;
-      color: #444;
+      font-size: 0.78rem;
+      border-radius: 6px;
     }
-    footer strong { color: #1a1a1a; }
+    footer strong { color: #fff; }
     .back-hero {
       text-align: center;
-      margin-bottom: 8px;
+      margin-bottom: 4px;
     }
     .back-hero h1 {
       font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
-      font-size: 1.6rem;
+      font-size: 1.55rem;
       letter-spacing: 0.06em;
       font-weight: 400;
+      color: var(--green);
     }
     @media print {
       body { background: #fff; }
@@ -167,10 +215,14 @@
         width: auto;
         min-height: 0;
         height: auto;
-        padding: 0;
       }
       .sheet-front { page-break-after: always; }
       .sheet-back { page-break-before: always; }
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
     }
   </style>
 </head>
@@ -180,21 +232,28 @@
       <button type="button" onclick="window.print()">Print double-sided menu</button>
       &nbsp; Use <strong>2-sided / duplex</strong> · flip on long edge · letter size.
     </p>
+    <div class="tip">
+      <strong>For full color:</strong> in the print dialog set
+      <em>Color</em> (not Black &amp; white / Grayscale), and turn on
+      <em>Background graphics</em> (Chrome: More settings → Background graphics).
+      Your printer is fine — the browser was likely set to B&amp;W.
+    </div>
     <p style="margin-top:8px">
       <a href="/">← Back to site</a> ·
       <a href="/menu-print">tacoexpresspeabody.com/menu-print</a>
-      · Front = mains · Back = sides, extras, fryer, drinks
     </p>
   </div>
 
   <!-- ========== FRONT ========== -->
   <div class="sheet sheet-front">
-    <p class="page-label">Front</p>
-    <header>
+    <div class="brand-bar">
       <h1>TACO EXPRESS</h1>
       <p class="tag">Braised / shredded meats — never ground · Mild or spicy</p>
       <p class="addr">58 Pulaski St, Peabody MA &nbsp;·&nbsp; (978) 982-1800 &nbsp;·&nbsp; tacoexpresspeabody.com</p>
-    </header>
+    </div>
+    <div class="accent-stripe"></div>
+    <div class="sheet-inner">
+    <p class="page-label">Front</p>
 
     <h2>TACOS · THREE</h2>
     <p class="blurb">Same protein on every taco. Dinner plate = item + seasoned rice + beans (+$7).</p>
@@ -283,15 +342,19 @@
     <footer>
       <strong>Continued on back →</strong> Sides · Extras · Fryer · Drinks · Beer &amp; wine
     </footer>
+    </div>
   </div>
 
   <!-- ========== BACK ========== -->
   <div class="sheet sheet-back">
-    <p class="page-label">Back</p>
-    <div class="back-hero">
+    <div class="brand-bar">
       <h1>TACO EXPRESS · MORE</h1>
-      <p class="tag" style="margin-top:4px;color:#555;font-size:0.85rem">58 Pulaski St · (978) 982-1800</p>
+      <p class="tag">Sides · Extras · Fryer · Drinks</p>
+      <p class="addr">58 Pulaski St · (978) 982-1800</p>
     </div>
+    <div class="accent-stripe"></div>
+    <div class="sheet-inner">
+    <p class="page-label">Back</p>
 
     <div class="grid-2 grow">
       <section>
@@ -336,7 +399,7 @@
           <div class="row"><span class="name">San Pellegrino</span><span class="dots"></span><span class="price">$3.49</span></div>
         </div>
 
-        <div class="note-box" style="margin-top:18px">
+        <div class="note-box orange" style="margin-top:18px">
           <strong>Beer &amp; wine</strong> — we have a full liquor license. Ask what’s cold. Margaritas &amp; cocktails are an easy next step when you’re ready to push the bar.
         </div>
       </section>
@@ -347,6 +410,7 @@
       Order online · tacoexpresspeabody.com &nbsp;·&nbsp; Voice order · /voice<br />
       DoorDash · Uber Eats · Grubhub
     </footer>
+    </div>
   </div>
 </body>
 </html>
