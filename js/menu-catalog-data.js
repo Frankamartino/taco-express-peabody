@@ -25,7 +25,7 @@ window.TACO_MENU_ITEMS = [
     "section": "tacos",
     "title": "Shrimp",
     "name": "Three Tacos · Grilled Shrimp",
-    "priceCents": 1499
+    "priceCents": 2199
   },
   {
     "id": "burrito-beef",
@@ -53,7 +53,7 @@ window.TACO_MENU_ITEMS = [
     "section": "burritos",
     "title": "Shrimp",
     "name": "Burrito · Grilled Shrimp",
-    "priceCents": 1499
+    "priceCents": 2199
   },
   {
     "id": "enchilada-beef",
@@ -81,7 +81,7 @@ window.TACO_MENU_ITEMS = [
     "section": "enchiladas",
     "title": "Shrimp",
     "name": "Two Enchiladas · Grilled Shrimp",
-    "priceCents": 1599
+    "priceCents": 2199
   },
   {
     "id": "quesadilla-beef",
@@ -109,7 +109,7 @@ window.TACO_MENU_ITEMS = [
     "section": "quesadillas",
     "title": "Shrimp",
     "name": "Loaded Quesadillas Shrimp",
-    "priceCents": 1499
+    "priceCents": 2199
   },
   {
     "id": "side-rice",
