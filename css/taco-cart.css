@@ -1,0 +1,108 @@
+/* Taco Express — cart stepper + bottom checkout bar */
+.qty-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 12px;
+  width: 100%;
+}
+.qty-stepper button {
+  width: 40px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid rgba(132, 204, 22, 0.55);
+  background: rgba(132, 204, 22, 0.1);
+  color: #84cc16;
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+.qty-stepper button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.qty-stepper .qty-count {
+  min-width: 1.5rem;
+  text-align: center;
+  font-weight: 800;
+  font-size: 1rem;
+  color: #fffbeb;
+  font-variant-numeric: tabular-nums;
+}
+#tacoCartBar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9998;
+  background: rgba(20, 83, 45, 0.98);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  display: flex;
+  justify-content: center;
+}
+#tacoCartBar[hidden] { display: none; }
+#tacoCartBar .cart-bar-inner {
+  width: min(100%, 400px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+#tacoCartBar .cart-summary {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #ecfccb;
+  text-align: center;
+}
+#tacoCartBar .cart-checkout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 28px;
+  background: #ea580c;
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: 0.03em;
+  text-decoration: none;
+  border-radius: 999px;
+  border: 0;
+  cursor: pointer;
+  white-space: nowrap;
+}
+#tacoCartBar .cart-checkout[aria-disabled="true"] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+body.has-cart-bar { padding-bottom: 96px; }
+.checkout-line {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.92rem;
+}
+.checkout-line:last-child { border-bottom: 0; }
+.checkout-line .line-name { min-width: 0; }
+.checkout-line .line-price {
+  font-weight: 700;
+  color: #84cc16;
+  white-space: nowrap;
+}
+.checkout-line .qty-stepper {
+  margin-top: 0;
+  gap: 6px;
+}
+.checkout-line .qty-stepper button {
+  width: 34px;
+  height: 32px;
+  font-size: 1.1rem;
+}

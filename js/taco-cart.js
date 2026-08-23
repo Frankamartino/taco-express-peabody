@@ -17,10 +17,36 @@
     document.dispatchEvent(new CustomEvent('taco-cart-updated'));
   }
 
+  function getQty(itemId) {
+    var row = loadCart().find(function (r) { return r.id === itemId; });
+    return row ? row.qty : 0;
+  }
+
   function saveCart(cart) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
     renderCartBar();
+    updateAllSteppers();
     notifyCartUpdated();
+  }
+
+  function setQty(itemId, qty) {
+    if (!catalogById[itemId]) return;
+    var prev = getQty(itemId);
+    var cart = loadCart().filter(function (row) { return row.id !== itemId; });
+    var next = Math.max(0, Math.min(20, Number(qty) || 0));
+    if (next > 0) cart.push({ id: itemId, qty: next });
+    saveCart(cart);
+    if (next > prev) {
+      var bar = document.getElementById('tacoCartBar');
+      if (bar) {
+        bar.classList.add('cart-pulse');
+        window.setTimeout(function () { bar.classList.remove('cart-pulse'); }, 450);
+      }
+    }
+  }
+
+  function changeQty(itemId, delta) {
+    setQty(itemId, getQty(itemId) + delta);
   }
 
   function parsePrice(text) {
@@ -48,21 +74,6 @@
           item.title.toLowerCase() === wanted &&
           item.priceCents === priceCents;
       });
-  }
-
-  function addToCart(itemId) {
-    var item = catalogById[itemId];
-    if (!item) return;
-    var cart = loadCart();
-    var existing = cart.find(function (row) { return row.id === itemId; });
-    if (existing) existing.qty += 1;
-    else cart.push({ id: itemId, qty: 1 });
-    saveCart(cart);
-    var bar = document.getElementById('tacoCartBar');
-    if (bar) {
-      bar.classList.add('cart-pulse');
-      window.setTimeout(function () { bar.classList.remove('cart-pulse'); }, 500);
-    }
   }
 
   function cartTotals(cart) {
@@ -94,31 +105,72 @@
     if (checkoutBtn) {
       var disabled = totals.count === 0;
       checkoutBtn.setAttribute('aria-disabled', disabled ? 'true' : 'false');
-      checkoutBtn.style.pointerEvents = disabled ? 'none' : '';
-      checkoutBtn.style.opacity = disabled ? '0.5' : '';
+      checkoutBtn.textContent = disabled
+        ? 'Checkout'
+        : 'Checkout · ' + '$' + (totals.totalCents / 100).toFixed(2);
     }
     bar.hidden = totals.count === 0;
+    document.body.classList.toggle('has-cart-bar', totals.count > 0);
+  }
+
+  function createStepper(itemId, compact) {
+    var wrap = document.createElement('div');
+    wrap.className = 'qty-stepper';
+    wrap.setAttribute('data-item-id', itemId);
+    if (compact) wrap.classList.add('qty-stepper-compact');
+
+    var minus = document.createElement('button');
+    minus.type = 'button';
+    minus.className = 'qty-minus';
+    minus.setAttribute('aria-label', 'Remove one');
+    minus.textContent = '−';
+
+    var count = document.createElement('span');
+    count.className = 'qty-count';
+    count.setAttribute('aria-live', 'polite');
+    count.textContent = '0';
+
+    var plus = document.createElement('button');
+    plus.type = 'button';
+    plus.className = 'qty-plus';
+    plus.setAttribute('aria-label', 'Add one');
+    plus.textContent = '+';
+
+    minus.addEventListener('click', function () { changeQty(itemId, -1); });
+    plus.addEventListener('click', function () { changeQty(itemId, 1); });
+
+    wrap.appendChild(minus);
+    wrap.appendChild(count);
+    wrap.appendChild(plus);
+    return wrap;
+  }
+
+  function updateStepperEl(wrap) {
+    if (!wrap) return;
+    var itemId = wrap.getAttribute('data-item-id');
+    var qty = getQty(itemId);
+    var count = wrap.querySelector('.qty-count');
+    var minus = wrap.querySelector('.qty-minus');
+    if (count) count.textContent = String(qty);
+    if (minus) minus.disabled = qty <= 0;
+  }
+
+  function updateAllSteppers() {
+    document.querySelectorAll('.qty-stepper[data-item-id]').forEach(updateStepperEl);
   }
 
   function wireCards() {
     document.querySelectorAll('.card, .drink-card').forEach(function (card) {
-      if (card.querySelector('.add-btn')) return;
+      if (card.querySelector('.qty-stepper')) return;
       var title = cardTitle(card);
       var priceCents = parsePrice(card.querySelector('.price') && card.querySelector('.price').textContent);
       var item = findCatalogItem(sectionIdFor(card), title, priceCents);
       if (!item) return;
 
       card.setAttribute('data-menu-id', item.id);
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'add-btn';
-      btn.textContent = 'Add';
-      btn.addEventListener('click', function () {
-        addToCart(item.id);
-        btn.textContent = 'Added ✓';
-        window.setTimeout(function () { btn.textContent = 'Add'; }, 900);
-      });
-      card.appendChild(btn);
+      var stepper = createStepper(item.id, false);
+      card.appendChild(stepper);
+      updateStepperEl(stepper);
     });
   }
 
@@ -146,6 +198,10 @@
   window.TacoCart = {
     load: loadCart,
     save: saveCart,
+    getQty: getQty,
+    setQty: setQty,
+    changeQty: changeQty,
+    createStepper: createStepper,
     totals: function () { return cartTotals(loadCart()); },
     catalogById: function () { return catalogById; },
     isReady: function () { return catalogReady; },

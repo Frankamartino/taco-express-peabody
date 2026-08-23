@@ -7,6 +7,7 @@
   <link rel="canonical" href="https://www.tacoexpresspeabody.com/checkout" />
   <link rel="icon" href="images/taco-express-logo.jpg" type="image/jpeg" />
   <link rel="apple-touch-icon" href="images/taco-express-logo.jpg" />
+  <link rel="stylesheet" href="css/taco-cart.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
@@ -25,7 +26,6 @@
     .line { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.92rem; }
     .line:last-child { border-bottom: 0; }
     .line .name { flex: 1; }
-    .line .qty { color: rgba(255,251,235,0.65); min-width: 2.5rem; text-align: right; }
     .totals .line { border-bottom: 0; padding: 4px 0; }
     .totals .grand { font-weight: 800; font-size: 1.05rem; color: var(--lime); margin-top: 6px; }
     label { display: block; font-size: 0.82rem; font-weight: 700; margin: 12px 0 6px; }
@@ -82,6 +82,13 @@
 
       function money(cents) { return '$' + (cents / 100).toFixed(2); }
 
+      function syncStepper(stepper, qty) {
+        var count = stepper.querySelector('.qty-count');
+        var minus = stepper.querySelector('.qty-minus');
+        if (count) count.textContent = String(qty);
+        if (minus) minus.disabled = qty <= 0;
+      }
+
       function render() {
         var cart = window.TacoCart.load();
         var catalog = window.TacoCart.catalogById();
@@ -89,7 +96,7 @@
         linesEl.innerHTML = '';
 
         if (!cart.length) {
-          linesEl.innerHTML = '<p class="empty">Your cart is empty. <a href="/">Go back and tap Add</a> on anything you want.</p>';
+          linesEl.innerHTML = '<p class="empty">Your cart is empty. <a href="/">Go back and use + on anything you want.</a></p>';
           if (payPanel) payPanel.hidden = true;
           return;
         }
@@ -100,8 +107,22 @@
           if (!item) return;
           rendered += 1;
           var line = document.createElement('div');
-          line.className = 'line';
-          line.innerHTML = '<span class="name">' + item.name + '</span><span class="qty">x' + row.qty + '</span><span>' + money(item.priceCents * row.qty) + '</span>';
+          line.className = 'checkout-line';
+
+          var name = document.createElement('span');
+          name.className = 'line-name';
+          name.textContent = item.name;
+
+          var stepper = window.TacoCart.createStepper(row.id, true);
+          syncStepper(stepper, row.qty);
+
+          var price = document.createElement('span');
+          price.className = 'line-price';
+          price.textContent = money(item.priceCents * row.qty);
+
+          line.appendChild(name);
+          line.appendChild(stepper);
+          line.appendChild(price);
           linesEl.appendChild(line);
         });
 
@@ -162,6 +183,7 @@
       });
 
       document.addEventListener('taco-cart-ready', render);
+      document.addEventListener('taco-cart-updated', render);
       render();
     })();
   </script>
