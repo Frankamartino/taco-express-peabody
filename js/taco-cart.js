@@ -2,6 +2,7 @@
   var STORAGE_KEY = 'tacoExpressCartV1';
   var TAX_RATE = 0.07;
   var catalogById = {};
+  var catalogReady = false;
 
   function loadCart() {
     try {
@@ -12,9 +13,14 @@
     }
   }
 
+  function notifyCartUpdated() {
+    document.dispatchEvent(new CustomEvent('taco-cart-updated'));
+  }
+
   function saveCart(cart) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
     renderCartBar();
+    notifyCartUpdated();
   }
 
   function parsePrice(text) {
@@ -52,6 +58,11 @@
     if (existing) existing.qty += 1;
     else cart.push({ id: itemId, qty: 1 });
     saveCart(cart);
+    var bar = document.getElementById('tacoCartBar');
+    if (bar) {
+      bar.classList.add('cart-pulse');
+      window.setTimeout(function () { bar.classList.remove('cart-pulse'); }, 500);
+    }
   }
 
   function cartTotals(cart) {
@@ -81,15 +92,10 @@
     if (countEl) countEl.textContent = String(totals.count);
     if (totalEl) totalEl.textContent = '$' + (totals.totalCents / 100).toFixed(2);
     if (checkoutBtn) {
-      if (totals.count === 0) {
-        checkoutBtn.setAttribute('aria-disabled', 'true');
-        checkoutBtn.style.pointerEvents = 'none';
-        checkoutBtn.style.opacity = '0.5';
-      } else {
-        checkoutBtn.removeAttribute('aria-disabled');
-        checkoutBtn.style.pointerEvents = '';
-        checkoutBtn.style.opacity = '';
-      }
+      var disabled = totals.count === 0;
+      checkoutBtn.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+      checkoutBtn.style.pointerEvents = disabled ? 'none' : '';
+      checkoutBtn.style.opacity = disabled ? '0.5' : '';
     }
     bar.hidden = totals.count === 0;
   }
@@ -109,34 +115,40 @@
       btn.textContent = 'Add';
       btn.addEventListener('click', function () {
         addToCart(item.id);
-        btn.textContent = 'Added';
-        window.setTimeout(function () { btn.textContent = 'Add'; }, 700);
+        btn.textContent = 'Added ✓';
+        window.setTimeout(function () { btn.textContent = 'Add'; }, 900);
       });
       card.appendChild(btn);
     });
   }
 
-  function boot(catalog) {
-    catalog.items.forEach(function (item) {
+  function boot(items) {
+    items.forEach(function (item) {
       catalogById[item.id] = item;
     });
+    catalogReady = true;
     wireCards();
     renderCartBar();
     document.dispatchEvent(new CustomEvent('taco-cart-ready'));
   }
 
-  fetch('/api/menu-catalog')
-    .then(function (r) { return r.ok ? r.json() : null; })
-    .then(function (catalog) {
-      if (catalog && catalog.items) boot(catalog);
-    })
-    .catch(function () {});
+  if (window.TACO_MENU_ITEMS && window.TACO_MENU_ITEMS.length) {
+    boot(window.TACO_MENU_ITEMS);
+  } else {
+    fetch('/api/menu-catalog')
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (catalog) {
+        if (catalog && catalog.items) boot(catalog.items);
+      })
+      .catch(function () {});
+  }
 
   window.TacoCart = {
     load: loadCart,
     save: saveCart,
     totals: function () { return cartTotals(loadCart()); },
     catalogById: function () { return catalogById; },
+    isReady: function () { return catalogReady; },
     clear: function () {
       saveCart([]);
     },
