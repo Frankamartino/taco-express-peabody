@@ -6,13 +6,17 @@ This is the Taco Express Peabody site only — own repo, own Vercel project, own
 - **Domain:** https://www.tacoexpresspeabody.com
 - **Phone:** (978) 982-1800
 - **Address:** 58 Pulaski St, Peabody, MA 01960
-- **Ordering:** DoorDash (delivery & pickup) + Diego voice (`/voice`) + phone
+- **Ordering:** Tap **Add** on the menu → **Checkout** (Stripe card) · DoorDash · Diego voice (`/voice`) · phone
 
 ## Online ordering
 
-The website is a **menu board** — items are not clickable for checkout. Customers pay through **DoorDash**.
+The website is a **menu board** with **Add** buttons. Customers can:
 
-1. Complete [DoorDash Merchant](https://get.doordash.com/) onboarding for 58 Pulaski St.
+1. **Order here (Stripe)** — tap Add on items → `/checkout` → pay by card (pickup at 58 Pulaski St).
+2. **DoorDash** — delivery & pickup via the DoorDash buttons.
+3. **Diego voice** — `/voice` with cash or saved card.
+
+For DoorDash Merchant setup:
 2. Copy your store URL from the DoorDash Merchant Portal.
 3. Paste it into `order-config.json` as `orderOnlineUrl` (or `doordashUrl`) and push — all **DoorDash** buttons update automatically.
 
@@ -45,7 +49,8 @@ Same domain / repo: **menu + photos** (`/`) and **Diego voice** (`/voice`, `/voi
 
 | Surface | Job | Billing |
 |--------|-----|---------|
-| **`/`** | Menu board, photos, DoorDash | DoorDash |
+| **`/`** | Menu board, photos, **Add** + checkout | Stripe Checkout |
+| **`/checkout`** | Review cart + pay by card | Stripe Checkout |
 | **`/voice`** | Talk to Diego, ticket, cash or saved card | Stripe on **this** Vercel project |
 
 Header / Order section / footer on the photo site link to `/voice`.

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Taco Express Peabody — Order received</title>
+  <link rel="icon" href="images/taco-express-logo.jpg" type="image/jpeg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --lime: #84cc16; --ink: #1c1917; --cream: #fffbeb; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      font-family: "DM Sans", system-ui, sans-serif;
+      background: var(--ink);
+      color: var(--cream);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 18px;
+      text-align: center;
+    }
+    .card {
+      max-width: 420px;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 16px;
+      padding: 28px 22px;
+      background: rgba(255,255,255,.04);
+    }
+    img {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #fff;
+      margin-bottom: 14px;
+    }
+    h1 {
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 2.4rem;
+      color: var(--lime);
+      letter-spacing: 0.05em;
+      line-height: 1;
+    }
+    p { margin-top: 12px; line-height: 1.5; opacity: 0.9; }
+    a {
+      display: inline-block;
+      margin-top: 18px;
+      color: var(--lime);
+      font-weight: 700;
+      text-decoration: none;
+    }
+    #status { margin-top: 10px; font-weight: 700; }
+    #status.err { color: #fca5a5; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <img src="images/taco-express-logo.jpg" width="96" height="96" alt="Taco Express Peabody" />
+    <h1 id="headline">Thank you!</h1>
+    <p id="body">Checking your payment…</p>
+    <p id="status"></p>
+    <a href="/">Back to menu</a>
+  </div>
+  <script src="/js/taco-cart.js"></script>
+  <script>
+    (function () {
+      var sessionId = new URLSearchParams(window.location.search).get('session_id');
+      var headline = document.getElementById('headline');
+      var body = document.getElementById('body');
+      var status = document.getElementById('status');
+
+      if (!sessionId) {
+        headline.textContent = 'Missing session';
+        body.textContent = 'No payment session was returned.';
+        status.className = 'err';
+        return;
+      }
+
+      fetch('/api/checkout-status?session_id=' + encodeURIComponent(sessionId))
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (!data.ok || !data.paid) {
+            headline.textContent = 'Payment not complete';
+            body.textContent = 'Stripe did not mark this order as paid yet.';
+            status.textContent = data.error || ('Status: ' + (data.paymentStatus || 'unknown'));
+            status.className = 'err';
+            return;
+          }
+          headline.textContent = 'Order paid!';
+          body.textContent =
+            'Your card was charged. Pickup at 58 Pulaski St, Peabody. Stripe emailed your receipt.';
+          if (data.orderId) status.textContent = 'Order ' + data.orderId;
+          if (window.TacoCart) window.TacoCart.clear();
+        })
+        .catch(function () {
+          headline.textContent = 'Could not verify payment';
+          body.textContent = 'If Stripe charged your card, call (978) 982-1800 and we will confirm.';
+          status.className = 'err';
+        });
+    })();
+  </script>
+</body>
+</html>
