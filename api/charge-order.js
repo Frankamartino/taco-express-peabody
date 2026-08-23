@@ -39,6 +39,8 @@ async function stripeForm(secret, path, params) {
   return { ok: r.ok, status: r.status, data };
 }
 
+const { isStoreClosed, closedPayload } = require('./storeStatus');
+
 async function stripeGet(secret, path) {
   const r = await fetch('https://api.stripe.com/v1/' + path, {
     method: 'GET',
@@ -55,6 +57,9 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+  if (isStoreClosed()) {
+    return res.status(503).json(closedPayload());
   }
 
   const secret = clean(process.env.STRIPE_SECRET_KEY);

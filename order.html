@@ -14,6 +14,7 @@
     body { font-family: "DM Sans", system-ui, sans-serif; background: var(--ink); color: var(--cream); line-height: 1.55; }
     .top-bar { background: #14532d; color: #bbf7d0; text-align: center; padding: 8px 14px; font-size: 0.78rem; font-weight: 600; }
     .top-bar a { color: #fff; text-decoration: none; font-weight: 700; }
+    .top-bar.is-closed { background: #7f1d1d; color: #fecaca; }
     .wrap { max-width: 560px; margin: 0 auto; padding: 28px 18px 48px; }
     .brand { text-align: center; margin-bottom: 24px; }
     .brand img { width: 88px; height: 88px; border-radius: 50%; object-fit: cover; background: #fff; margin-bottom: 10px; }
@@ -37,12 +38,13 @@
   </style>
 </head>
 <body>
-  <div class="top-bar">58 Pulaski St · Peabody MA 01960 · <a href="tel:+19789821800">(978) 982-1800</a></div>
+  <div class="top-bar is-closed">Closed early today. We'll be back at our regular hours. · <a href="tel:+19789821800">(978) 982-1800</a></div>
   <div class="wrap">
     <div class="brand">
       <img src="images/taco-express-logo.jpg" width="88" height="88" alt="Taco Express Peabody" />
       <h1>How to order</h1>
       <p class="intro">Same kitchen — pick the way that works for you.</p>
+      <p id="closedTodayNote" style="margin-top:12px;color:#fecaca;font-weight:700;">Closed early today — not taking orders.</p>
       <a class="back" href="/">← Back to menu</a>
     </div>
 
@@ -79,6 +81,7 @@
       </div>
     </div>
   </div>
+  <script src="/js/store-status.js"></script>
   <script>
     fetch('order-config.json')
       .then(function (r) { return r.ok ? r.json() : null; })

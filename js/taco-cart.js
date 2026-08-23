@@ -29,7 +29,14 @@
     notifyCartUpdated();
   }
 
+  function storeClosed() {
+    return window.TacoStore && typeof window.TacoStore.isClosed === 'function'
+      ? window.TacoStore.isClosed()
+      : true;
+  }
+
   function setQty(itemId, qty) {
+    if (storeClosed()) return;
     if (!catalogById[itemId]) return;
     var prev = getQty(itemId);
     var cart = loadCart().filter(function (row) { return row.id !== itemId; });
@@ -95,6 +102,11 @@
   function renderCartBar() {
     var bar = document.getElementById('tacoCartBar');
     if (!bar) return;
+    if (storeClosed()) {
+      bar.hidden = true;
+      document.body.classList.remove('has-cart-bar');
+      return;
+    }
     var cart = loadCart();
     var totals = cartTotals(cart);
     var countEl = bar.querySelector('[data-cart-count]');
@@ -171,6 +183,11 @@
   }
 
   function wireCards() {
+    if (storeClosed()) {
+      document.querySelectorAll('.qty-stepper').forEach(function (el) { el.remove(); });
+      renderCartBar();
+      return;
+    }
     wireOrderRows();
     document.querySelectorAll('.card, .drink-card').forEach(function (card) {
       if (card.querySelector('.qty-stepper')) return;
@@ -196,6 +213,17 @@
     renderCartBar();
     document.dispatchEvent(new CustomEvent('taco-cart-ready'));
   }
+
+  document.addEventListener('taco-store-status', function () {
+    if (!catalogReady) return;
+    if (storeClosed()) {
+      document.querySelectorAll('.qty-stepper').forEach(function (el) { el.remove(); });
+      renderCartBar();
+    } else {
+      wireCards();
+      renderCartBar();
+    }
+  });
 
   if (window.TACO_MENU_ITEMS && window.TACO_MENU_ITEMS.length) {
     boot(window.TACO_MENU_ITEMS);

@@ -40,6 +40,7 @@
       font-weight: 600;
     }
     .top-bar a { color: #fff; text-decoration: none; font-weight: 700; }
+    .top-bar.is-closed { background: #7f1d1d; color: #fecaca; }
     header {
       position: sticky;
       top: 0;
@@ -489,8 +490,8 @@
   </style>
 </head>
 <body>
-  <div class="top-bar">
-    58 Pulaski St · Peabody MA 01960 · <a href="tel:+19789821800">(978) 982-1800</a>
+  <div class="top-bar is-closed">
+    Closed early today. We'll be back at our regular hours. · <a href="tel:+19789821800">(978) 982-1800</a>
   </div>
 
   <header>
@@ -1000,6 +1001,7 @@
         <tr><td>Wed – Sat</td><td>11 AM – 8 PM</td></tr>
         <tr><td>Sunday</td><td>11 AM – 6 PM</td></tr>
       </table>
+      <p id="closedTodayNote" style="margin-top:14px;color:#fecaca;font-weight:700;">Closed early today — not taking orders.</p>
       <p style="margin-top:20px;font-size:0.95rem;">
         <strong>58 Pulaski Street</strong><br>
         Peabody, Massachusetts 01960<br>
@@ -1025,6 +1027,7 @@
     </div>
   </div>
 
+  <script src="/js/store-status.js"></script>
   <script src="/js/menu-catalog-data.js"></script>
   <script src="/js/taco-cart.js"></script>
 </body>

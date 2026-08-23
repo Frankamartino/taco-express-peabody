@@ -41,6 +41,7 @@
       margin: 0 -20px 0;
     }
     .top-bar a { color: #fff; text-decoration: none; font-weight: 700; }
+    .top-bar.is-closed { background: #7f1d1d; color: #fecaca; }
     .top {
       padding-top: 28px;
     }
@@ -368,8 +369,8 @@
   </style>
 </head>
 <body>
-  <div class="top-bar">
-    58 Pulaski St · Peabody MA 01960 · <a href="tel:+19789821800">(978) 982-1800</a>
+  <div class="top-bar is-closed">
+    Closed early today. We'll be back at our regular hours. · <a href="tel:+19789821800">(978) 982-1800</a>
   </div>
   <div class="top">
     <img class="voice-logo" src="images/taco-express-logo.jpg" width="96" height="96" alt="Taco Express Peabody" />
@@ -387,6 +388,7 @@
 
   <div class="bottom">
     <button type="button" id="orderNowBtn">Talk to Diego</button>
+    <p id="closedVoiceNote" style="color:#fecaca;font-weight:700;margin-top:10px;">Closed early today — Diego is not taking orders.</p>
     <p id="status" aria-live="polite"></p>
     <p class="card-trust">
       <a href="/voice-signup" id="signupLink">First-time customers: sign up for hands-free ordering</a>
@@ -406,11 +408,13 @@
 
   <audio id="remoteAudio" autoplay playsinline></audio>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="/js/store-status.js"></script>
 
   <script>
     (function () {
       var btn = document.getElementById('orderNowBtn');
       var statusEl = document.getElementById('status');
+      var closedVoiceNote = document.getElementById('closedVoiceNote');
       var ticketEl = document.getElementById('ticket');
       var signupOverlay = document.getElementById('signupOverlay');
       var signupFrame = document.getElementById('signupFrame');
@@ -1523,7 +1527,31 @@
         }, 4000);
       }
 
+      function storeClosed() {
+        return window.TacoStore && window.TacoStore.isClosed();
+      }
+
+      function applyClosedVoice() {
+        var closed = storeClosed();
+        if (closedVoiceNote) closedVoiceNote.hidden = !closed;
+        if (closed && !callInProgress()) {
+          btn.disabled = true;
+          btn.textContent = 'Closed early today';
+          setStatus("Closed early today. We'll be back at our regular hours.");
+        } else if (!closed && !callInProgress()) {
+          btn.disabled = false;
+          btn.textContent = 'Talk to Diego';
+        }
+      }
+
+      document.addEventListener('taco-store-status', applyClosedVoice);
+      applyClosedVoice();
+
       async function startDiego() {
+        if (storeClosed()) {
+          applyClosedVoice();
+          return;
+        }
         if (callInProgress()) {
           hangUp();
           return;
@@ -1700,6 +1728,10 @@
       }
 
       btn.addEventListener('click', function () {
+        if (storeClosed()) {
+          applyClosedVoice();
+          return;
+        }
         if (callInProgress()) {
           hangUp();
           return;

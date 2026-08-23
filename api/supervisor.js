@@ -4,6 +4,7 @@
  * Same DoorDash menu as api/tacoMenu.js (this repo only).
  */
 const { FULL_MENU } = require('./tacoMenu');
+const { isStoreClosed, closedPayload } = require('./storeStatus');
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -12,6 +13,9 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+  if (isStoreClosed()) {
+    return res.status(503).json(closedPayload());
   }
 
   const OPENAI_API_KEY = process.env.OPENAI_API_KEY?.trim();

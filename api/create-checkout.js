@@ -1,4 +1,5 @@
 const { buildLinesFromCart, computeTotals, resolveTipCents } = require('./menuCatalog');
+const { isStoreClosed, closedPayload } = require('./storeStatus');
 
 function clean(v) {
   return String(v || '')
@@ -34,6 +35,9 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+  if (isStoreClosed()) {
+    return res.status(503).json(closedPayload());
   }
 
   const secret = clean(process.env.STRIPE_SECRET_KEY);
