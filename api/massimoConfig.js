@@ -7,31 +7,27 @@ module.exports = {
   SHOP_SHORT: 'Taco Express',
 
   /**
-   * First spoken line — ENGLISH lead-in, then hi/hola + Spanish-or-English offer.
-   * Fixed. Do not invent a different welcome.
+   * Fixed opener — English offer, then the word OR (English only), then Spanish offer.
+   * Customer picks their language. Do not invent a different welcome.
    */
   GREETING_EXACT:
-    'Hey, I can take your order. My name is Diego. Hi — hola. I can speak Spanish. Hola — I can take your order in Spanish or English. May I have your full name?',
+    'Hi, my name is Diego. I can take your order in English? OR Hola, me llamo Diego. Puedo tomar tu pedido en español.',
+
+  /** After they pick English. */
+  AFTER_PICK_ENGLISH:
+    'Great — English. May I have your full name?',
+
+  /** After they pick Spanish — rest of call stays Spanish. */
+  AFTER_PICK_SPANISH:
+    'Perfecto. Seguimos en español. ¿Me das tu nombre completo?',
 
   /** Saved Spanish — short. */
   I_SPEAK_SPANISH_ES: 'Puedo hablar español.',
 
-  /** Full Spanish greeting if they already chose Spanish / speak Spanish first. */
   GREETING_ES:
-    'Hola. Puedo tomar tu pedido. Me llamo Diego. Puedo hablar español o inglés. ¿Me das tu nombre completo?',
+    'Hola, me llamo Diego. Puedo tomar tu pedido en español.',
 
-  /** After they pick Spanish — confirm once, then stay in Spanish. */
-  SWITCH_TO_SPANISH_EN:
-    'Perfecto — Spanish it is.',
-  SWITCH_TO_SPANISH_ES:
-    'Perfecto. Seguimos en español. ¿Me das tu nombre completo?',
-
-  /** After they pick English — stay English. */
-  SWITCH_TO_ENGLISH_EN:
-    'Got it — English. May I have your full name?',
-
-  /** Short English reminder. */
-  SPEAK_BOTH_EN: 'I can speak Spanish or English.',
+  SPEAK_BOTH_EN: 'I can take your order in English or Spanish.',
 
   /** If they call him Massimo — one beat, then back to the taco order. */
   MASSIMO_HANDOFF:
