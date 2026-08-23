@@ -28,10 +28,14 @@ Adapt for chicken / pork / shrimp protein. Cheese: Mexican blend inside & on top
 
 Ring DoorDash titles (exact) — show order: tacos, burritos, enchiladas, quesadillas. Proteins always Beef, Chicken, Pork, Shrimp:
 TACOS (three alone): Three Tacos · Shredded Beef $13.49 | Three Tacos · Shredded Chicken $13.49 | Three Tacos · Shredded Pork $13.49 | Three Tacos · Grilled Shrimp $21.99
-TACO DINNER (Add two sides = rice & beans, +$7): Taco Plate · Beef $20.49 | Taco Plate · Chicken $20.49 | Taco Plate · Pork $20.49 | Taco Plate · Shrimp $28.99 — use when they say dinner, plate, or with rice and beans.
-BURRITOS: Burrito · Shredded Beef $13.49 | Burrito · Shredded Chicken $13.49 | Burrito · Pork $13.49 | Burrito · Grilled Shrimp $21.99
-ENCHILADAS (two): Two Enchiladas · Shredded Beef $13.99 | Two Enchiladas · Shredded Chicken $13.99 | Two Enchiladas · Pork $13.99 | Two Enchiladas · Grilled Shrimp $21.99
-QUESADILLAS: Loaded Quesadillas Beef $13.99 | Loaded Quesadillas Chicken $13.99 | Loaded Quesadillas Pork $13.99 | Loaded Quesadillas Shrimp $21.99
+TACO DINNER (Add two sides = rice & beans, +$7): Taco Plate · Beef $20.49 | Taco Plate · Chicken $20.49 | Taco Plate · Pork $20.49 | Taco Plate · Shrimp $28.99
+BURRITOS (alone): Burrito · Shredded Beef $13.49 | Burrito · Shredded Chicken $13.49 | Burrito · Pork $13.49 | Burrito · Grilled Shrimp $21.99
+BURRITO DINNER (+$7 rice & beans): Burrito Plate · Beef $20.49 | Chicken $20.49 | Pork $20.49 | Shrimp $28.99
+ENCHILADAS (two alone): Two Enchiladas · Shredded Beef $13.99 | Two Enchiladas · Shredded Chicken $13.99 | Two Enchiladas · Pork $13.99 | Two Enchiladas · Grilled Shrimp $21.99
+ENCHILADA DINNER (+$7 rice & beans): Enchilada Plate · Beef $20.99 | Chicken $20.99 | Pork $20.99 | Shrimp $28.99
+QUESADILLAS (alone): Loaded Quesadillas Beef $13.99 | Loaded Quesadillas Chicken $13.99 | Loaded Quesadillas Pork $13.99 | Loaded Quesadillas Shrimp $21.99
+QUESADILLA DINNER (+$7 rice & beans): Quesadilla Plate · Beef $20.99 | Chicken $20.99 | Pork $20.99 | Shrimp $28.99
+When they say dinner, plate, or with rice and beans on any of the above, use the matching DINNER / Plate item.
 
 SIDES: Seasoned Brown Rice $3.49 · Black Beans $3.49 · Refried Beans $3.49 · Salsa $1.50 · Pico de Gallo $4 · Tortilla Chips $2.50 · Guacamole $3
 

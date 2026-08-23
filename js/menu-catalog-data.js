@@ -84,6 +84,34 @@ window.TACO_MENU_ITEMS = [
     "priceCents": 2199
   },
   {
+    "id": "burrito-beef-plate",
+    "section": "burritos",
+    "title": "Beef Dinner",
+    "name": "Burrito Plate · Beef (burrito + rice & beans)",
+    "priceCents": 2049
+  },
+  {
+    "id": "burrito-chicken-plate",
+    "section": "burritos",
+    "title": "Chicken Dinner",
+    "name": "Burrito Plate · Chicken (burrito + rice & beans)",
+    "priceCents": 2049
+  },
+  {
+    "id": "burrito-pork-plate",
+    "section": "burritos",
+    "title": "Pork Dinner",
+    "name": "Burrito Plate · Pork (burrito + rice & beans)",
+    "priceCents": 2049
+  },
+  {
+    "id": "burrito-shrimp-plate",
+    "section": "burritos",
+    "title": "Shrimp Dinner",
+    "name": "Burrito Plate · Shrimp (burrito + rice & beans)",
+    "priceCents": 2899
+  },
+  {
     "id": "enchilada-beef",
     "section": "enchiladas",
     "title": "Beef",
@@ -112,6 +140,34 @@ window.TACO_MENU_ITEMS = [
     "priceCents": 2199
   },
   {
+    "id": "enchilada-beef-plate",
+    "section": "enchiladas",
+    "title": "Beef Dinner",
+    "name": "Enchilada Plate · Beef (2 enchiladas + rice & beans)",
+    "priceCents": 2099
+  },
+  {
+    "id": "enchilada-chicken-plate",
+    "section": "enchiladas",
+    "title": "Chicken Dinner",
+    "name": "Enchilada Plate · Chicken (2 enchiladas + rice & beans)",
+    "priceCents": 2099
+  },
+  {
+    "id": "enchilada-pork-plate",
+    "section": "enchiladas",
+    "title": "Pork Dinner",
+    "name": "Enchilada Plate · Pork (2 enchiladas + rice & beans)",
+    "priceCents": 2099
+  },
+  {
+    "id": "enchilada-shrimp-plate",
+    "section": "enchiladas",
+    "title": "Shrimp Dinner",
+    "name": "Enchilada Plate · Shrimp (2 enchiladas + rice & beans)",
+    "priceCents": 2899
+  },
+  {
     "id": "quesadilla-beef",
     "section": "quesadillas",
     "title": "Beef",
@@ -138,6 +194,34 @@ window.TACO_MENU_ITEMS = [
     "title": "Shrimp",
     "name": "Loaded Quesadillas Shrimp",
     "priceCents": 2199
+  },
+  {
+    "id": "quesadilla-beef-plate",
+    "section": "quesadillas",
+    "title": "Beef Dinner",
+    "name": "Quesadilla Plate · Beef (quesadilla + rice & beans)",
+    "priceCents": 2099
+  },
+  {
+    "id": "quesadilla-chicken-plate",
+    "section": "quesadillas",
+    "title": "Chicken Dinner",
+    "name": "Quesadilla Plate · Chicken (quesadilla + rice & beans)",
+    "priceCents": 2099
+  },
+  {
+    "id": "quesadilla-pork-plate",
+    "section": "quesadillas",
+    "title": "Pork Dinner",
+    "name": "Quesadilla Plate · Pork (quesadilla + rice & beans)",
+    "priceCents": 2099
+  },
+  {
+    "id": "quesadilla-shrimp-plate",
+    "section": "quesadillas",
+    "title": "Shrimp Dinner",
+    "name": "Quesadilla Plate · Shrimp (quesadilla + rice & beans)",
+    "priceCents": 2899
   },
   {
     "id": "side-rice",
