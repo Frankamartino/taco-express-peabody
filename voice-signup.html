@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Taco Express Voice — Save card for voice pay</title>
   <meta name="robots" content="noindex, nofollow" />
-  <meta name="description" content="One-time form to save a live card for Taco Express Peabody Voice hands-free pay." />
+  <meta name="description" content="One-time form to save a live card for Taco Express Peabody Voice hands-free pay with Diego." />
+  <link rel="icon" href="images/taco-express-logo.jpg" type="image/jpeg" />
+  <link rel="apple-touch-icon" href="images/taco-express-logo.jpg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
   <script src="https://js.stripe.com/v3/"></script>
@@ -22,10 +24,34 @@
       font-family: "DM Sans", system-ui, sans-serif;
       background: var(--charcoal);
       color: var(--white);
-      padding: 36px 20px 56px;
+      padding: 0 20px 56px;
       display: flex;
       flex-direction: column;
       align-items: center;
+    }
+    .top-bar {
+      background: #14532d;
+      color: #bbf7d0;
+      text-align: center;
+      padding: 8px 14px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      width: calc(100% + 40px);
+      margin: 0 -20px;
+    }
+    .top-bar a { color: #fff; text-decoration: none; font-weight: 700; }
+    .signup-brand {
+      margin-top: 28px;
+      text-align: center;
+    }
+    .signup-logo {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      margin: 0 auto 12px;
+      background: #fff;
     }
     h1 {
       font-family: "Bebas Neue", sans-serif;
@@ -141,10 +167,16 @@
   </style>
 </head>
 <body>
-  <h1>Save card for voice pay</h1>
+  <div class="top-bar">
+    58 Pulaski St · Peabody MA 01960 · <a href="tel:+19789821800">(978) 982-1800</a>
+  </div>
+  <div class="signup-brand">
+    <img class="signup-logo" src="images/taco-express-logo.jpg" width="96" height="96" alt="Taco Express Peabody" />
+    <h1>Taco Express Peabody</h1>
+  </div>
   <p class="sub" id="subLine">
-    One-time form for <strong>Taco Express Peabody Voice</strong>.
-    After your card is saved, you order by talking to Diego — no tapping to pay.
+  <strong>Save card for voice pay with Diego.</strong>
+    After your card is saved, go to <a href="/voice" style="color:var(--lime);font-weight:700;">Talk to Diego</a> — no tapping to pay.
   </p>
 
   <p id="msg" aria-live="polite"></p>

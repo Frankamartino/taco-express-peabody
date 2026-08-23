@@ -28,7 +28,21 @@
       color: var(--white);
       display: flex;
       flex-direction: column;
-      padding: 28px 20px 40px;
+      padding: 0 20px 40px;
+    }
+    .top-bar {
+      background: #14532d;
+      color: #bbf7d0;
+      text-align: center;
+      padding: 8px 14px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      width: calc(100% + 40px);
+      margin: 0 -20px 0;
+    }
+    .top-bar a { color: #fff; text-decoration: none; font-weight: 700; }
+    .top {
+      padding-top: 28px;
     }
     .top { text-align: center; flex-shrink: 0; }
     .voice-logo {
@@ -354,6 +368,9 @@
   </style>
 </head>
 <body>
+  <div class="top-bar">
+    58 Pulaski St · Peabody MA 01960 · <a href="tel:+19789821800">(978) 982-1800</a>
+  </div>
   <div class="top">
     <img class="voice-logo" src="images/taco-express-logo.jpg" width="96" height="96" alt="Taco Express Peabody" />
     <h1>Taco Express Peabody</h1>
