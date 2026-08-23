@@ -9,6 +9,15 @@ module.exports = {
   GREETING_EXACT:
     'Welcome to Taco Express. My name is Diego. May I have your full name?',
 
+  /**
+   * When they say hello / hi / hey — English first, then optional short Spanish.
+   * Mexican Spanish (español mexicano) — same language family as Spain Spanish, different flavor.
+   */
+  HELLO_SPANISH_OFFER_EN:
+    "I hear ya, amigo. I can speak Spanish too — English or Spanish, whatever you like.",
+  HELLO_SPANISH_OFFER_ES:
+    'Puedo hablar español.',
+
   /** If they call him Massimo — one beat, then back to the taco order. */
   MASSIMO_HANDOFF:
     "I'm Diego — Massimo's at the pasta bar next door.",
