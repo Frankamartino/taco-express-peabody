@@ -159,9 +159,22 @@
     document.querySelectorAll('.qty-stepper[data-item-id]').forEach(updateStepperEl);
   }
 
+  function wireOrderRows() {
+    document.querySelectorAll('.order-row[data-item-id]').forEach(function (row) {
+      if (row.querySelector('.qty-stepper')) return;
+      var itemId = row.getAttribute('data-item-id');
+      if (!catalogById[itemId]) return;
+      var stepper = createStepper(itemId, true);
+      row.appendChild(stepper);
+      updateStepperEl(stepper);
+    });
+  }
+
   function wireCards() {
+    wireOrderRows();
     document.querySelectorAll('.card, .drink-card').forEach(function (card) {
       if (card.querySelector('.qty-stepper')) return;
+      if (card.querySelector('.order-row')) return;
       var title = cardTitle(card);
       var priceCents = parsePrice(card.querySelector('.price') && card.querySelector('.price').textContent);
       var item = findCatalogItem(sectionIdFor(card), title, priceCents);

@@ -30,9 +30,30 @@ window.TACO_MENU_ITEMS = [
   {
     "id": "tacos-beef-plate",
     "section": "tacos",
-    "title": "Beef Dinner Plate",
+    "title": "Beef Dinner",
     "name": "Taco Plate · Beef (3 tacos + rice & beans)",
     "priceCents": 2049
+  },
+  {
+    "id": "tacos-chicken-plate",
+    "section": "tacos",
+    "title": "Chicken Dinner",
+    "name": "Taco Plate · Chicken (3 tacos + rice & beans)",
+    "priceCents": 2049
+  },
+  {
+    "id": "tacos-pork-plate",
+    "section": "tacos",
+    "title": "Pork Dinner",
+    "name": "Taco Plate · Pork (3 tacos + rice & beans)",
+    "priceCents": 2049
+  },
+  {
+    "id": "tacos-shrimp-plate",
+    "section": "tacos",
+    "title": "Shrimp Dinner",
+    "name": "Taco Plate · Shrimp (3 tacos + rice & beans)",
+    "priceCents": 2899
   },
   {
     "id": "burrito-beef",

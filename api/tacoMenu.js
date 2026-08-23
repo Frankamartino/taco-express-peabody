@@ -27,8 +27,8 @@ ENCHILADA PITCH (first-time guests / when they ask how enchiladas are made — w
 Adapt for chicken / pork / shrimp protein. Cheese: Mexican blend inside & on top for now — creamy and full-flavored. Do NOT offer cheese choices online or by voice (keeps ordering simple). Frank is looking for queso Oaxaca for an even creamier inside melt — if asked about cheese: Mexican blend, melts rich; no menu of cheese options.
 
 Ring DoorDash titles (exact) — show order: tacos, burritos, enchiladas, quesadillas. Proteins always Beef, Chicken, Pork, Shrimp:
-TACOS (three): Three Tacos · Shredded Beef $13.49 | Three Tacos · Shredded Chicken $13.49 | Three Tacos · Shredded Pork $13.49 | Three Tacos · Grilled Shrimp $21.99
-TACO DINNER PLATE (beef only for now): Taco Plate · Beef (3 tacos + rice & beans) $20.49 — when they say "taco plate", "dinner", or "with rice and beans", use this (not the $13.49 three-tacos alone).
+TACOS (three alone): Three Tacos · Shredded Beef $13.49 | Three Tacos · Shredded Chicken $13.49 | Three Tacos · Shredded Pork $13.49 | Three Tacos · Grilled Shrimp $21.99
+TACO DINNER (Add two sides = rice & beans, +$7): Taco Plate · Beef $20.49 | Taco Plate · Chicken $20.49 | Taco Plate · Pork $20.49 | Taco Plate · Shrimp $28.99 — use when they say dinner, plate, or with rice and beans.
 BURRITOS: Burrito · Shredded Beef $13.49 | Burrito · Shredded Chicken $13.49 | Burrito · Pork $13.49 | Burrito · Grilled Shrimp $21.99
 ENCHILADAS (two): Two Enchiladas · Shredded Beef $13.99 | Two Enchiladas · Shredded Chicken $13.99 | Two Enchiladas · Pork $13.99 | Two Enchiladas · Grilled Shrimp $21.99
 QUESADILLAS: Loaded Quesadillas Beef $13.99 | Loaded Quesadillas Chicken $13.99 | Loaded Quesadillas Pork $13.99 | Loaded Quesadillas Shrimp $21.99

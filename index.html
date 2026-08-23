@@ -312,6 +312,46 @@
     .card .meta { font-size: 0.75rem; color: var(--lime); font-weight: 600; }
     .price { font-weight: 700; color: var(--lime); font-size: 1.05rem; }
     .price-dash { color: var(--muted); }
+    .order-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+    .order-row:first-of-type { border-top: 0; padding-top: 2px; }
+    .order-row-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+      flex: 1;
+    }
+    .order-row-label {
+      font-size: 0.82rem;
+      font-weight: 650;
+      color: var(--cream);
+    }
+    .order-row-note {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+    .order-row .price { font-size: 0.95rem; }
+    .order-row .qty-stepper {
+      margin-top: 0;
+      width: auto;
+      flex-shrink: 0;
+      gap: 6px;
+      justify-content: flex-end;
+    }
+    .order-row .qty-stepper button {
+      width: 34px;
+      height: 30px;
+      font-size: 1.1rem;
+      border-radius: 8px;
+    }
+    .order-row .qty-stepper .qty-count { font-size: 0.92rem; min-width: 1.25rem; }
     #tacoCartBar.cart-pulse .cart-bar-inner {
       animation: cartPulse 0.45s ease;
     }
@@ -496,42 +536,80 @@
     <section id="tacos">
       <p class="section-label">Tacos</p>
       <h2>Three tacos</h2>
-      <p class="section-intro">Three tacos per order — same protein on every taco. Mild or spicy.</p>
+      <p class="section-intro">Three tacos per order — same protein on every taco. Mild or spicy. Want dinner? Add two sides (rice &amp; beans) for +$7.00 on the same card.</p>
       <p class="section-intro"><strong>How we cook it:</strong> Beef, chicken &amp; pork are <strong>braised / shredded — never ground</strong>. Beef is slow-cooked with carrots, celery &amp; taco seasoning, cooled, shredded, then back in the pot until fork-tender. Shrimp is seasoned and grilled to perfection.</p>
       <div class="grid-2">
         <div class="card">
           <div class="card-media"><img src="images/menu/tacos-beef.jpg" alt="Three Tacos · Beef" /></div>
           <h3>Beef</h3>
           <p class="meta">Braised / shredded</p>
-          <p class="price">$13.49</p>
+          <div class="order-row" data-item-id="tacos-beef">
+            <div class="order-row-copy">
+              <span class="order-row-label">Three tacos</span>
+              <span class="price">$13.49</span>
+            </div>
+          </div>
+          <div class="order-row" data-item-id="tacos-beef-plate">
+            <div class="order-row-copy">
+              <span class="order-row-label">Add two sides</span>
+              <span class="order-row-note">Rice &amp; beans · dinner plate</span>
+              <span class="price">+$7.00</span>
+            </div>
+          </div>
         </div>
         <div class="card">
           <div class="card-media"><img src="images/menu/tacos-chicken.jpg" alt="Three Tacos · Chicken" /></div>
           <h3>Chicken</h3>
           <p class="meta">Braised / shredded</p>
-          <p class="price">$13.49</p>
+          <div class="order-row" data-item-id="tacos-chicken">
+            <div class="order-row-copy">
+              <span class="order-row-label">Three tacos</span>
+              <span class="price">$13.49</span>
+            </div>
+          </div>
+          <div class="order-row" data-item-id="tacos-chicken-plate">
+            <div class="order-row-copy">
+              <span class="order-row-label">Add two sides</span>
+              <span class="order-row-note">Rice &amp; beans · dinner plate</span>
+              <span class="price">+$7.00</span>
+            </div>
+          </div>
         </div>
         <div class="card">
           <div class="card-media"><img src="images/menu/tacos-pork.jpg" alt="Three Tacos · Pork" /></div>
           <h3>Pork</h3>
           <p class="meta">Braised / shredded</p>
-          <p class="price">$13.49</p>
+          <div class="order-row" data-item-id="tacos-pork">
+            <div class="order-row-copy">
+              <span class="order-row-label">Three tacos</span>
+              <span class="price">$13.49</span>
+            </div>
+          </div>
+          <div class="order-row" data-item-id="tacos-pork-plate">
+            <div class="order-row-copy">
+              <span class="order-row-label">Add two sides</span>
+              <span class="order-row-note">Rice &amp; beans · dinner plate</span>
+              <span class="price">+$7.00</span>
+            </div>
+          </div>
         </div>
         <div class="card">
           <div class="card-media"><img src="images/menu/tacos-shrimp.jpg" alt="Three Tacos · Shrimp" /></div>
           <h3>Shrimp</h3>
           <p class="meta">Seasoned &amp; grilled</p>
-          <p class="price">$21.99</p>
-        </div>
-      </div>
-      <p class="subhead">Dinner plate</p>
-      <p class="section-intro">Same three tacos as above, with rice &amp; beans on the plate — like the sit-down places. Trying beef first.</p>
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-media"><img src="images/menu/tacos-beef.jpg" alt="Taco Plate · Beef" /></div>
-          <h3>Beef Dinner Plate</h3>
-          <p class="meta">Three beef tacos + seasoned rice + beans</p>
-          <p class="price">$20.49</p>
+          <div class="order-row" data-item-id="tacos-shrimp">
+            <div class="order-row-copy">
+              <span class="order-row-label">Three tacos</span>
+              <span class="price">$21.99</span>
+            </div>
+          </div>
+          <div class="order-row" data-item-id="tacos-shrimp-plate">
+            <div class="order-row-copy">
+              <span class="order-row-label">Add two sides</span>
+              <span class="order-row-note">Rice &amp; beans · dinner plate</span>
+              <span class="price">+$7.00</span>
+            </div>
+          </div>
         </div>
       </div>
     </section>
