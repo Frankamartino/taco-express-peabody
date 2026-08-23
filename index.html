@@ -353,126 +353,6 @@
       35% { transform: translateY(-4px); }
       100% { transform: translateY(0); }
     }
-    body.checkout-open { overflow: hidden; }
-    #tacoCheckoutModal {
-      position: fixed;
-      inset: 0;
-      z-index: 10000;
-      background: rgba(0, 0, 0, 0.72);
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      padding: 0;
-    }
-    #tacoCheckoutModal[hidden] { display: none; }
-    .checkout-sheet {
-      width: min(100%, 480px);
-      max-height: 92vh;
-      overflow: auto;
-      background: #1c1917;
-      color: #fffbeb;
-      border-radius: 18px 18px 0 0;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-bottom: 0;
-      padding: 18px 18px calc(18px + env(safe-area-inset-bottom));
-    }
-    .checkout-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 14px;
-    }
-    .checkout-head h2 {
-      font-family: "Bebas Neue", sans-serif;
-      font-size: 1.8rem;
-      letter-spacing: 0.05em;
-      color: #84cc16;
-      line-height: 1;
-    }
-    .checkout-close {
-      border: 0;
-      background: rgba(255,255,255,0.08);
-      color: #fff;
-      width: 36px;
-      height: 36px;
-      border-radius: 999px;
-      font-size: 1.2rem;
-      cursor: pointer;
-    }
-    .checkout-line {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 8px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      font-size: 0.92rem;
-    }
-    .checkout-line-name { flex: 1; }
-    .checkout-line-qty { color: rgba(255,251,235,0.65); min-width: 2rem; text-align: right; }
-    .checkout-totals { margin: 12px 0 16px; }
-    .checkout-totals .checkout-line { border-bottom: 0; padding: 4px 0; }
-    .checkout-totals .checkout-grand {
-      font-weight: 800;
-      color: #84cc16;
-      font-size: 1.05rem;
-      margin-top: 4px;
-    }
-    .checkout-empty {
-      color: rgba(255,251,235,0.7);
-      font-size: 0.92rem;
-      line-height: 1.45;
-      padding: 8px 0 12px;
-    }
-    .checkout-field label {
-      display: block;
-      font-size: 0.8rem;
-      font-weight: 700;
-      margin: 10px 0 6px;
-    }
-    .checkout-field input,
-    .checkout-field textarea {
-      width: 100%;
-      border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.25);
-      color: #fff;
-      padding: 11px 12px;
-      font: inherit;
-    }
-    .checkout-field textarea { min-height: 64px; resize: vertical; }
-    .checkout-pay {
-      width: 100%;
-      margin-top: 14px;
-      border: 0;
-      border-radius: 999px;
-      background: #ea580c;
-      color: #fff;
-      font-weight: 800;
-      font-size: 1rem;
-      padding: 14px 18px;
-      cursor: pointer;
-    }
-    .checkout-pay:disabled { opacity: 0.5; cursor: not-allowed; }
-    .checkout-msg {
-      margin-top: 10px;
-      min-height: 1.2em;
-      font-weight: 600;
-      text-align: center;
-      font-size: 0.9rem;
-    }
-    .checkout-msg.err { color: #fca5a5; }
-    .checkout-note {
-      margin-top: 10px;
-      font-size: 0.78rem;
-      color: rgba(255,251,235,0.65);
-      text-align: center;
-      line-height: 1.4;
-    }
-    #tacoCartBar .cart-checkout[disabled] {
-      opacity: 0.5;
-      pointer-events: none;
-    }
     body { padding-bottom: 84px; }
     .feature {
       margin: 4px 0 12px;
@@ -621,7 +501,7 @@
       </div>
       <div class="header-actions">
         <a class="voice-btn" href="/voice">Talk to Diego</a>
-        <a class="order-btn order-online" href="https://order.online/business/taco-express-peabody--58-pulaski-st--unit-b-22509311" target="_blank" rel="noopener noreferrer">DoorDash</a>
+        <a class="order-btn" href="/order">Delivery</a>
         <a class="call-btn call-btn-secondary" href="tel:+19789821800">Call (978) 982-1800</a>
       </div>
     </div>
@@ -633,8 +513,8 @@
       <a href="#sides">Sides</a>
       <a href="#fryer">Fryer Favorites</a>
       <a href="#drinks">Beverages</a>
-      <a href="#order">Order</a>
-      <a href="#" data-open-checkout>Checkout</a>
+      <a href="/order">Order</a>
+      <a href="/checkout">Checkout</a>
       <a href="/voice">Voice</a>
       <a href="#hours">Hours</a>
     </nav>
@@ -913,34 +793,6 @@
       </div>
     </section>
 
-    <section id="order">
-      <p class="section-label">Order</p>
-      <h2>How to order</h2>
-      <p class="section-intro">Browse prices and photos here — then pick how you want to order.</p>
-      <div class="order-paths">
-        <div class="order-path">
-          <h3>Order here — pay by card</h3>
-          <p>Tap <strong>Add</strong> on any item — checkout pops up right here. Secure Stripe payment, pickup at the counter.</p>
-          <button type="button" class="order-btn" data-open-checkout>Checkout</button>
-        </div>
-        <div class="order-path">
-          <h3>Order by voice</h3>
-          <p>Talk to Diego — build your ticket hands-free. Cash at the counter or a saved card.</p>
-          <a class="voice-btn voice-btn-block" href="/voice">Talk to Diego</a>
-        </div>
-        <div class="order-path">
-          <h3>Order on DoorDash</h3>
-          <p>DoorDash delivery &amp; pickup — use the <strong>DoorDash</strong> button at the top or the floating button.</p>
-          <a class="order-btn order-online" href="https://order.online/business/taco-express-peabody--58-pulaski-st--unit-b-22509311" target="_blank" rel="noopener noreferrer">DoorDash</a>
-        </div>
-        <div class="order-path">
-          <h3>Call the counter</h3>
-          <p>Questions or pickup — call ahead.</p>
-          <a class="call-btn call-btn-secondary" href="tel:+19789821800">Call (978) 982-1800</a>
-        </div>
-      </div>
-    </section>
-
     <section id="hours">
       <p class="section-label">Visit</p>
       <h2>Hours &amp; location</h2>
@@ -964,91 +816,16 @@
   <footer>
     <p class="brand-footer">Taco Express Peabody</p>
     <p style="margin-top:6px;"><a href="https://tacoexpresspeabody.com">tacoexpresspeabody.com</a></p>
-    <p style="margin-top:8px;"><a href="/voice">Talk to Diego</a></p>
+    <p style="margin-top:8px;"><a href="/order">How to order</a> · <a href="/voice">Talk to Diego</a></p>
     <p style="margin-top:12px;">© Taco Express Peabody</p>
   </footer>
 
   <div id="tacoCartBar" hidden>
     <div class="cart-summary"><span data-cart-count>0</span> items · <span data-cart-total>$0.00</span></div>
-    <button type="button" class="cart-checkout" data-cart-checkout data-open-checkout>Checkout</button>
-  </div>
-
-  <div id="tacoCheckoutModal" hidden>
-    <div class="checkout-sheet" role="dialog" aria-modal="true" aria-label="Checkout">
-      <div class="checkout-head">
-        <h2>Your order</h2>
-        <button type="button" class="checkout-close" data-close-checkout aria-label="Close">×</button>
-      </div>
-      <div id="checkoutLines"></div>
-      <div class="checkout-totals">
-        <div class="checkout-line"><span>Subtotal</span><span id="checkoutSubtotal">$0.00</span></div>
-        <div class="checkout-line"><span>Tax (7%)</span><span id="checkoutTax">$0.00</span></div>
-        <div class="checkout-line checkout-grand"><span>Total</span><span id="checkoutTotal">$0.00</span></div>
-      </div>
-      <div class="checkout-field">
-        <label for="checkoutName">Full name</label>
-        <input id="checkoutName" type="text" autocomplete="name" />
-        <label for="checkoutEmail">Email (Stripe receipt)</label>
-        <input id="checkoutEmail" type="email" autocomplete="email" />
-        <label for="checkoutPhone">Phone</label>
-        <input id="checkoutPhone" type="tel" autocomplete="tel" inputmode="tel" />
-        <label for="checkoutInstructions">Special instructions (optional)</label>
-        <textarea id="checkoutInstructions" placeholder="Mild or spicy, pickup time, etc."></textarea>
-      </div>
-      <button type="button" class="checkout-pay" id="checkoutPayBtn">Pay with card</button>
-      <p class="checkout-msg" id="checkoutMsg" aria-live="polite"></p>
-      <p class="checkout-note">Secure Stripe checkout · pickup at 58 Pulaski St, Peabody</p>
-    </div>
+    <a class="cart-checkout" data-cart-checkout href="/checkout">Checkout</a>
   </div>
 
   <script src="/js/menu-catalog-data.js"></script>
   <script src="/js/taco-cart.js"></script>
-  <script src="/js/taco-checkout-modal.js"></script>
-  <script>
-    !function(e,t){var o,c,s;o=e.document,c=t.children[0],s=o.createElement("script"),e.StorefrontSDKObject="StorefrontSDK",e[e.StorefrontSDKObject]={executeCommand:function(t,r){e[e.StorefrontSDKObject].buffer.push([t,r])},buffer:[]},s.async=1,s.src="https://web-assets.cdn4dd.com/prod/storefront-sdk/latest/app.js",t.insertBefore(s,c)}(window,document.head);
-  </script>
-  <script>
-    (function () {
-      var defaultOrderUrl = "https://order.online/business/taco-express-peabody--58-pulaski-st--unit-b-22509311";
-      var defaultSdk = {
-        businessId: 22509311,
-        businessSlug: "TacoExpressPeabody-58PulaskiStUnitB",
-        floatingBar: true,
-        position: "bottom",
-        buttonAlignment: "center",
-        backgroundColor: "transparent",
-        buttonBackgroundColor: "#ea580c",
-        borderColor: "transparent",
-        buttonText: "DoorDash",
-        showModal: false,
-        redirectUrl: defaultOrderUrl,
-      };
-
-      function boot(cfg) {
-        var orderUrl = (cfg && (cfg.orderOnlineUrl || cfg.doordashUrl)) || defaultOrderUrl;
-        StorefrontSDK.executeCommand("renderFloatingButton", {
-          businessId: cfg && cfg.storefrontBusinessId || defaultSdk.businessId,
-          businessSlug: cfg && cfg.storefrontBusinessSlug || defaultSdk.businessSlug,
-          floatingBar: defaultSdk.floatingBar,
-          position: defaultSdk.position,
-          buttonAlignment: defaultSdk.buttonAlignment,
-          backgroundColor: defaultSdk.backgroundColor,
-          buttonBackgroundColor: defaultSdk.buttonBackgroundColor,
-          borderColor: defaultSdk.borderColor,
-          buttonText: defaultSdk.buttonText,
-          showModal: defaultSdk.showModal,
-          redirectUrl: orderUrl,
-        });
-        document.querySelectorAll(".order-online").forEach(function (a) {
-          a.href = orderUrl;
-        });
-      }
-
-      fetch("order-config.json")
-        .then(function (r) { return r.ok ? r.json() : null; })
-        .then(boot)
-        .catch(function () { boot(null); });
-    })();
-  </script>
 </body>
 </html>
