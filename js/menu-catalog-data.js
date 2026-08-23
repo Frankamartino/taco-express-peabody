@@ -28,6 +28,13 @@ window.TACO_MENU_ITEMS = [
     "priceCents": 2199
   },
   {
+    "id": "tacos-beef-plate",
+    "section": "tacos",
+    "title": "Beef Dinner Plate",
+    "name": "Taco Plate · Beef (3 tacos + rice & beans)",
+    "priceCents": 2049
+  },
+  {
     "id": "burrito-beef",
     "section": "burritos",
     "title": "Beef",

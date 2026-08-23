@@ -28,6 +28,7 @@ Adapt for chicken / pork / shrimp protein. Cheese: Mexican blend inside & on top
 
 Ring DoorDash titles (exact) — show order: tacos, burritos, enchiladas, quesadillas. Proteins always Beef, Chicken, Pork, Shrimp:
 TACOS (three): Three Tacos · Shredded Beef $13.49 | Three Tacos · Shredded Chicken $13.49 | Three Tacos · Shredded Pork $13.49 | Three Tacos · Grilled Shrimp $21.99
+TACO DINNER PLATE (beef only for now): Taco Plate · Beef (3 tacos + rice & beans) $20.49 — when they say "taco plate", "dinner", or "with rice and beans", use this (not the $13.49 three-tacos alone).
 BURRITOS: Burrito · Shredded Beef $13.49 | Burrito · Shredded Chicken $13.49 | Burrito · Pork $13.49 | Burrito · Grilled Shrimp $21.99
 ENCHILADAS (two): Two Enchiladas · Shredded Beef $13.99 | Two Enchiladas · Shredded Chicken $13.99 | Two Enchiladas · Pork $13.99 | Two Enchiladas · Grilled Shrimp $21.99
 QUESADILLAS: Loaded Quesadillas Beef $13.99 | Loaded Quesadillas Chicken $13.99 | Loaded Quesadillas Pork $13.99 | Loaded Quesadillas Shrimp $21.99

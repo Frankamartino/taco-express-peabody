@@ -8,6 +8,7 @@ const MENU_ITEMS = [
   { id: 'tacos-chicken', section: 'tacos', title: 'Chicken', name: 'Three Tacos · Shredded Chicken', priceCents: 1349 },
   { id: 'tacos-pork', section: 'tacos', title: 'Pork', name: 'Three Tacos · Shredded Pork', priceCents: 1349 },
   { id: 'tacos-shrimp', section: 'tacos', title: 'Shrimp', name: 'Three Tacos · Grilled Shrimp', priceCents: 2199 },
+  { id: 'tacos-beef-plate', section: 'tacos', title: 'Beef Dinner Plate', name: 'Taco Plate · Beef (3 tacos + rice & beans)', priceCents: 2049 },
   { id: 'burrito-beef', section: 'burritos', title: 'Beef', name: 'Burrito · Shredded Beef', priceCents: 1349 },
   { id: 'burrito-chicken', section: 'burritos', title: 'Chicken', name: 'Burrito · Shredded Chicken', priceCents: 1349 },
   { id: 'burrito-pork', section: 'burritos', title: 'Pork', name: 'Burrito · Pork', priceCents: 1349 },
