@@ -39,6 +39,15 @@
     var hoursNote = document.getElementById('closedTodayNote');
     if (hoursNote) hoursNote.hidden = !closed;
 
+    document.querySelectorAll('.order-doordash, .order-grubhub').forEach(function (el) {
+      if (closed) {
+        el.setAttribute('aria-disabled', 'true');
+        el.style.pointerEvents = 'none';
+        el.style.opacity = '0.4';
+        el.removeAttribute('href');
+      }
+    });
+
     document.dispatchEvent(new CustomEvent('taco-store-status', { detail: current }));
   }
 

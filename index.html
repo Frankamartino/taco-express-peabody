@@ -40,7 +40,15 @@
       font-weight: 600;
     }
     .top-bar a { color: #fff; text-decoration: none; font-weight: 700; }
-    .top-bar.is-closed { background: #7f1d1d; color: #fecaca; }
+    .top-bar.is-closed {
+      background: #7f1d1d;
+      color: #fecaca;
+      position: sticky;
+      top: 0;
+      z-index: 60;
+    }
+    body.store-closed .voice-btn,
+    body.store-closed .header-diego-hint { display: none; }
     header {
       position: sticky;
       top: 0;
