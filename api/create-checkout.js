@@ -1,4 +1,4 @@
-const { buildLinesFromCart, computeTotals } = require('./menuCatalog');
+const { buildLinesFromCart, computeTotals, resolveTipCents } = require('./menuCatalog');
 
 function clean(v) {
   return String(v || '')
@@ -79,10 +79,20 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ ok: false, code: 'bad_cart', error: err.message || 'Invalid cart.' });
   }
 
-  const { subtotalCents, taxCents, totalCents } = computeTotals(lines);
+  const tipInput = body.tip && typeof body.tip === 'object' ? body.tip : { mode: 'percent', percent: 15 };
+  const foodSubtotal = lines.reduce((sum, line) => sum + line.priceCents * line.qty, 0);
+  const tipCents = resolveTipCents(foodSubtotal, tipInput);
+  const { subtotalCents, taxCents, totalCents } = computeTotals(lines, tipCents);
   if (totalCents < 50) {
     return res.status(400).json({ ok: false, code: 'bad_amount', error: 'Order total is too small.' });
   }
+
+  const tipLabel =
+    tipInput.mode === 'percent'
+      ? 'Tip (' + tipInput.percent + '%)'
+      : tipCents > 0
+        ? 'Tip'
+        : '';
 
   const baseUrl = clean(process.env.PUBLIC_BASE_URL || 'https://www.tacoexpresspeabody.com').replace(/\/$/, '');
   const orderId = 'TACO-WEB-' + Date.now();
@@ -97,6 +107,8 @@ module.exports = async function handler(req, res) {
     'metadata[phone]': phone,
     'metadata[fulfillment]': fulfillment,
     'metadata[instructions]': instructions,
+    'metadata[tipCents]': String(tipCents),
+    'metadata[tipMode]': String(tipInput.mode || ''),
     'metadata[lines]': lines
       .map((line) => line.qty + 'x ' + line.name)
       .join('; ')
@@ -110,11 +122,19 @@ module.exports = async function handler(req, res) {
     params['line_items[' + index + '][price_data][product_data][name]'] = line.name;
   });
 
-  const taxIndex = lines.length;
-  params['line_items[' + taxIndex + '][quantity]'] = '1';
-  params['line_items[' + taxIndex + '][price_data][currency]'] = 'usd';
-  params['line_items[' + taxIndex + '][price_data][unit_amount]'] = String(taxCents);
-  params['line_items[' + taxIndex + '][price_data][product_data][name]'] = 'MA meals tax (7%)';
+  let nextIndex = lines.length;
+  params['line_items[' + nextIndex + '][quantity]'] = '1';
+  params['line_items[' + nextIndex + '][price_data][currency]'] = 'usd';
+  params['line_items[' + nextIndex + '][price_data][unit_amount]'] = String(taxCents);
+  params['line_items[' + nextIndex + '][price_data][product_data][name]'] = 'MA meals tax (7%)';
+  nextIndex += 1;
+
+  if (tipCents > 0) {
+    params['line_items[' + nextIndex + '][quantity]'] = '1';
+    params['line_items[' + nextIndex + '][price_data][currency]'] = 'usd';
+    params['line_items[' + nextIndex + '][price_data][unit_amount]'] = String(tipCents);
+    params['line_items[' + nextIndex + '][price_data][product_data][name]'] = tipLabel || 'Tip';
+  }
 
   const session = await stripeForm(secret, 'checkout/sessions', params);
   if (!session.ok) {
@@ -131,6 +151,7 @@ module.exports = async function handler(req, res) {
     orderId,
     subtotal: subtotalCents / 100,
     tax: taxCents / 100,
+    tip: tipCents / 100,
     total: totalCents / 100,
   });
 };

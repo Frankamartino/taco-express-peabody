@@ -38,6 +38,56 @@
     .note { margin-top: 12px; font-size: 0.82rem; color: rgba(255,251,235,0.65); text-align: center; line-height: 1.45; }
     .empty { color: rgba(255,251,235,0.7); line-height: 1.5; }
     .empty a { color: var(--lime); font-weight: 700; }
+    .tip-panel { margin: 14px 0 4px; }
+    .tip-panel h3 {
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 1.15rem;
+      letter-spacing: 0.06em;
+      color: var(--lime);
+      margin-bottom: 10px;
+    }
+    .tip-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .tip-btn {
+      border: 1px solid var(--border);
+      background: rgba(0, 0, 0, 0.25);
+      color: var(--cream);
+      border-radius: 10px;
+      padding: 12px 8px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 700;
+    }
+    .tip-btn.active {
+      border-color: var(--lime);
+      background: rgba(132, 204, 22, 0.18);
+      color: var(--lime);
+    }
+    .tip-other-wrap {
+      margin-top: 10px;
+      display: none;
+    }
+    .tip-other-wrap.show { display: block; }
+    .tip-other-wrap label { margin-top: 0; }
+    .tip-other-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tip-other-row span {
+      font-weight: 700;
+      color: rgba(255,251,235,0.7);
+    }
+    .tip-other-row input {
+      flex: 1;
+    }
+    #tipLine { display: none; }
+    #tipLine.show { display: flex; }
   </style>
 </head>
 <body>
@@ -51,9 +101,30 @@
     <div class="panel">
       <h2>Your order</h2>
       <div id="lines"></div>
+
+      <div class="tip-panel" id="tipPanel" hidden>
+        <h3>Tip</h3>
+        <div class="tip-grid" role="group" aria-label="Tip amount">
+          <button type="button" class="tip-btn" data-tip="5">5%</button>
+          <button type="button" class="tip-btn" data-tip="10">10%</button>
+          <button type="button" class="tip-btn active" data-tip="15">15%</button>
+          <button type="button" class="tip-btn" data-tip="20">20%</button>
+          <button type="button" class="tip-btn" data-tip="25">25%</button>
+          <button type="button" class="tip-btn" data-tip="other">Other</button>
+        </div>
+        <div class="tip-other-wrap" id="tipOtherWrap">
+          <label for="tipOtherAmount">Custom tip ($)</label>
+          <div class="tip-other-row">
+            <span>$</span>
+            <input id="tipOtherAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" />
+          </div>
+        </div>
+      </div>
+
       <div class="totals">
         <div class="line"><span>Subtotal</span><span id="subtotal">$0.00</span></div>
         <div class="line"><span>Tax (7%)</span><span id="tax">$0.00</span></div>
+        <div class="line" id="tipLine"><span id="tipLabel">Tip</span><span id="tip">$0.00</span></div>
         <div class="line grand"><span>Total</span><span id="total">$0.00</span></div>
       </div>
     </div>
@@ -78,7 +149,15 @@
     (function () {
       var payBtn = document.getElementById('payBtn');
       var payPanel = document.getElementById('payPanel');
+      var tipPanel = document.getElementById('tipPanel');
+      var tipOtherWrap = document.getElementById('tipOtherWrap');
+      var tipOtherAmount = document.getElementById('tipOtherAmount');
+      var tipLine = document.getElementById('tipLine');
+      var tipLabel = document.getElementById('tipLabel');
       var msg = document.getElementById('msg');
+
+      var tipMode = 'percent';
+      var tipPercent = 15;
 
       function money(cents) { return '$' + (cents / 100).toFixed(2); }
 
@@ -87,6 +166,38 @@
         var minus = stepper.querySelector('.qty-minus');
         if (count) count.textContent = String(qty);
         if (minus) minus.disabled = qty <= 0;
+      }
+
+      function tipCentsFromSubtotal(subtotalCents) {
+        if (tipMode === 'percent') {
+          return Math.round(subtotalCents * (tipPercent / 100));
+        }
+        var dollars = parseFloat(tipOtherAmount.value);
+        if (!isFinite(dollars) || dollars < 0) return 0;
+        return Math.min(Math.round(dollars * 100), 50000);
+      }
+
+      function tipPayload() {
+        if (tipMode === 'other') {
+          return { mode: 'other', amount: parseFloat(tipOtherAmount.value) || 0 };
+        }
+        return { mode: 'percent', percent: tipPercent };
+      }
+
+      function setTipSelection(value) {
+        document.querySelectorAll('.tip-btn').forEach(function (btn) {
+          btn.classList.toggle('active', btn.getAttribute('data-tip') === String(value));
+        });
+        if (value === 'other') {
+          tipMode = 'other';
+          tipOtherWrap.classList.add('show');
+          tipOtherAmount.focus();
+        } else {
+          tipMode = 'percent';
+          tipPercent = Number(value);
+          tipOtherWrap.classList.remove('show');
+        }
+        render();
       }
 
       function render() {
@@ -98,6 +209,8 @@
         if (!cart.length) {
           linesEl.innerHTML = '<p class="empty">Your cart is empty. <a href="/">Go back and use + on anything you want.</a></p>';
           if (payPanel) payPanel.hidden = true;
+          if (tipPanel) tipPanel.hidden = true;
+          tipLine.classList.remove('show');
           return;
         }
 
@@ -129,16 +242,41 @@
         if (!rendered) {
           linesEl.innerHTML = '<p class="empty">Loading your order…</p>';
           if (payBtn) payBtn.disabled = true;
+          if (tipPanel) tipPanel.hidden = true;
           return;
         }
 
         if (payPanel) payPanel.hidden = false;
+        if (tipPanel) tipPanel.hidden = false;
+
         var totals = window.TacoCart.totals();
+        var tipCents = tipCentsFromSubtotal(totals.subtotalCents);
+        var grand = totals.subtotalCents + totals.taxCents + tipCents;
+
         document.getElementById('subtotal').textContent = money(totals.subtotalCents);
         document.getElementById('tax').textContent = money(totals.taxCents);
-        document.getElementById('total').textContent = money(totals.totalCents);
-        if (payBtn) payBtn.disabled = totals.totalCents < 50;
+        document.getElementById('tip').textContent = money(tipCents);
+        document.getElementById('total').textContent = money(grand);
+
+        if (tipMode === 'percent') {
+          tipLabel.textContent = 'Tip (' + tipPercent + '%)';
+        } else {
+          tipLabel.textContent = 'Tip';
+        }
+        tipLine.classList.toggle('show', tipCents > 0 || tipMode === 'other');
+
+        if (payBtn) {
+          payBtn.disabled = grand < 50;
+          payBtn.textContent = 'Pay with card · ' + money(grand);
+        }
       }
+
+      document.querySelectorAll('.tip-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          setTipSelection(btn.getAttribute('data-tip'));
+        });
+      });
+      tipOtherAmount.addEventListener('input', render);
 
       if (new URLSearchParams(window.location.search).get('canceled') === '1') {
         msg.textContent = 'Payment canceled — your cart is still here.';
@@ -156,6 +294,7 @@
         if (!phone) { msg.textContent = 'Please enter your phone.'; msg.className = 'err'; return; }
 
         payBtn.disabled = true;
+        var payLabel = payBtn.textContent;
         payBtn.textContent = 'Opening Stripe…';
         fetch('/api/create-checkout', {
           method: 'POST',
@@ -167,6 +306,7 @@
             phone: phone,
             instructions: document.getElementById('instructions').value.trim(),
             fulfillment: 'pickup',
+            tip: tipPayload(),
           }),
         })
           .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
@@ -178,7 +318,8 @@
             msg.textContent = err.message || 'Checkout failed.';
             msg.className = 'err';
             payBtn.disabled = false;
-            payBtn.textContent = 'Pay with card';
+            payBtn.textContent = payLabel || 'Pay with card';
+            render();
           });
       });
 

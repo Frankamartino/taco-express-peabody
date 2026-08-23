@@ -70,11 +70,28 @@ function findMenuItem(sectionId, title) {
   );
 }
 
-function computeTotals(lines) {
+function computeTotals(lines, tipCents) {
   const subtotalCents = lines.reduce((sum, line) => sum + line.priceCents * line.qty, 0);
   const taxCents = Math.round(subtotalCents * TAX_RATE);
-  const totalCents = subtotalCents + taxCents;
-  return { subtotalCents, taxCents, totalCents };
+  const tip = Math.max(0, Math.round(Number(tipCents) || 0));
+  const totalCents = subtotalCents + taxCents + tip;
+  return { subtotalCents, taxCents, tipCents: tip, totalCents };
+}
+
+/** Tip from percent of food subtotal, or a fixed dollar/cents amount. */
+function resolveTipCents(subtotalCents, tip) {
+  if (!tip || typeof tip !== 'object') return 0;
+  if (tip.mode === 'percent') {
+    const pct = Number(tip.percent);
+    if (![5, 10, 15, 20, 25].includes(pct)) return 0;
+    return Math.round(subtotalCents * (pct / 100));
+  }
+  if (tip.mode === 'other') {
+    const dollars = Number(tip.amount);
+    if (!isFinite(dollars) || dollars < 0) return 0;
+    return Math.min(Math.round(dollars * 100), 50000);
+  }
+  return 0;
 }
 
 function buildLinesFromCart(cartLines) {
@@ -105,5 +122,6 @@ module.exports = {
   BY_ID,
   findMenuItem,
   computeTotals,
+  resolveTipCents,
   buildLinesFromCart,
 };
