@@ -7,7 +7,9 @@
  *   TACO_VOICE_STRIPE_CUSTOMER_ID
  *   TACO_VOICE_STRIPE_PAYMENT_METHOD_ID (optional)
  *   TACO_VOICE_EMAIL_ALLOWLIST (default frankamartino@gmail.com)
+ *   SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY (same kitchen print_jobs as Martino)
  */
+const { queueKitchenPrint, receiptFromVoiceTicket } = require('./kitchenPrint');
 function clean(v) {
   return String(v || '')
     .replace(/^\uFEFF/, '')
@@ -239,6 +241,20 @@ module.exports = async function handler(req, res) {
     });
   }
 
+  let kitchen = { queued: false };
+  try {
+    const receipt = receiptFromVoiceTicket(ticket, {
+      orderId,
+      paymentMethod: 'stripe',
+      fulfillment,
+      instructions,
+      stripeRef: intent.id ? String(intent.id).slice(-8) : '',
+    });
+    kitchen = await queueKitchenPrint(receipt);
+  } catch (err) {
+    console.error('[Taco Voice charge] kitchen queue error', err && err.message);
+  }
+
   return res.status(200).json({
     ok: true,
     paid: true,
@@ -247,5 +263,7 @@ module.exports = async function handler(req, res) {
     amountCents,
     orderId,
     shop: 'taco-express-peabody-voice',
+    kitchenQueued: !!kitchen.queued || !!kitchen.skipped,
+    ticketNumber: kitchen.ticketNumber,
   });
 };

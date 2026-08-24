@@ -984,16 +984,62 @@
           if (pm === 'cash') {
             order.paid = false;
             order.paymentIntentId = '';
+            renderTicket();
+            setStatus('Sending ticket to kitchen…');
+            fetch('/api/queue-kitchen-ticket', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ ticket: ticketSnapshot(), paymentMethod: 'cash' }),
+            })
+              .then(function (r) {
+                return r.json().then(function (data) {
+                  return { httpOk: r.ok, data: data };
+                });
+              })
+              .then(function (res) {
+                setStatus('Diego is on — talk anytime');
+                var queued = !!(res.httpOk && res.data && res.data.ok);
+                replyTool(callId, {
+                  ok: true,
+                  paymentMethod: 'cash',
+                  kitchenQueued: queued,
+                  orderId: (res.data && res.data.orderId) || '',
+                  ticket: ticketSnapshot(),
+                  speakHint: queued
+                    ? 'Say warmly: ticket is sent to the restaurant — they will start making the food right away; it will be ready in about 20 minutes. Pay cash at the counter when you pick up.'
+                    : 'Cash marked. If kitchen queue failed, tell them to call (978) 982-1800 to confirm the order, or pay at Frankie’s Toast / counter.',
+                  hangUpHint:
+                    'Short cash + pickup (~20 min), warm goodbye, then STOP. Call ends automatically.',
+                });
+                if (queued) {
+                  if (hangUpTimer) clearTimeout(hangUpTimer);
+                  hangUpTimer = setTimeout(function () {
+                    if (!callInProgress()) return;
+                    hangUp();
+                  }, 14000);
+                }
+                delete pendingCalls[callId];
+              })
+              .catch(function () {
+                setStatus('Diego is on — talk anytime');
+                replyTool(callId, {
+                  ok: true,
+                  paymentMethod: 'cash',
+                  kitchenQueued: false,
+                  ticket: ticketSnapshot(),
+                  speakHint:
+                    'Cash marked but kitchen link failed — ask them to call (978) 982-1800 so the kitchen gets the order.',
+                });
+                delete pendingCalls[callId];
+              });
+            return;
           }
           renderTicket();
           replyTool(callId, {
             ok: true,
             paymentMethod: pm,
             ticket: ticketSnapshot(),
-            speakHint:
-              pm === 'cash'
-                ? 'Say warmly: ticket is sent to the restaurant — they will start making the food right away; it will be ready in about 20 minutes. Pay cash at the counter when you pick up.'
-                : '',
+            speakHint: '',
           });
           return;
         }
