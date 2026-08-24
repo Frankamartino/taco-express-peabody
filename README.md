@@ -6,21 +6,17 @@ This is the Taco Express Peabody site only — own repo, own Vercel project, own
 - **Domain:** https://www.tacoexpresspeabody.com
 - **Phone:** (978) 982-1800
 - **Address:** 58 Pulaski St, Peabody, MA 01960
-- **Ordering:** Tap **Add** on the menu → **Checkout** (Stripe card) · DoorDash · Diego voice (`/voice`) · phone
+- **Ordering:** Tap **Add** on the menu → **Checkout** (Stripe card) · Diego voice (`/voice`) · phone
 
 ## Online ordering
 
 The website is a **menu board** with **Add** buttons. Customers can:
 
 1. **Order here (Stripe)** — tap Add on items → `/checkout` → pay by card (pickup at 58 Pulaski St).
-2. **DoorDash** — delivery & pickup via the DoorDash buttons.
-3. **Diego voice** — `/voice` with cash or saved card.
+2. **Diego voice** — `/voice` with cash or saved card.
+3. **Call** — (978) 982-1800.
 
-For DoorDash Merchant setup:
-2. Copy your store URL from the DoorDash Merchant Portal.
-3. Paste it into `order-config.json` as `orderOnlineUrl` (or `doordashUrl`) and push — all **DoorDash** buttons update automatically.
-
-Until the store is live, buttons link to a DoorDash search for Taco Express Peabody.
+Third-party apps (DoorDash / Uber Eats / Grubhub) are off for now.
 
 ## Preview locally
 

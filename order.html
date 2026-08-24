@@ -42,7 +42,7 @@
     <div class="brand">
       <img src="images/taco-express-logo.jpg" width="88" height="88" alt="Taco Express Peabody" />
       <h1>How to order</h1>
-      <p class="intro">Same kitchen — pick the way that works for you.</p>
+      <p class="intro">Pickup at the counter — order on this site, talk to Diego, or call.</p>
       <a class="back" href="/">← Back to menu</a>
     </div>
 
@@ -54,16 +54,6 @@
           <a class="order-btn" href="/">Browse menu</a>
           <a class="order-btn" href="/checkout">Checkout</a>
         </div>
-      </div>
-
-      <div class="order-path" id="delivery">
-        <h2>Delivery &amp; pickup apps</h2>
-        <p>Order through a delivery app — prices and fees may differ from our menu site.</p>
-        <div class="btn-row" id="deliveryButtons">
-          <a class="order-btn order-doordash" href="https://order.online/business/taco-express-peabody--58-pulaski-st--unit-b-22509311" target="_blank" rel="noopener noreferrer">DoorDash</a>
-          <a class="order-btn order-grubhub" href="https://www.grubhub.com/restaurant/taco-express-peabody-58-pulaski-street-peabody/15286648" target="_blank" rel="noopener noreferrer">Grubhub</a>
-        </div>
-        <p class="delivery-note">Uber Eats — not listed for this location yet. If that changes we will add it here.</p>
       </div>
 
       <div class="order-path">
@@ -79,17 +69,5 @@
       </div>
     </div>
   </div>
-  <script>
-    fetch('order-config.json')
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (cfg) {
-        if (!cfg) return;
-        var dd = document.querySelector('.order-doordash');
-        var gh = document.querySelector('.order-grubhub');
-        if (dd && (cfg.orderOnlineUrl || cfg.doordashUrl)) dd.href = cfg.orderOnlineUrl || cfg.doordashUrl;
-        if (gh && cfg.grubhubUrl) gh.href = cfg.grubhubUrl;
-      })
-      .catch(function () {});
-  </script>
 </body>
 </html>

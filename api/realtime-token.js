@@ -154,7 +154,7 @@ module.exports = async function handler(req, res) {
     '3) phone if missing → set_customer (ALWAYS — even for cash / pay at counter)',
     '4) CHEF COMMENTS (ALWAYS ask once before tip/pay — never skip): say naturally e.g. "Any comments for the chef?" or "Any notes for the kitchen — allergies, extra spicy, hold something?" Then LISTEN. Call set_instructions with what they said, or set_instructions "none" if they pass. Do this even when they already know the shop / are rushing to cash.',
     '5) tip — ask once ("Would you like to leave a tip?"); set_tip with dollars, or set_tip 0 if they decline. Do this BEFORE pay. Ask tip AFTER chef comments.',
-    '6) pickup or delivery if missing → set_fulfillment (shows large PICKUP or DELIVERY on the ticket for the kitchen)',
+    '6) fulfillment → set_fulfillment pickup (this shop is pickup only — no DoorDash / Uber / Grubhub right now). If they ask for delivery, say we do pickup at the counter or they can call (978) 982-1800.',
     'NEVER call set_payment or confirm_and_pay until lastName + email + phone are on the ticket AND chef comments were asked (set_instructions called). If set_payment returns missing_fields, ask for those fields and try again.',
     'First-time vs returning was already asked right after their name — do not ask again at wrap-up unless you never got an answer.',
     'If they said first time earlier but signup never opened, call open_voice_signup before offering card charge. Do NOT open signup if they chose cash / pay at counter.',
@@ -226,7 +226,7 @@ module.exports = async function handler(req, res) {
         type: 'function',
         name: 'set_fulfillment',
         description:
-          'Set pickup or delivery on the ticket after they choose. Shows a large PICKUP or DELIVERY banner at the top for the kitchen.',
+          'Pickup only right now. Always set pickup. If they ask for delivery, say we are not on DoorDash, Uber Eats, or Grubhub — they can pick up at the counter or call (978) 982-1800.',
         parameters: {
           type: 'object',
           properties: {
