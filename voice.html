@@ -630,10 +630,9 @@
           sessionStorage.setItem('diegoAutostart', '1');
           sessionStorage.setItem('diegoResumeCheckout', '1');
         } catch (eFlags) {}
+        /* Contact travels in storage, never in the address bar — a URL ends up in
+           browser history, server logs and anything the guest shares. */
         var q = '/checkout?diego=1';
-        if (payload.name) q += '&name=' + encodeURIComponent(payload.name);
-        if (payload.email) q += '&email=' + encodeURIComponent(payload.email);
-        if (payload.phone) q += '&phone=' + encodeURIComponent(payload.phone);
         if (notifyMenuParent({
           type: 'open_checkout',
           name: payload.name,
@@ -651,19 +650,6 @@
       }
 
       function restoreCustomerFromStorage() {
-        try {
-          var params = new URLSearchParams(window.location.search || '');
-          var urlName = String(params.get('name') || '').trim();
-          var urlEmail = String(params.get('email') || '').trim();
-          var urlPhone = String(params.get('phone') || '').trim();
-          if (urlName) {
-            var parts = urlName.split(/\s+/).filter(Boolean);
-            if (parts.length) customer.firstName = parts[0];
-            if (parts.length > 1) customer.lastName = parts.slice(1).join(' ');
-          }
-          if (urlEmail) customer.email = urlEmail;
-          if (urlPhone) customer.phone = urlPhone;
-        } catch (eUrl) {}
         try {
           var raw =
             sessionStorage.getItem('tacoCheckoutContact') ||

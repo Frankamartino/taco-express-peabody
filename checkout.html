@@ -414,6 +414,25 @@
       var tipChosen = false;
       var instructionsTouched = false;
 
+      /* Older builds put the guest's name, email and phone in the query string.
+         Strip them from the address bar so they stop being written to history,
+         and do not read them — a shared link must never pre-fill someone else. */
+      (function scrubContactFromUrl() {
+        try {
+          var url = new URL(window.location.href);
+          var dirty = false;
+          ['name', 'email', 'phone'].forEach(function (k) {
+            if (url.searchParams.has(k)) {
+              url.searchParams.delete(k);
+              dirty = true;
+            }
+          });
+          if (dirty) {
+            history.replaceState({}, '', url.pathname + url.search + url.hash);
+          }
+        } catch (eScrub) {}
+      })();
+
       /* Shown inside the menu page as an overlay so Diego's call is never torn down. */
       var embedMode = false;
       try {
@@ -516,20 +535,6 @@
       }
 
       function loadSavedCheckoutContact() {
-        try {
-          var params = new URLSearchParams(window.location.search || '');
-          var urlName = String(params.get('name') || '').trim();
-          var urlEmail = String(params.get('email') || '').trim();
-          var urlPhone = String(params.get('phone') || '').trim();
-          if (urlName || urlEmail || urlPhone) {
-            applyCheckoutContact({
-              name: urlName,
-              email: urlEmail,
-              phone: urlPhone,
-              force: true,
-            });
-          }
-        } catch (eUrl) {}
         try {
           var raw =
             sessionStorage.getItem('tacoCheckoutContact') ||
