@@ -414,6 +414,23 @@
       var tipChosen = false;
       var instructionsTouched = false;
 
+      /* Shown inside the menu page as an overlay so Diego's call is never torn down. */
+      var embedMode = false;
+      try {
+        embedMode = new URLSearchParams(window.location.search || '').get('embed') === '1';
+      } catch (eEmbed) {}
+
+      /** Leaving for Stripe or the receipt must move the whole tab, not just the overlay. */
+      function goTo(href) {
+        try {
+          if (embedMode && window.top && window.top !== window) {
+            window.top.location.href = href;
+            return;
+          }
+        } catch (eTop) {}
+        window.location.href = href;
+      }
+
       function money(cents) { return '$' + (cents / 100).toFixed(2); }
 
       function clearFieldGlows() {
@@ -773,7 +790,7 @@
           .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
           .then(function (res) {
             if (!res.ok || !res.data.checkoutUrl) throw new Error((res.data && res.data.error) || 'Could not start checkout.');
-            window.location.href = res.data.checkoutUrl;
+            goTo(res.data.checkoutUrl);
           })
           .catch(function (err) {
             msg.textContent = err.message || 'Checkout failed.';
@@ -821,7 +838,7 @@
                 dial.click();
                 dial.remove();
               } catch (eDial) {}
-              window.location.href = q;
+              goTo(q);
             })
             .catch(function (err) {
               msg.textContent = err.message || 'Cash order failed.';
@@ -855,6 +872,44 @@
       var diegoBtn = document.getElementById('headerDiegoBtn');
       var diegoFrame = document.getElementById('diegoFrame');
       var diegoOpen = false;
+      var embedded = false;
+      try {
+        embedded = new URLSearchParams(window.location.search || '').get('embed') === '1';
+      } catch (eEm) {}
+
+      /** Overlay mode: the menu page behind us already has Diego on the line. */
+      function tellHost(payload) {
+        try {
+          if (embedded && window.parent && window.parent !== window) {
+            window.parent.postMessage(
+              Object.assign({ source: 'taco-checkout' }, payload),
+              window.location.origin
+            );
+            return true;
+          }
+        } catch (eHost) {}
+        return false;
+      }
+
+      /** Back to the menu — close the overlay if we are in one, otherwise navigate. */
+      function goToMenuSection(section) {
+        if (tellHost({ type: 'close', section: section || '' })) return;
+        window.location.href = '/#' + encodeURIComponent(section || '');
+      }
+
+      if (embedded) {
+        /* One Diego per call. The host owns the voice; we must not start a second one. */
+        if (diegoBtn) diegoBtn.remove();
+        if (diegoFrame) diegoFrame.remove();
+        diegoFrame = null;
+        var forget = document.querySelector('.forget-btn');
+        if (forget) {
+          forget.addEventListener('click', function (ev) {
+            ev.preventDefault();
+            goToMenuSection('');
+          });
+        }
+      }
 
       function setDiegoIdleLabel() {
         if (!diegoBtn) return;
@@ -953,7 +1008,7 @@
           var section = String(data.section || 'tacos')
             .trim()
             .toLowerCase();
-          window.location.href = '/#' + encodeURIComponent(section);
+          goToMenuSection(section);
           return;
         }
         if (data.type === 'open_checkout') {
@@ -1014,6 +1069,7 @@
       } catch (eWant) {
         wantDiego = /[?&]diego=1/.test(window.location.search || '');
       }
+      if (embedded) wantDiego = false;
       if (wantDiego) {
         setTimeout(function () {
           startDiegoOnCheckout(true);

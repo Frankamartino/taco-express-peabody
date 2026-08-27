@@ -410,6 +410,14 @@
       .catch(function () {});
   }
 
+  /* The checkout overlay is a same-origin iframe — keep both documents on one cart. */
+  window.addEventListener('storage', function (ev) {
+    if (ev.key && ev.key !== STORAGE_KEY) return;
+    renderCartBar();
+    updateAllSteppers();
+    notifyCartUpdated();
+  });
+
   window.TacoCart = {
     load: loadCart,
     save: saveCart,

@@ -800,6 +800,26 @@
     body.diego-open .hero {
       display: none;
     }
+    /* Checkout rides on top of the menu so a live call is never torn down. */
+    #checkoutOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: var(--bg, #0a0a0a);
+      display: none;
+    }
+    #checkoutOverlay.show {
+      display: block;
+    }
+    #checkoutOverlay iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+    }
+    body.checkout-open {
+      overflow: hidden;
+    }
     .voice-btn.is-live {
       animation: none;
       background: linear-gradient(180deg, #dc2626 0%, #b91c1c 55%, #991b1b 100%);
@@ -1381,6 +1401,10 @@
 
   <iframe id="diegoFrame" title="Diego voice" allow="microphone *; autoplay *"></iframe>
 
+  <div id="checkoutOverlay" aria-hidden="true">
+    <iframe id="checkoutFrame" title="Checkout"></iframe>
+  </div>
+
   <script src="/js/menu-catalog-data.js"></script>
   <script src="/js/taco-sold-out.js"></script>
   <script src="/js/taco-cart.js"></script>
@@ -1469,6 +1493,70 @@
         });
       }
 
+      /* ---- Checkout without leaving the page ----
+         Navigating to /checkout destroys this document, and Diego's WebRTC call
+         with it. While he is on the line the checkout is shown as an overlay
+         instead, so the same call keeps running underneath. */
+      var checkoutOverlay = document.getElementById('checkoutOverlay');
+      var checkoutFrame = document.getElementById('checkoutFrame');
+      var checkoutOpen = false;
+
+      function openCheckoutOverlay() {
+        if (!checkoutOverlay || !checkoutFrame) return false;
+        if (!checkoutOpen) {
+          checkoutFrame.src = '/checkout?embed=1';
+          checkoutOpen = true;
+        }
+        checkoutOverlay.classList.add('show');
+        checkoutOverlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('checkout-open');
+        return true;
+      }
+
+      function closeCheckoutOverlay(section) {
+        if (!checkoutOverlay) return;
+        checkoutOverlay.classList.remove('show');
+        checkoutOverlay.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('checkout-open');
+        if (section) {
+          var target = document.getElementById(section);
+          if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+
+      /** Relay Diego's instructions into the overlay so he still drives the form. */
+      function sendToCheckout(payload) {
+        if (!checkoutOpen || !checkoutFrame || !checkoutFrame.contentWindow) return;
+        try {
+          checkoutFrame.contentWindow.postMessage(
+            Object.assign({ source: 'taco-diego' }, payload),
+            window.location.origin
+          );
+        } catch (eSend) {}
+      }
+
+      window.addEventListener('message', function (ev) {
+        if (ev.origin !== window.location.origin) return;
+        var d = ev.data;
+        if (!d || d.source !== 'taco-checkout') return;
+        if (d.type === 'close') closeCheckoutOverlay(d.section);
+      });
+
+      /* Tapping Checkout during a call must not hang up on him either. */
+      document.addEventListener(
+        'click',
+        function (ev) {
+          if (!diegoOpen) return;
+          var link = ev.target && ev.target.closest ? ev.target.closest('a[href]') : null;
+          if (!link) return;
+          var href = link.getAttribute('href') || '';
+          if (!/^\/checkout(\?|#|$)/.test(href)) return;
+          ev.preventDefault();
+          openCheckoutOverlay();
+        },
+        true
+      );
+
       function applyShopStatus(state) {
         var banner = document.getElementById('shopClosedBanner');
         var reasonEl = document.getElementById('shopClosedReason');
@@ -1531,6 +1619,8 @@
           return;
         }
         if (data.type === 'scroll_to') {
+          /* "Oops, add a coke" — drop the checkout overlay and show him the menu again. */
+          closeCheckoutOverlay();
           var section = String(data.section || '')
             .trim()
             .toLowerCase();
@@ -1576,8 +1666,24 @@
             sessionStorage.setItem('tacoCheckoutContact', contactPayload);
             localStorage.setItem('tacoCheckoutContact', withoutInstructions(contactPayload));
           } catch (eStore) {}
+          /* He is mid-sentence — show checkout over the menu and let him keep talking. */
+          if (diegoOpen && openCheckoutOverlay()) {
+            /* Nothing reloads on this path, so the resume flags must not linger. */
+            try {
+              sessionStorage.removeItem('diegoAutostart');
+              sessionStorage.removeItem('diegoResumeCheckout');
+            } catch (eFlags) {}
+            sendToCheckout({
+              type: 'customer_update',
+              name: data.name || '',
+              email: data.email || '',
+              phone: data.phone || '',
+              instructions: data.instructions || '',
+              force: true,
+            });
+            return;
+          }
           var href = String(data.href || '/checkout?diego=1');
-          /* Short beat so Diego can say "opening checkout" — then keep him on the new page. */
           setTimeout(function () {
             window.location.href = href;
           }, 900);
@@ -1596,6 +1702,20 @@
             sessionStorage.setItem('tacoCheckoutContact', contactPayload);
             localStorage.setItem('tacoCheckoutContact', withoutInstructions(contactPayload));
           } catch (eCust) {}
+          sendToCheckout({
+            type: 'customer_update',
+            firstName: data.firstName || '',
+            lastName: data.lastName || '',
+            name: data.name || '',
+            email: data.email || '',
+            phone: data.phone || '',
+            instructions: data.instructions || '',
+            force: true,
+          });
+          return;
+        }
+        if (data.type === 'tip_update') {
+          sendToCheckout({ type: 'tip_update', amount: data.amount });
           return;
         }
         if (data.type === 'shop_status') {
