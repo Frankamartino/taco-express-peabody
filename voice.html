@@ -7,7 +7,16 @@
   <link rel="canonical" href="https://www.tacoexpresspeabody.com/voice" />
   <link rel="icon" href="images/taco-express-logo.jpg" type="image/jpeg" />
   <link rel="apple-touch-icon" href="images/taco-express-logo.jpg" />
-  <meta name="description" content="Order Taco Express Peabody by voice with Diego — tacos, burritos, enchiladas & quesadillas. 58 Pulaski St, Peabody MA. (978) 982-1800." />
+  <meta name="description" content="Order Taco Express Peabody by voice with Diego — tacos, burritos, enchiladas & quesadillas. 58 Pulaski St Unit B, Peabody MA. (978) 982-1800." />
+  <link rel="alternate" type="text/plain" href="https://www.tacoexpresspeabody.com/llms.txt" title="LLM summary" />
+  <meta name="robots" content="index, follow" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Taco Express Peabody" />
+  <meta property="og:url" content="https://www.tacoexpresspeabody.com/voice" />
+  <meta property="og:title" content="Order by Voice with Diego — Taco Express Peabody" />
+  <meta property="og:description" content="Press the button — Diego takes your taco order by voice. Pay by card, pickup at 58 Pulaski St Unit B, Peabody MA." />
+  <meta property="og:image" content="https://www.tacoexpresspeabody.com/images/taco-express-logo.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
@@ -247,19 +256,102 @@
     }
     #orderNowBtn {
       width: min(320px, 100%);
-      border: none;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.22);
       cursor: pointer;
       font-family: inherit;
       font-weight: 800;
-      font-size: 1.15rem;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      padding: 18px 28px;
+      font-size: clamp(14px, 3.6vw, 17px);
+      letter-spacing: 0.02em;
+      text-transform: none;
+      line-height: 1.2;
+      padding: 16px 28px;
       border-radius: 999px;
-      background: var(--terra);
       color: #fff;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(120% 80% at 50% 0%, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0.08) 32%, transparent 55%),
+        linear-gradient(180deg, #fb923c 0%, #ea580c 38%, #c2410c 100%);
+      animation: diegoGelPulse 2.6s ease-in-out infinite;
+      transition: filter 0.2s ease;
+    }
+    @keyframes diegoGelPulse {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow:
+          0 8px 24px rgba(234, 88, 12, 0.42),
+          0 0 0 0 rgba(132, 204, 22, 0),
+          inset 0 2px 0 rgba(255, 255, 255, 0.4),
+          inset 0 -12px 20px rgba(0, 0, 0, 0.28);
+      }
+      50% {
+        transform: scale(1.03);
+        box-shadow:
+          0 16px 40px rgba(234, 88, 12, 0.55),
+          0 0 36px 4px rgba(132, 204, 22, 0.32),
+          inset 0 2px 0 rgba(255, 255, 255, 0.5),
+          inset 0 -12px 20px rgba(0, 0, 0, 0.2);
+      }
+    }
+    @keyframes diegoGelShine {
+      0% { transform: translateX(-140%) skewX(-18deg); opacity: 0; }
+      18% { opacity: 0.85; }
+      42% { opacity: 0.55; }
+      58%, 100% { transform: translateX(220%) skewX(-18deg); opacity: 0; }
+    }
+    @keyframes diegoGelRipple {
+      0% { box-shadow: 0 0 0 0 rgba(132, 204, 22, 0.42); opacity: 1; }
+      100% { box-shadow: 0 0 0 22px rgba(132, 204, 22, 0); opacity: 0; }
+    }
+    #orderNowBtn::before {
+      content: '';
+      position: absolute;
+      top: -20%;
+      left: 0;
+      width: 42%;
+      height: 140%;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.08) 30%,
+        rgba(255, 255, 255, 0.55) 50%,
+        rgba(255, 255, 255, 0.08) 70%,
+        transparent 100%
+      );
+      animation: diegoGelShine 3.4s ease-in-out infinite;
+      pointer-events: none;
+    }
+    #orderNowBtn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      animation: diegoGelRipple 2.6s ease-out infinite;
+      pointer-events: none;
+    }
+    #orderNowBtn .btn-main,
+    #orderNowBtn .btn-sub {
+      position: relative;
+      z-index: 1;
+    }
+    #orderNowBtn .btn-sub {
+      margin-top: 4px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.92);
     }
     #orderNowBtn:hover { filter: brightness(1.08); }
+    #orderNowBtn:active:not(.live):not(.canceling) {
+      filter: brightness(0.96);
+      transform: scale(0.98);
+      animation: none;
+    }
     #orderNowBtn:disabled {
       opacity: 0.65;
       cursor: wait;
@@ -270,10 +362,20 @@
       opacity: 1;
       cursor: pointer;
       pointer-events: auto;
+      animation: none;
+      border: none;
+      overflow: visible;
+    }
+    #orderNowBtn.live::before,
+    #orderNowBtn.live::after,
+    #orderNowBtn.canceling::before,
+    #orderNowBtn.canceling::after {
+      display: none;
     }
     #orderNowBtn.live {
       background: var(--lime);
       color: #14532d;
+      box-shadow: none;
     }
     #status {
       min-height: 1.2em;
@@ -365,17 +467,40 @@
       border: 0;
       background: var(--charcoal);
     }
+    /* Embedded on homepage menu sheet — hide full-page chrome */
+    body.embed-mode {
+      min-height: 100%;
+      height: 100%;
+      padding: 8px 12px 12px;
+    }
+    body.embed-mode .top-bar,
+    body.embed-mode .top {
+      display: none;
+    }
+    body.embed-mode .ticket-wrap {
+      min-height: 80px;
+      padding: 8px 0;
+      align-items: flex-start;
+    }
+    body.embed-mode .card-trust {
+      font-size: 0.72rem;
+    }
+    html.embed-mode,
+    html.embed-mode body {
+      height: 100%;
+      overflow: auto;
+    }
   </style>
 </head>
 <body>
   <div class="top-bar">
-    58 Pulaski St · Peabody MA 01960 · <a href="tel:+19789821800">(978) 982-1800</a>
+    58 Pulaski St Unit B · Peabody MA 01960 · <a href="tel:+19789821800">(978) 982-1800</a>
   </div>
   <div class="top">
     <img class="voice-logo" src="images/taco-express-logo.jpg" width="96" height="96" alt="Taco Express Peabody" />
     <h1>Taco Express Peabody</h1>
     <p class="outlet">
-      58 Pulaski Street<br>
+      58 Pulaski Street Unit B<br>
       <a href="tel:+19789821800">(978) 982-1800</a>
     </p>
     <a class="menu-link" href="/">← Menu &amp; photos</a>
@@ -386,7 +511,10 @@
   </div>
 
   <div class="bottom">
-    <button type="button" id="orderNowBtn">Talk to Diego</button>
+    <button type="button" id="orderNowBtn" aria-label="Diego will take your order. Press button now.">
+      <span class="btn-main">Diego will take your order</span>
+      <span class="btn-sub">Press button now</span>
+    </button>
     <p id="status" aria-live="polite"></p>
     <p class="card-trust">
       <a href="/voice-signup" id="signupLink">First-time customers: sign up for hands-free ordering</a>
@@ -409,7 +537,151 @@
 
   <script>
     (function () {
+      var embedMode = false;
+      var resumeCheckout = false;
+      try {
+        var bootParams = new URLSearchParams(window.location.search || '');
+        embedMode = bootParams.get('embed') === '1' || window.self !== window.top;
+        resumeCheckout = bootParams.get('resume') === 'checkout';
+      } catch (eEmbed) {
+        embedMode = window.self !== window.top;
+      }
+      if (embedMode) {
+        try {
+          document.documentElement.classList.add('embed-mode');
+          document.body.classList.add('embed-mode');
+        } catch (eClass) {}
+      }
+
+      function notifyMenuHangup() {
+        if (!embedMode) return;
+        try {
+          window.parent.postMessage(
+            { source: 'taco-diego', type: 'hangup' },
+            window.location.origin
+          );
+        } catch (ePost) {}
+      }
+
+      /** Tell the homepage (or checkout) parent to scroll / jump / open checkout. */
+      function notifyMenuParent(payload) {
+        try {
+          if (embedMode && window.parent && window.parent !== window) {
+            window.parent.postMessage(
+              Object.assign({ source: 'taco-diego' }, payload),
+              window.location.origin
+            );
+            return true;
+          }
+        } catch (ePost) {}
+        return false;
+      }
+
+      /** Persist pickup contact so /checkout can fill Full name / Email / Phone after page handoff. */
+      function persistCustomerForCheckout() {
+        var payload = {
+          firstName: customer.firstName || '',
+          lastName: customer.lastName || '',
+          name: [customer.firstName, customer.lastName].filter(Boolean).join(' '),
+          email: customer.email || '',
+          phone: customer.phone || '',
+        };
+        try {
+          sessionStorage.setItem('tacoCheckoutContact', JSON.stringify(payload));
+        } catch (eStore) {}
+        notifyMenuParent({
+          type: 'customer_update',
+          firstName: payload.firstName,
+          lastName: payload.lastName,
+          name: payload.name,
+          email: payload.email,
+          phone: payload.phone,
+        });
+        return payload;
+      }
+
+      /** Always open checkout WITH Diego resume — never dump to bare /checkout (kills voice). */
+      function goToCheckoutWithDiego() {
+        persistCustomerForCheckout();
+        try {
+          sessionStorage.setItem('diegoAutostart', '1');
+          sessionStorage.setItem('diegoResumeCheckout', '1');
+        } catch (eFlags) {}
+        if (notifyMenuParent({ type: 'open_checkout' })) return true;
+        try {
+          window.location.href = '/checkout?diego=1';
+        } catch (eCo) {}
+        return false;
+      }
+
+      function normalizeMenuSection(raw) {
+        var s = String(raw || '')
+          .trim()
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+        if (!s) return '';
+        if (/\bburrito/.test(s)) return 'burritos';
+        if (/\benchilada/.test(s)) return 'enchiladas';
+        if (/\bquesadilla/.test(s)) return 'quesadillas';
+        if (/\btaco/.test(s)) return 'tacos';
+        if (/\b(fried|fryer|fry)\b/.test(s)) return 'fryer';
+        if (/\b(drink|beverage|soda|water)\b/.test(s)) return 'drinks';
+        if (/\b(side|rice|bean|extra)\b/.test(s)) return 'sides';
+        if (/\bhour/.test(s)) return 'hours';
+        var allowed = {
+          tacos: 1,
+          burritos: 1,
+          enchiladas: 1,
+          quesadillas: 1,
+          sides: 1,
+          fryer: 1,
+          drinks: 1,
+          hours: 1,
+        };
+        if (allowed[s]) return s;
+        return '';
+      }
+
+      /** Push Diego ticket lines into the real website shopping cart (homepage / checkout). */
+      function syncWebCart(action, payload) {
+        var msg = Object.assign({ type: 'cart_' + action }, payload || {});
+        if (notifyMenuParent(msg)) return true;
+        try {
+          if (!window.TacoCart) return false;
+          if (action === 'add' && window.TacoCart.addFromVoice) {
+            var added = window.TacoCart.addFromVoice(payload.title, payload.qty, payload.price);
+            if (added && added.soldOut) return false;
+            return !!added;
+          }
+          if (action === 'set' && window.TacoCart.setFromVoice) {
+            return !!window.TacoCart.setFromVoice(payload.title, payload.qty, payload.price);
+          }
+          if (action === 'remove' && window.TacoCart.removeFromVoice) {
+            return !!window.TacoCart.removeFromVoice(payload.title, payload.price);
+          }
+          if (action === 'clear' && window.TacoCart.clear) {
+            window.TacoCart.clear();
+            return true;
+          }
+        } catch (eCart) {}
+        return false;
+      }
+
       var btn = document.getElementById('orderNowBtn');
+      function setDiegoIdleButtonLabel() {
+        btn.classList.remove('live', 'canceling');
+        btn.innerHTML =
+          '<span class="btn-main">Diego will take your order</span>' +
+          '<span class="btn-sub">Press button now</span>';
+        btn.setAttribute('aria-label', 'Diego will take your order. Press button now.');
+      }
+      function setDiegoHangUpButtonLabel() {
+        btn.textContent = 'Hang Up';
+        btn.setAttribute('aria-label', 'Hang up');
+        btn.setAttribute('aria-label', 'Hang up');
+      }
       var statusEl = document.getElementById('status');
       var ticketEl = document.getElementById('ticket');
       var signupOverlay = document.getElementById('signupOverlay');
@@ -506,6 +778,70 @@
       };
       var customer = { firstName: '', lastName: '', email: '', phone: '' };
       var fulfillment = ''; // pickup | delivery
+      var TACO_PHONE_TEL = 'tel:+19789821800';
+
+      function easternShopStatus() {
+        var tz = 'America/New_York';
+        var now = new Date();
+        var parts = new Intl.DateTimeFormat('en-US', {
+          timeZone: tz,
+          weekday: 'long',
+          hour: 'numeric',
+          minute: 'numeric',
+          hour12: false,
+        }).formatToParts(now);
+        function part(t) {
+          for (var i = 0; i < parts.length; i++) {
+            if (parts[i].type === t) return parts[i].value;
+          }
+          return '';
+        }
+        var day = part('weekday');
+        var hour = parseInt(part('hour') || '0', 10);
+        var minute = parseInt(part('minute') || '0', 10);
+        var mins = hour * 60 + minute;
+        var formatted = new Intl.DateTimeFormat('en-US', {
+          timeZone: tz,
+          weekday: 'long',
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+        }).format(now);
+        if (day === 'Monday' || day === 'Tuesday') {
+          return {
+            formatted: formatted,
+            day: day,
+            open: false,
+            line:
+              'Right now it is ' +
+              formatted +
+              ' Eastern. CLOSED TODAY — ' +
+              day +
+              ' we are always closed. Mon–Tue closed. Next open Wednesday 11 AM.',
+          };
+        }
+        var openStart = 11 * 60;
+        var openEnd = day === 'Sunday' ? 18 * 60 : 20 * 60;
+        var hoursLabel = day === 'Sunday' ? '11 AM–6 PM' : '11 AM–8 PM';
+        var open = mins >= openStart && mins < openEnd;
+        return {
+          formatted: formatted,
+          day: day,
+          open: open,
+          line: open
+            ? 'Right now it is ' + formatted + ' Eastern. OPEN — today (' + day + ') ' + hoursLabel + '.'
+            : 'Right now it is ' +
+              formatted +
+              ' Eastern. CLOSED right now — today (' +
+              day +
+              ') hours ' +
+              hoursLabel +
+              '.',
+        };
+      }
 
       function money(n) {
         var x = Math.round((Number(n) || 0) * 100) / 100;
@@ -704,6 +1040,34 @@
         fulfillment = '';
       }
 
+      function findOrderLineIndex(args) {
+        if (args.line_index != null) {
+          var oneBased = Number(args.line_index);
+          if (isFinite(oneBased) && oneBased >= 1 && oneBased <= order.lines.length) {
+            return oneBased - 1;
+          }
+          return -1;
+        }
+        var mt = String(args.match_title || args.title || '').trim().toLowerCase();
+        if (!mt) return -1;
+        for (var li = 0; li < order.lines.length; li++) {
+          if (String(order.lines[li].title || '').toLowerCase().indexOf(mt) >= 0) return li;
+        }
+        return -1;
+      }
+
+      function ticketLinesForHost() {
+        return order.lines.map(function (line, i) {
+          return {
+            line_index: i + 1,
+            title: line.title,
+            qty: line.qty != null ? line.qty : 1,
+            price: line.price,
+            note: line.note || '',
+          };
+        });
+      }
+
       function ticketSnapshot() {
         var sub = subtotal();
         var taxable = taxableSubtotal();
@@ -899,15 +1263,59 @@
             replyTool(callId, { ok: false, error: 'title and price required' });
             return;
           }
-          order.lines.push({
-            title: title,
-            price: price,
-            qty: isFinite(qty) && qty > 0 ? qty : 1,
-            note: args.note ? String(args.note).trim() : '',
-            taxIncluded: !!args.taxIncluded,
-          });
-          renderTicket();
-          replyTool(callId, { ok: true, ticket: ticketSnapshot() });
+          var lineQty = isFinite(qty) && qty > 0 ? qty : 1;
+
+          fetch('/api/sold-out', { cache: 'no-store' })
+            .then(function (r) {
+              return r.ok ? r.json() : { items: [], ids: [] };
+            })
+            .catch(function () {
+              return { items: [], ids: [] };
+            })
+            .then(function (sold) {
+              var soldItems = Array.isArray(sold.items) ? sold.items : [];
+              var titleNorm = String(title)
+                .toLowerCase()
+                .replace(/[·•|]/g, ' ')
+                .replace(/[^a-z0-9\s]/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+              var blocked = soldItems.some(function (name) {
+                var n = String(name)
+                  .toLowerCase()
+                  .replace(/[·•|]/g, ' ')
+                  .replace(/[^a-z0-9\s]/g, ' ')
+                  .replace(/\s+/g, ' ')
+                  .trim();
+                return n === titleNorm || titleNorm.indexOf(n) >= 0 || n.indexOf(titleNorm) >= 0;
+              });
+              if (blocked) {
+                replyTool(callId, {
+                  ok: false,
+                  soldOut: true,
+                  speakHint:
+                    'That item is sold out / unavailable today. Do not add it. Tell them warmly and suggest another protein or item.',
+                });
+                return;
+              }
+              order.lines.push({
+                title: title,
+                price: price,
+                qty: lineQty,
+                note: args.note ? String(args.note).trim() : '',
+                taxIncluded: !!args.taxIncluded,
+              });
+              renderTicket();
+              var cartOk = syncWebCart('add', { title: title, price: price, qty: lineQty });
+              replyTool(callId, {
+                ok: true,
+                ticket: ticketSnapshot(),
+                webCartSynced: cartOk,
+                speakHint: cartOk
+                  ? 'Item is on the ticket AND the shopping cart / checkout on their screen. Confirm short, then ask protein only if they said a bare category.'
+                  : 'Item is on your voice ticket. If their shopping cart did not update, ask them to tap + on the menu or say the protein again.',
+              });
+            });
           return;
         }
 
@@ -930,6 +1338,7 @@
             if (!customer.phone && matched.phone) customer.phone = String(matched.phone);
           }
           renderTicket();
+          persistCustomerForCheckout();
           var out = { ok: true, ticket: ticketSnapshot() };
           if (matched) {
             var mem = knownGuestPayload(matched);
@@ -937,6 +1346,9 @@
             out.memories = mem.memories;
             out.speakHint = mem.speakHint;
           }
+          out.speakHint =
+            (out.speakHint ? out.speakHint + ' ' : '') +
+            'Pickup details on checkout should show name/email/phone. Confirm on screen if needed.';
           replyTool(callId, out);
           return;
         }
@@ -945,7 +1357,325 @@
           var ft = String(args.type || '').trim().toLowerCase();
           fulfillment = ft === 'delivery' ? 'delivery' : ft === 'pickup' ? 'pickup' : '';
           renderTicket();
-          replyTool(callId, { ok: true, ticket: ticketSnapshot() });
+          var fOut = { ok: true, ticket: ticketSnapshot() };
+          if (fulfillment === 'delivery') {
+            fOut.speakHint =
+              'Pickup only on our site — no delivery apps here. Offer call_restaurant to dial (978) 982-1800 if they want to phone in.';
+          }
+          replyTool(callId, fOut);
+          return;
+        }
+
+        if (name === 'call_restaurant') {
+          window.open(TACO_PHONE_TEL, '_self');
+          replyTool(callId, {
+            ok: true,
+            speakHint:
+              'Dialer opening for (978) 982-1800. Say you are connecting them — may ring a few times if staff are with a customer at the counter.',
+          });
+          return;
+        }
+
+        if (name === 'get_current_datetime' || name === 'get_current_time') {
+          var st = easternShopStatus();
+          fetch('/api/shop-status', { cache: 'no-store' })
+            .then(function (r) {
+              return r.ok ? r.json() : null;
+            })
+            .catch(function () {
+              return null;
+            })
+            .then(function (override) {
+              var line = st.line;
+              var open = st.open;
+              if (override && override.closed) {
+                open = false;
+                line =
+                  'EMERGENCY / EARLY CLOSE — CLOSED for the rest of today. ' +
+                  (override.reason ? 'Reason: ' + override.reason + '. ' : '') +
+                  st.formatted +
+                  ' Eastern.';
+              }
+              replyTool(callId, {
+                ok: true,
+                datetime: st.formatted,
+                open: open,
+                status: line,
+                emergencyClosed: !!(override && override.closed),
+                reason: (override && override.reason) || '',
+                speakHint: line,
+              });
+            });
+          return;
+        }
+
+        if (name === 'show_menu') {
+          if (notifyMenuParent({ type: 'scroll_to', section: 'tacos' })) {
+            replyTool(callId, {
+              ok: true,
+              speakHint:
+                'Customer is on the menu — scrolled to tacos / top. Offer scroll_menu or navigate_section for burritos, enchiladas, etc. Keep talking.',
+            });
+            return;
+          }
+          var menuLink = document.querySelector('.menu-link');
+          if (menuLink) {
+            /* Full /voice page only — never click this in embed (kills the call). */
+            window.open('/', '_blank', 'noopener,noreferrer');
+          } else {
+            window.open('/', '_blank', 'noopener,noreferrer');
+          }
+          replyTool(callId, {
+            ok: true,
+            speakHint:
+              'Menu and photos opening in a new tab. Keep talking — offer scroll when they are on the homepage with you.',
+          });
+          return;
+        }
+
+        if (name === 'scroll_menu') {
+          var dir = String(args.direction || 'down')
+            .trim()
+            .toLowerCase();
+          if (dir !== 'up' && dir !== 'down') dir = 'down';
+          var speed = String(args.speed || 'normal')
+            .trim()
+            .toLowerCase();
+          if (speed !== 'slow') speed = 'normal';
+          if (notifyMenuParent({ type: 'scroll', direction: dir, speed: speed })) {
+            replyTool(callId, {
+              ok: true,
+              direction: dir,
+              speed: speed,
+              speakHint:
+                'Scrolled ' +
+                dir +
+                ' on their menu. Call scroll_menu again if they want more, or navigate_section for a category.',
+            });
+            return;
+          }
+          try {
+            var amount = speed === 'slow' ? 280 : 520;
+            window.scrollBy({ top: dir === 'up' ? -amount : amount, behavior: 'smooth' });
+          } catch (eScroll) {}
+          replyTool(callId, {
+            ok: true,
+            direction: dir,
+            speakHint: 'Scrolled ' + dir + ' on this page. Prefer homepage embed for full menu photos.',
+          });
+          return;
+        }
+
+        if (name === 'navigate_section') {
+          var section = normalizeMenuSection(args.section || args.category || '');
+          if (!section) {
+            replyTool(callId, {
+              ok: false,
+              error:
+                'section must be tacos, burritos, enchiladas, quesadillas, sides, fryer, drinks, or hours',
+            });
+            return;
+          }
+          if (notifyMenuParent({ type: 'scroll_to', section: section })) {
+            replyTool(callId, {
+              ok: true,
+              section: section,
+              speakHint:
+                'Showing ' +
+                section +
+                ' with photos on their screen. Describe briefly and ask what they want. Keep talking.',
+            });
+            return;
+          }
+          try {
+            window.open('/#' + section, '_blank', 'noopener,noreferrer');
+          } catch (eNav) {}
+          replyTool(callId, {
+            ok: true,
+            section: section,
+            speakHint: 'Opened menu at #' + section + ' in a tab. Keep talking.',
+          });
+          return;
+        }
+
+        if (name === 'navigate_to_checkout') {
+          goToCheckoutWithDiego();
+          replyTool(callId, {
+            ok: true,
+            speakHint:
+              'Opening Checkout with Diego still on the line. Guide: first and last name → email → phone → tip → special instructions (optional) → pay. Fill fields with set_customer as they speak.',
+          });
+          return;
+        }
+
+        if (name === 'staff_set_item_availability') {
+          var soldRaw = args.sold_out != null ? args.sold_out : args.soldOut;
+          var soldOut =
+            soldRaw === true || soldRaw === 'true' || soldRaw === 1 || soldRaw === '1';
+          fetch('/api/sold-out', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'set',
+              owner_name: args.owner_name || args.ownerName || '',
+              pin: args.pin || '',
+              item_name: args.item_name || args.itemName || '',
+              match_contains: args.match_contains || args.matchContains || '',
+              sold_out: soldOut,
+            }),
+          })
+            .then(function (r) {
+              return r.json().then(function (data) {
+                return { httpOk: r.ok, data: data };
+              });
+            })
+            .then(function (res) {
+              var data = res.data || {};
+              if (data.state) {
+                notifyMenuParent({ type: 'sold_out_state', state: data.state });
+              } else {
+                notifyMenuParent({ type: 'sold_out_refresh' });
+              }
+              replyTool(callId, {
+                ok: !!data.ok,
+                message: data.message || '',
+                state: data.state || null,
+                speakHint: data.ok
+                  ? data.message +
+                    ' Tell Frank short confirm. Customers see Sold out · unavailable today on that row.'
+                  : data.message || 'Staff update failed — check name and PIN.',
+              });
+            })
+            .catch(function () {
+              replyTool(callId, {
+                ok: false,
+                error: 'sold_out_api_failed',
+                speakHint: 'Could not update sold-out list — try again in a moment.',
+              });
+            });
+          return;
+        }
+
+        if (name === 'staff_set_shop_status') {
+          var closedRaw = args.closed;
+          var closed =
+            closedRaw === true ||
+            closedRaw === 'true' ||
+            closedRaw === 1 ||
+            closedRaw === '1';
+          fetch('/api/shop-status', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              owner_name: args.owner_name || args.ownerName || '',
+              pin: args.pin || '',
+              closed: closed,
+              reason: args.reason || '',
+            }),
+          })
+            .then(function (r) {
+              return r.json().then(function (data) {
+                return { httpOk: r.ok, data: data };
+              });
+            })
+            .then(function (res) {
+              var data = res.data || {};
+              if (data.state) {
+                notifyMenuParent({ type: 'shop_status', state: data.state });
+              }
+              replyTool(callId, {
+                ok: !!data.ok,
+                message: data.message || '',
+                state: data.state || null,
+                speakHint: data.ok
+                  ? data.message +
+                    (closed
+                      ? ' Confirm calmly to Frank. Do not take new orders today.'
+                      : ' Confirm shop is open again for normal hours.')
+                  : data.message || 'Could not update shop status — check name and PIN.',
+              });
+            })
+            .catch(function () {
+              replyTool(callId, {
+                ok: false,
+                error: 'shop_status_failed',
+                speakHint: 'Could not update shop open/closed status right now.',
+              });
+            });
+          return;
+        }
+
+        if (name === 'staff_list_sold_out') {
+          fetch('/api/sold-out', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'list',
+              owner_name: args.owner_name || args.ownerName || '',
+              pin: args.pin || '',
+            }),
+          })
+            .then(function (r) {
+              return r.json().then(function (data) {
+                return { httpOk: r.ok, data: data };
+              });
+            })
+            .then(function (res) {
+              var data = res.data || {};
+              replyTool(callId, {
+                ok: !!data.ok,
+                message: data.message || '',
+                state: data.state || null,
+                speakHint: data.ok
+                  ? data.message
+                  : data.message || 'Could not list sold-out items — check PIN.',
+              });
+            })
+            .catch(function () {
+              replyTool(callId, {
+                ok: false,
+                error: 'sold_out_list_failed',
+                speakHint: 'Could not read sold-out list right now.',
+              });
+            });
+          return;
+        }
+
+        if (name === 'web_search') {
+          var q = String(args.query || args.q || '').trim();
+          if (!q) {
+            replyTool(callId, { ok: false, error: 'query required' });
+            return;
+          }
+          fetch('/api/web-search', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query: q }),
+          })
+            .then(function (r) {
+              return r.json().then(function (data) {
+                return { httpOk: r.ok, data: data };
+              });
+            })
+            .then(function (res) {
+              var data = res.data || {};
+              var result = data.result || data.message || '';
+              replyTool(callId, {
+                ok: !!(res.httpOk && data.ok !== false),
+                query: q,
+                result: result,
+                speakHint:
+                  result ||
+                  'Search failed — tell them honestly you could not look it up; do not invent weather.',
+              });
+            })
+            .catch(function () {
+              replyTool(callId, {
+                ok: false,
+                error: 'web_search_failed',
+                speakHint: 'Search failed — do not invent weather or news.',
+              });
+            });
           return;
         }
 
@@ -1109,14 +1839,109 @@
           return;
         }
 
+        if (name === 'get_ticket') {
+          replyTool(callId, {
+            ok: true,
+            ticket: ticketSnapshot(),
+            lines: ticketLinesForHost(),
+            speakHint:
+              order.lines.length
+                ? 'Ticket has ' + order.lines.length + ' line(s). Use line_index or match_title to fix.'
+                : 'Ticket is empty — nothing to fix yet.',
+          });
+          return;
+        }
+
+        if (name === 'update_order_line') {
+          var uIdx = findOrderLineIndex(args);
+          if (uIdx < 0) {
+            replyTool(callId, {
+              ok: false,
+              error: 'Line not found. Call get_ticket — use line_index or match_title.',
+              lines: ticketLinesForHost(),
+            });
+            return;
+          }
+          var uLine = order.lines[uIdx];
+          var oldTitle = uLine.title;
+          var oldPrice = uLine.price;
+          if (args.qty != null) {
+            var uQty = Number(args.qty);
+            if (!isFinite(uQty) || uQty <= 0) {
+              order.lines.splice(uIdx, 1);
+              syncWebCart('remove', { title: oldTitle, price: oldPrice });
+              renderTicket();
+              replyTool(callId, {
+                ok: true,
+                ticket: ticketSnapshot(),
+                lines: ticketLinesForHost(),
+                speakHint: 'Removed that line from ticket and shopping cart.',
+              });
+              return;
+            }
+            uLine.qty = Math.min(20, Math.max(1, Math.round(uQty)));
+          }
+          if (args.title != null && String(args.title).trim()) {
+            uLine.title = String(args.title).trim();
+          }
+          if (args.price != null && isFinite(Number(args.price))) {
+            uLine.price = Number(args.price);
+          }
+          if (args.note != null) {
+            uLine.note = String(args.note).trim();
+          }
+          renderTicket();
+          if (order.lines[uIdx]) {
+            if (oldTitle !== uLine.title) {
+              syncWebCart('remove', { title: oldTitle, price: oldPrice });
+              syncWebCart('add', { title: uLine.title, price: uLine.price, qty: uLine.qty });
+            } else {
+              syncWebCart('set', { title: uLine.title, price: uLine.price, qty: uLine.qty });
+            }
+          }
+          replyTool(callId, {
+            ok: true,
+            ticket: ticketSnapshot(),
+            lines: ticketLinesForHost(),
+            speakHint: 'Fixed — confirm what the ticket and shopping cart show now.',
+          });
+          return;
+        }
+
+        if (name === 'remove_order_line') {
+          var rIdx = findOrderLineIndex(args);
+          if (rIdx < 0) {
+            replyTool(callId, {
+              ok: false,
+              error: 'Line not found on ticket. Call get_ticket first.',
+              lines: ticketLinesForHost(),
+            });
+            return;
+          }
+          var removedTitle = order.lines[rIdx].title;
+          var removedPrice = order.lines[rIdx].price;
+          order.lines.splice(rIdx, 1);
+          renderTicket();
+          syncWebCart('remove', { title: removedTitle, price: removedPrice });
+          replyTool(callId, {
+            ok: true,
+            removed: removedTitle,
+            ticket: ticketSnapshot(),
+            lines: ticketLinesForHost(),
+            speakHint: 'Removed ' + removedTitle + ' from ticket and shopping cart. Confirm it looks right.',
+          });
+          return;
+        }
+
         if (name === 'clear_order') {
           resetOrder();
           resetCustomer();
           renderTicket();
+          syncWebCart('clear', {});
           replyTool(callId, {
             ok: true,
             ticket: ticketSnapshot(),
-            note: 'Full reset — lines and customer cleared.',
+            note: 'Full reset — lines, customer, and shopping cart cleared.',
           });
           return;
         }
@@ -1316,7 +2141,21 @@
             fname === 'set_spice' ||
             fname === 'set_tip' ||
             fname === 'set_instructions' ||
-            fname === 'clear_order'
+            fname === 'clear_order' ||
+            fname === 'get_ticket' ||
+            fname === 'update_order_line' ||
+            fname === 'remove_order_line' ||
+            fname === 'call_restaurant' ||
+            fname === 'get_current_datetime' ||
+            fname === 'get_current_time' ||
+            fname === 'show_menu' ||
+            fname === 'scroll_menu' ||
+            fname === 'navigate_section' ||
+            fname === 'navigate_to_checkout' ||
+            fname === 'staff_set_item_availability' ||
+            fname === 'staff_list_sold_out' ||
+            fname === 'staff_set_shop_status' ||
+            fname === 'web_search'
           ) {
             try {
               handleOrderTool(fname, callId, data.arguments || '{}');
@@ -1495,7 +2334,7 @@
         btn.disabled = false;
         btn.classList.remove('live');
         btn.classList.remove('canceling');
-        btn.textContent = 'Talk to Diego';
+        setDiegoIdleButtonLabel();
       }
 
       function hangUp() {
@@ -1521,6 +2360,13 @@
           remoteAudio.muted = true;
           remoteAudio.volume = 0;
         } catch (e) {}
+        if (embedMode) {
+          notifyMenuHangup();
+          setDiegoIdleButtonLabel();
+          return;
+        }
+        /* Full-page /voice only — back to homepage */
+        window.location.href = '/';
       }
 
       function callInProgress() {
@@ -1585,6 +2431,7 @@
         btn.classList.add('canceling');
         btn.classList.remove('live');
         btn.textContent = 'Hang Up';
+        btn.setAttribute('aria-label', 'Hang up');
         setStatus('Talking to Diego…');
         resetOrder();
         resetCustomer();
@@ -1601,7 +2448,7 @@
           var tokenPromise = fetch('/api/realtime-token', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: '{}',
+            body: JSON.stringify(resumeCheckout ? { resume: 'checkout' } : {}),
           }).then(async function (resp) {
             if (!resp.ok) {
               var errText = await resp.text().catch(function () { return ''; });
@@ -1638,8 +2485,9 @@
             remoteAudio.play().catch(function () {});
           };
 
-          var greetingExact =
-            'Welcome to Taco Express. My name is Diego. May I have your full name?';
+          var greetingExact = resumeCheckout
+            ? "We're at checkout together. Tip is glowing first — No tip is fine, or pick a percent when you're ready. I'll walk you through name, email, and phone next."
+            : 'Welcome to Taco Express. My name is Diego. May I have your full name?';
           var dcOpen = false;
           var greetingArmed = false;
           var greetingSpoken = false;
@@ -1648,13 +2496,17 @@
             if (!stillThisConnect() || !sessionAlive || !dcOpen || !greetingArmed || greetingSpoken) return;
             greetingSpoken = true;
             greetingArmed = false;
+            var follow = resumeCheckout
+              ? 'Then STOP and listen. Guide tip → full name → email → phone → pay. Do NOT re-introduce yourself. Do NOT say Hi my name is Diego. Do NOT ask language. Do NOT restart the order greeting.'
+              : 'Then stop. Pause. Listen for their language choice or name. Do not ask what they want yet. Nothing else. Do not repeat yourself. Do not say Welcome twice.';
             dcSend({
               type: 'response.create',
               response: {
                 instructions:
                   'Say EXACTLY and ONLY with a happy pleasant smiling warm tone and a steady natural pace: "' +
                   greetingExact +
-                  '" Then stop. Pause. Listen for their name. Do not ask what they want yet. Nothing else. Do not repeat yourself. Do not say Welcome twice.',
+                  '" ' +
+                  follow,
               },
             });
           }
@@ -1685,6 +2537,9 @@
           var ephemeralKey = (tokenPayload.value || '').trim();
           if (!ephemeralKey) throw new Error('Missing ephemeral token');
           if (tokenPayload.greetingExact) greetingExact = String(tokenPayload.greetingExact);
+          if (tokenPayload.resume === 'checkout') {
+            resumeCheckout = true;
+          }
           if (tokenPayload.taxRate != null && isFinite(Number(tokenPayload.taxRate))) {
             taxRate = Number(tokenPayload.taxRate);
           }
@@ -1735,6 +2590,7 @@
           btn.classList.remove('canceling');
           btn.classList.add('live');
           btn.textContent = 'Hang Up';
+        btn.setAttribute('aria-label', 'Hang up');
           setStatus('Diego is on — ticket updates as you order');
         } catch (e) {
           console.error('[Taco Diego]', e);
@@ -1752,6 +2608,36 @@
         }
         startDiego();
       });
+
+      window.addEventListener('message', function (ev) {
+        if (!embedMode) return;
+        if (ev.origin !== window.location.origin) return;
+        var data = ev.data;
+        if (!data || data.source !== 'taco-menu') return;
+        if (data.type === 'hangup') hangUp();
+      });
+
+      /* Homepage sheet → /voice?start=1&embed=1 — connect immediately, stay on menu. */
+      (function maybeAutostartDiego() {
+        var params = new URLSearchParams(window.location.search || '');
+        var wantStart = params.get('start') === '1';
+        try {
+          if (sessionStorage.getItem('diegoAutostart') === '1') wantStart = true;
+          sessionStorage.removeItem('diegoAutostart');
+        } catch (eSs) {}
+        if (!wantStart) return;
+        try {
+          var keep =
+            embedMode
+              ? resumeCheckout
+                ? '/voice?embed=1&resume=checkout'
+                : '/voice?embed=1'
+              : '/voice';
+          history.replaceState({}, '', keep);
+        } catch (eHist) {}
+        setStatus('Talking to Diego…');
+        startDiego();
+      })();
     })();
   </script>
 </body>

@@ -3,7 +3,7 @@
  * This GitHub repo only (taco-express-peabody). Do not load another restaurant's menu.
  */
 const FULL_MENU = `
-Taco Express Peabody — 58 Pulaski Street, Peabody MA 01960 · (978) 982-1800
+Taco Express Peabody — 58 Pulaski Street Unit B, Peabody MA 01960 · (978) 982-1800
 Hours: Mon–Tue CLOSED. Wed–Sat 11AM–8PM. Sun 11AM–6PM.
 Prices match DoorDash Menu Manager.
 
@@ -16,8 +16,13 @@ RULES (always):
 - NOT ON MENU: ribeye burrito, one-taco $5 special, taco bowls, burrito bowls, party platters, steak taco, filet, veggie/tofu.
 
 TACO MAPPING (CRITICAL):
-- "beef/chicken/pork/shrimp taco(s)" = three-taco plate.
+- "three tacos" / "tacos" / "beef taco(s)" / "chicken tacos" = ONE plate, ONE protein, ONE ticket line.
+  Use Three Tacos · [protein] $13.49 (or shrimp $21.99). qty=1. The menu item ALREADY IS three tacos — do NOT add three separate lines.
+- NEVER use Taco Plate / dinner unless they explicitly say: dinner, plate, with rice and beans, two sides, taco dinner, make it a plate.
+- "Three tacos" alone is NOT Taco Plate. Do NOT add rice, beans, or any side unless they explicitly ask for a side or name a side item.
+- ONE protein per plate — never mix (no beef + chicken + pork on one order unless they ordered three separate plates).
   Titles: Three Tacos · Shredded Beef $13.49 | Three Tacos · Shredded Chicken $13.49 | Three Tacos · Shredded Pork $13.49 | Three Tacos · Grilled Shrimp $21.99
+- Taco Plate (ONLY when asked): Taco Plate · Beef $20.49 | Chicken $20.49 | Pork $20.49 | Shrimp $28.99 — includes rice & beans; still ONE line.
 
 COOKING METHOD (say when they ask how it's made — short; do not dump on every order):
 Beef, chicken & pork are braised / shredded — never ground. Beef: slow-cooked with carrots, celery & taco seasoning (like a good beef stew), cooled, shredded, simmered again. Shrimp: seasoned & grilled to perfection.
@@ -35,7 +40,8 @@ ENCHILADAS (two alone): Two Enchiladas · Shredded Beef $13.99 | Two Enchiladas 
 ENCHILADA DINNER (+$7 rice & beans): Enchilada Plate · Beef $20.99 | Chicken $20.99 | Pork $20.99 | Shrimp $28.99
 QUESADILLAS (alone): Loaded Quesadillas Beef $13.99 | Loaded Quesadillas Chicken $13.99 | Loaded Quesadillas Pork $13.99 | Loaded Quesadillas Shrimp $21.99
 QUESADILLA DINNER (+$7 rice & beans): Quesadilla Plate · Beef $20.99 | Chicken $20.99 | Pork $20.99 | Shrimp $28.99
-When they say dinner, plate, or with rice and beans on any of the above, use the matching DINNER / Plate item.
+When they say dinner, plate, or with rice and beans on any of the above, use the matching DINNER / Plate item — ONE line only.
+If they only said tacos / three tacos / chicken tacos with NO dinner language → Three Tacos only, never Plate, never loose sides.
 
 SIDES: Seasoned Brown Rice $3.49 · Black Beans $3.49 · Refried Beans $3.49 · Salsa $1.50 · Pico de Gallo $4 · Tortilla Chips $2.50 · Guacamole $3
 

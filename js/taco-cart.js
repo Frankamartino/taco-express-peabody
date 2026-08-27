@@ -31,6 +31,10 @@
 
   function setQty(itemId, qty) {
     if (!catalogById[itemId]) return;
+    if (window.TacoSoldOut && window.TacoSoldOut.isSoldOut(itemId) && Number(qty) > getQty(itemId)) {
+      flashCartTarget(itemId);
+      return;
+    }
     var prev = getQty(itemId);
     var cart = loadCart().filter(function (row) { return row.id !== itemId; });
     var next = Math.max(0, Math.min(20, Number(qty) || 0));
@@ -42,11 +46,167 @@
         bar.classList.add('cart-pulse');
         window.setTimeout(function () { bar.classList.remove('cart-pulse'); }, 450);
       }
+      flashCartTarget(itemId);
     }
+  }
+
+  /** Bright green flash on the order-row (or stepper) that just got qty — not the whole card. */
+  function flashCartTarget(itemId) {
+    if (!itemId) return;
+    var row = document.querySelector('.order-row[data-item-id="' + itemId + '"]');
+    var target = row;
+    if (!target) {
+      var stepper = document.querySelector('.qty-stepper[data-item-id="' + itemId + '"]');
+      target = stepper || null;
+    }
+    if (!target) return;
+    target.classList.remove('just-added');
+    void target.offsetWidth;
+    target.classList.add('just-added', 'is-in-cart');
+    try {
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } catch (eScroll) {
+      try {
+        target.scrollIntoView(true);
+      } catch (eScroll2) {}
+    }
+    window.setTimeout(function () {
+      target.classList.remove('just-added');
+    }, 1600);
+  }
+
+  function syncInCartHighlights() {
+    document.querySelectorAll('.order-row[data-item-id]').forEach(function (row) {
+      var id = row.getAttribute('data-item-id');
+      row.classList.toggle('is-in-cart', getQty(id) > 0);
+    });
+    document.querySelectorAll('.qty-stepper[data-item-id]').forEach(function (stepper) {
+      var id = stepper.getAttribute('data-item-id');
+      var inCart = getQty(id) > 0;
+      stepper.classList.toggle('is-in-cart', inCart);
+      /* Card-level steppers (sides/drinks): glow the stepper strip only, not the whole card. */
+      if (!stepper.closest('.order-row')) {
+        stepper.classList.toggle('stepper-in-cart', inCart);
+      }
+    });
   }
 
   function changeQty(itemId, delta) {
     setQty(itemId, getQty(itemId) + delta);
+  }
+
+  function normalizeMenuText(s) {
+    return String(s || '')
+      .toLowerCase()
+      .replace(/[·•|]/g, ' ')
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function detectProtein(norm) {
+    if (/\bshrimp\b/.test(norm)) return 'shrimp';
+    if (/\bchicken\b/.test(norm)) return 'chicken';
+    if (/\bpork\b/.test(norm)) return 'pork';
+    if (/\bbeef\b/.test(norm)) return 'beef';
+    return '';
+  }
+
+  function resolveByMenuName(title, priceDollars) {
+    var items = Object.keys(catalogById).map(function (id) {
+      return catalogById[id];
+    });
+    if (!items.length && window.TACO_MENU_ITEMS) items = window.TACO_MENU_ITEMS.slice();
+    if (!items.length) return null;
+
+    var raw = String(title || '').trim();
+    var norm = normalizeMenuText(raw);
+    if (!norm) return null;
+
+    var exact = items.find(function (item) {
+      return normalizeMenuText(item.name) === norm;
+    });
+    if (exact) return exact;
+
+    var priceCents =
+      priceDollars != null && isFinite(Number(priceDollars))
+        ? Math.round(Number(priceDollars) * 100)
+        : null;
+    if (priceCents != null) {
+      var byPriceName = items.find(function (item) {
+        return (
+          item.priceCents === priceCents &&
+          (normalizeMenuText(item.name).indexOf(norm) >= 0 ||
+            norm.indexOf(normalizeMenuText(item.name)) >= 0)
+        );
+      });
+      if (byPriceName) return byPriceName;
+    }
+
+    var isPlate = /\b(plate|dinner)\b/.test(norm);
+    var protein = detectProtein(norm);
+    var prefix = '';
+    if (/\bburrito/.test(norm)) prefix = 'burrito';
+    else if (/\benchilada/.test(norm)) prefix = 'enchilada';
+    else if (/\bquesadilla/.test(norm)) prefix = 'quesadilla';
+    else if (/\btaco/.test(norm)) prefix = 'tacos';
+    else if (/\b(rice|brown rice)\b/.test(norm) && !/\bextra\b/.test(norm)) {
+      return items.find(function (i) {
+        return i.id === 'side-rice';
+      }) || null;
+    } else if (/\bblack beans?\b/.test(norm) && !/\bextra\b/.test(norm)) {
+      return items.find(function (i) {
+        return i.id === 'side-black-beans';
+      }) || null;
+    } else if (/\brefried beans?\b/.test(norm)) {
+      return items.find(function (i) {
+        return i.id === 'side-refried-beans';
+      }) || null;
+    }
+
+    if (prefix && protein) {
+      var id = prefix + '-' + protein + (isPlate ? '-plate' : '');
+      var hit = items.find(function (i) {
+        return i.id === id;
+      });
+      if (hit) return hit;
+    }
+
+    if (priceCents != null) {
+      var loose = items.find(function (item) {
+        return item.priceCents === priceCents && normalizeMenuText(item.name).indexOf(protein) >= 0;
+      });
+      if (loose) return loose;
+    }
+
+    return null;
+  }
+
+  /** Diego / voice: add (or bump qty) by DoorDash-style title. Returns item or null. */
+  function addFromVoice(title, qty, priceDollars) {
+    var item = resolveByMenuName(title, priceDollars);
+    if (!item) return null;
+    if (window.TacoSoldOut && window.TacoSoldOut.isSoldOut(item.id)) {
+      return { soldOut: true, item: item };
+    }
+    var n = isFinite(Number(qty)) && Number(qty) > 0 ? Math.floor(Number(qty)) : 1;
+    setQty(item.id, getQty(item.id) + n);
+    return item;
+  }
+
+  function setFromVoice(title, qty, priceDollars) {
+    var item = resolveByMenuName(title, priceDollars);
+    if (!item) return null;
+    var n = Math.max(0, Math.floor(Number(qty) || 0));
+    setQty(item.id, n);
+    return item;
+  }
+
+  function removeFromVoice(title, priceDollars) {
+    var item = resolveByMenuName(title, priceDollars);
+    if (!item) return null;
+    setQty(item.id, 0);
+    return item;
   }
 
   function parsePrice(text) {
@@ -157,6 +317,7 @@
 
   function updateAllSteppers() {
     document.querySelectorAll('.qty-stepper[data-item-id]').forEach(updateStepperEl);
+    syncInCartHighlights();
   }
 
   function wireOrderRows() {
@@ -218,6 +379,11 @@
     totals: function () { return cartTotals(loadCart()); },
     catalogById: function () { return catalogById; },
     isReady: function () { return catalogReady; },
+    resolveByMenuName: resolveByMenuName,
+    addFromVoice: addFromVoice,
+    setFromVoice: setFromVoice,
+    removeFromVoice: removeFromVoice,
+    flashCartTarget: flashCartTarget,
     clear: function () {
       saveCart([]);
     },

@@ -14,15 +14,159 @@
     :root { --lime: #84cc16; --terra: #ea580c; --cream: #fffbeb; --ink: #1c1917; --border: rgba(255,255,255,0.1); }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: "DM Sans", system-ui, sans-serif; background: var(--ink); color: var(--cream); min-height: 100vh; padding: 0 18px 40px; }
-    .top-bar { background: #14532d; color: #bbf7d0; text-align: center; padding: 8px 14px; font-size: 0.78rem; font-weight: 600; width: calc(100% + 36px); margin: 0 -18px; }
-    .top-bar a { color: #fff; text-decoration: none; font-weight: 700; }
     .wrap { max-width: 520px; margin: 0 auto; padding-top: 24px; }
     .brand { text-align: center; margin-bottom: 22px; }
     .brand img { width: 88px; height: 88px; border-radius: 50%; object-fit: cover; background: #fff; margin-bottom: 10px; }
-    h1 { font-family: "Bebas Neue", sans-serif; font-size: 2.4rem; letter-spacing: 0.06em; color: var(--lime); line-height: 1; }
-    .back { display: inline-block; margin-top: 10px; color: #fff; text-decoration: none; font-weight: 600; font-size: 0.9rem; }
+    h1 {
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 2.4rem;
+      letter-spacing: 0.06em;
+      color: var(--lime);
+      line-height: 1;
+      margin: 0;
+    }
+    .order-heading {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px 14px;
+      margin-bottom: 12px;
+    }
+    @keyframes checkoutGelPulse {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow:
+          0 8px 24px rgba(234, 88, 12, 0.42),
+          0 0 0 0 rgba(132, 204, 22, 0),
+          inset 0 2px 0 rgba(255, 255, 255, 0.4),
+          inset 0 -12px 20px rgba(0, 0, 0, 0.28);
+      }
+      50% {
+        transform: scale(1.03);
+        box-shadow:
+          0 16px 40px rgba(234, 88, 12, 0.55),
+          0 0 36px 4px rgba(132, 204, 22, 0.32),
+          inset 0 2px 0 rgba(255, 255, 255, 0.5),
+          inset 0 -12px 20px rgba(0, 0, 0, 0.2);
+      }
+    }
+    @keyframes checkoutGelShine {
+      0% { transform: translateX(-140%) skewX(-18deg); opacity: 0; }
+      18% { opacity: 0.85; }
+      42% { opacity: 0.55; }
+      58%, 100% { transform: translateX(220%) skewX(-18deg); opacity: 0; }
+    }
+    @keyframes checkoutGelRipple {
+      0% { box-shadow: 0 0 0 0 rgba(132, 204, 22, 0.42); opacity: 1; }
+      100% { box-shadow: 0 0 0 22px rgba(132, 204, 22, 0); opacity: 0; }
+    }
+    .forget-btn,
+    .pay-btn {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      color: #fff;
+      cursor: pointer;
+      background:
+        radial-gradient(120% 80% at 50% 0%, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0.08) 32%, transparent 55%),
+        linear-gradient(180deg, #fb923c 0%, #ea580c 38%, #c2410c 100%);
+      animation: checkoutGelPulse 2.6s ease-in-out infinite;
+      transition: filter 0.2s ease;
+    }
+    .forget-btn::before,
+    .pay-btn::before {
+      content: '';
+      position: absolute;
+      top: -20%;
+      left: 0;
+      width: 42%;
+      height: 140%;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.08) 30%,
+        rgba(255, 255, 255, 0.55) 50%,
+        rgba(255, 255, 255, 0.08) 70%,
+        transparent 100%
+      );
+      animation: checkoutGelShine 3.4s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .forget-btn::after,
+    .pay-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      animation: checkoutGelRipple 2.6s ease-out infinite;
+      pointer-events: none;
+    }
+    .forget-btn:hover,
+    .pay-btn:hover:not(:disabled) {
+      filter: brightness(1.08);
+      color: #fff;
+    }
+    .forget-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35em;
+      padding: 12px 22px;
+      border-radius: 999px;
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 1.4rem;
+      letter-spacing: 0.04em;
+      line-height: 1;
+      font-weight: 400;
+      text-decoration: none;
+      white-space: nowrap;
+      z-index: 0;
+    }
+    .forget-btn > *,
+    .pay-btn {
+      position: relative;
+      z-index: 1;
+    }
+    .pay-btn {
+      width: 100%;
+      margin-top: 12px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 1rem;
+      padding: 14px 18px;
+      font-family: inherit;
+      text-align: center;
+      text-decoration: none;
+      box-sizing: border-box;
+    }
+    .pay-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-top: 6px;
+    }
+    .pay-actions .pay-btn:first-child {
+      margin-top: 18px;
+    }
+    a.pay-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .pay-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      animation: none;
+      filter: none;
+    }
+    .pay-btn:disabled::before,
+    .pay-btn:disabled::after {
+      animation: none;
+      opacity: 0;
+    }
     .panel { border: 1px solid var(--border); border-radius: 14px; padding: 16px; background: rgba(255,255,255,0.04); margin-bottom: 16px; }
-    .panel h2 { font-family: "Bebas Neue", sans-serif; font-size: 1.4rem; letter-spacing: 0.04em; margin-bottom: 12px; }
+    .panel h2 { font-family: "Bebas Neue", sans-serif; font-size: 1.4rem; letter-spacing: 0.04em; margin-bottom: 0; }
     .line { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.92rem; }
     .line:last-child { border-bottom: 0; }
     .line .name { flex: 1; }
@@ -31,8 +175,6 @@
     label { display: block; font-size: 0.82rem; font-weight: 700; margin: 12px 0 6px; }
     input, textarea { width: 100%; border-radius: 10px; border: 1px solid var(--border); background: rgba(0,0,0,0.25); color: #fff; padding: 11px 12px; font: inherit; }
     textarea { min-height: 72px; resize: vertical; }
-    .pay-btn { width: 100%; margin-top: 18px; border: 0; border-radius: 999px; background: var(--terra); color: #fff; font-weight: 800; font-size: 1rem; padding: 14px 18px; cursor: pointer; }
-    .pay-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     #msg { margin-top: 14px; min-height: 1.2em; font-weight: 600; text-align: center; }
     #msg.err { color: #fca5a5; }
     .note { margin-top: 12px; font-size: 0.82rem; color: rgba(255,251,235,0.65); text-align: center; line-height: 1.45; }
@@ -41,14 +183,52 @@
     .tip-panel { margin: 14px 0 4px; }
     .tip-panel h3 {
       font-family: "Bebas Neue", sans-serif;
-      font-size: 1.15rem;
-      letter-spacing: 0.06em;
-      color: var(--lime);
+      font-size: 1.55rem;
+      letter-spacing: 0.08em;
+      color: #fff;
       margin-bottom: 10px;
+      display: inline-block;
+    }
+    #payPanel > h2 {
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 1.55rem;
+      letter-spacing: 0.06em;
+      color: #fff;
+      margin-bottom: 12px;
+      display: inline-block;
+    }
+    @keyframes guideGlowPulse {
+      0%, 100% {
+        color: #fde68a;
+        text-shadow:
+          0 0 8px rgba(253, 230, 138, 0.55),
+          0 0 22px rgba(234, 179, 8, 0.45),
+          0 0 40px rgba(132, 204, 22, 0.25);
+        transform: scale(1);
+      }
+      50% {
+        color: #fef08a;
+        text-shadow:
+          0 0 14px rgba(254, 240, 138, 0.9),
+          0 0 32px rgba(250, 204, 21, 0.65),
+          0 0 56px rgba(132, 204, 22, 0.4);
+        transform: scale(1.04);
+      }
+    }
+    .guide-glow {
+      animation: guideGlowPulse 1.8s ease-in-out infinite;
+      transform-origin: left center;
+    }
+    label.guide-glow {
+      display: inline-block;
+      transform-origin: left center;
+    }
+    .pay-actions.guide-pay .pay-btn {
+      filter: brightness(1.06);
     }
     .tip-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 8px;
     }
     .tip-btn {
@@ -88,26 +268,84 @@
     }
     #tipLine { display: none; }
     #tipLine.show { display: flex; }
+
+    /* Diego background voice on checkout (same pattern as homepage) */
+    .checkout-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .checkout-top .brand { flex: 1; margin-bottom: 0; }
+    .voice-btn {
+      flex-shrink: 0;
+      border: 0;
+      cursor: pointer;
+      font-family: "Bebas Neue", sans-serif;
+      letter-spacing: 0.04em;
+      font-size: 0.95rem;
+      line-height: 1.15;
+      color: #fff;
+      background: linear-gradient(165deg, #fb923c 0%, #ea580c 45%, #c2410c 100%);
+      border-radius: 999px;
+      padding: 12px 16px;
+      box-shadow: 0 8px 24px rgba(234, 88, 12, 0.42);
+      max-width: 140px;
+      text-align: center;
+    }
+    .voice-btn .voice-btn-sub {
+      display: block;
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0;
+      opacity: 0.92;
+      margin-top: 2px;
+    }
+    .voice-btn.is-live {
+      background: linear-gradient(165deg, #ef4444 0%, #b91c1c 100%);
+      box-shadow: 0 8px 24px rgba(185, 28, 28, 0.4);
+    }
+    #diegoFrame {
+      position: fixed;
+      width: 1px;
+      height: 1px;
+      border: 0;
+      opacity: 0;
+      pointer-events: none;
+      left: 0;
+      bottom: 0;
+      z-index: -1;
+    }
   </style>
 </head>
 <body>
-  <div class="top-bar">58 Pulaski St · Peabody MA 01960 · <a href="tel:+19789821800">(978) 982-1800</a></div>
   <div class="wrap">
-    <div class="brand">
-      <img src="images/taco-express-logo.jpg" width="88" height="88" alt="Taco Express Peabody" />
-      <h1>Checkout</h1>
-      <a class="back" href="/">← Back to menu</a>
+    <div class="checkout-top">
+      <div class="brand">
+        <img src="images/taco-express-logo.jpg" width="88" height="88" alt="Taco Express Peabody" />
+        <h1>Checkout</h1>
+      </div>
+      <button type="button" class="voice-btn" id="headerDiegoBtn" aria-label="Diego will help with checkout. Press button now.">
+        <span>Diego</span>
+        <span class="voice-btn-sub">Press for help</span>
+      </button>
     </div>
     <div class="panel">
-      <h2>Your order</h2>
+      <div class="order-heading">
+        <h2>Your order</h2>
+        <a class="forget-btn" href="/">Oops! Forgot something · Menu</a>
+      </div>
       <div id="lines"></div>
 
       <div class="tip-panel" id="tipPanel" hidden>
-        <h3>Tip</h3>
+        <h3 id="tipHeading">Tip</h3>
         <div class="tip-grid" role="group" aria-label="Tip amount">
+          <button type="button" class="tip-btn active" data-tip="0">No tip</button>
           <button type="button" class="tip-btn" data-tip="5">5%</button>
           <button type="button" class="tip-btn" data-tip="10">10%</button>
-          <button type="button" class="tip-btn active" data-tip="15">15%</button>
+          <button type="button" class="tip-btn" data-tip="15">15%</button>
           <button type="button" class="tip-btn" data-tip="20">20%</button>
           <button type="button" class="tip-btn" data-tip="25">25%</button>
           <button type="button" class="tip-btn" data-tip="other">Other</button>
@@ -129,37 +367,170 @@
       </div>
     </div>
     <div class="panel" id="payPanel">
-      <h2>Pickup details</h2>
-      <label for="name">Full name</label>
+      <h2 id="pickupHeading">Pickup details</h2>
+      <label for="name" id="labelName" class="guide-glow">Full name</label>
       <input id="name" type="text" autocomplete="name" required />
-      <label for="email">Email (Stripe receipt)</label>
+      <label for="email" id="labelEmail">Email</label>
       <input id="email" type="email" autocomplete="email" required />
-      <label for="phone">Phone</label>
+      <label for="phone" id="labelPhone">Phone</label>
       <input id="phone" type="tel" autocomplete="tel" inputmode="tel" required />
-      <label for="instructions">Special instructions (optional)</label>
+      <label for="instructions" id="labelInstructions">Special instructions (optional)</label>
       <textarea id="instructions" placeholder="Mild or spicy, pickup time, etc."></textarea>
-      <button type="button" class="pay-btn" id="payBtn">Pay with card</button>
+      <div class="pay-actions">
+        <button type="button" class="pay-btn" id="payBtn">Pay with card</button>
+        <button type="button" class="pay-btn" id="cashBtn">Pay with cash</button>
+      </div>
       <p id="msg" aria-live="polite"></p>
-      <p class="note">Secure Stripe checkout · pickup at 58 Pulaski St, Peabody</p>
     </div>
   </div>
   <script src="/js/menu-catalog-data.js"></script>
+  <script src="/js/taco-sold-out.js"></script>
   <script src="/js/taco-cart.js"></script>
   <script>
     (function () {
       var payBtn = document.getElementById('payBtn');
+      var cashBtn = document.getElementById('cashBtn');
       var payPanel = document.getElementById('payPanel');
       var tipPanel = document.getElementById('tipPanel');
       var tipOtherWrap = document.getElementById('tipOtherWrap');
       var tipOtherAmount = document.getElementById('tipOtherAmount');
       var tipLine = document.getElementById('tipLine');
       var tipLabel = document.getElementById('tipLabel');
+      var tipHeading = document.getElementById('tipHeading');
+      var pickupHeading = document.getElementById('pickupHeading');
+      var labelName = document.getElementById('labelName');
+      var labelEmail = document.getElementById('labelEmail');
+      var labelPhone = document.getElementById('labelPhone');
+      var labelInstructions = document.getElementById('labelInstructions');
+      var payActions = document.querySelector('.pay-actions');
       var msg = document.getElementById('msg');
+      var nameInput = document.getElementById('name');
+      var emailInput = document.getElementById('email');
+      var phoneInput = document.getElementById('phone');
+      var instructionsInput = document.getElementById('instructions');
 
       var tipMode = 'percent';
-      var tipPercent = 15;
+      var tipPercent = 0;
+      var tipChosen = false;
+      var instructionsTouched = false;
 
       function money(cents) { return '$' + (cents / 100).toFixed(2); }
+
+      function clearFieldGlows() {
+        [labelName, labelEmail, labelPhone, labelInstructions, pickupHeading].forEach(function (el) {
+          if (el) el.classList.remove('guide-glow');
+        });
+        if (payActions) payActions.classList.remove('guide-pay');
+      }
+
+      function updateGuide() {
+        clearFieldGlows();
+        var c = readContact();
+        /* Name → email → phone first, then tip (Frank: credentials before tip glow). */
+        if (!c.name) {
+          if (labelName) labelName.classList.add('guide-glow');
+          return;
+        }
+        if (!c.email || c.email.indexOf('@') < 1) {
+          if (labelEmail) labelEmail.classList.add('guide-glow');
+          return;
+        }
+        if (!c.phone) {
+          if (labelPhone) labelPhone.classList.add('guide-glow');
+          return;
+        }
+        if (!tipChosen) {
+          if (tipHeading) tipHeading.classList.add('guide-glow');
+          return;
+        }
+        /* Instructions optional — glow the label and light pay so they can skip. */
+        if (!instructionsTouched) {
+          if (labelInstructions) labelInstructions.classList.add('guide-glow');
+        }
+        if (payActions) payActions.classList.add('guide-pay');
+      }
+
+      function applyCheckoutContact(data) {
+        if (!data || typeof data !== 'object') return;
+        var full =
+          String(data.name || '').trim() ||
+          [data.firstName, data.lastName].filter(Boolean).join(' ').trim();
+        if (full && nameInput && !nameInput.value.trim()) nameInput.value = full;
+        else if (full && nameInput && data.force) nameInput.value = full;
+        if (data.email && emailInput) {
+          if (!emailInput.value.trim() || data.force) emailInput.value = String(data.email).trim();
+        }
+        if (data.phone && phoneInput) {
+          if (!phoneInput.value.trim() || data.force) phoneInput.value = String(data.phone).trim();
+        }
+        updateGuide();
+      }
+
+      function loadSavedCheckoutContact() {
+        try {
+          var raw = sessionStorage.getItem('tacoCheckoutContact');
+          if (!raw) return;
+          applyCheckoutContact(JSON.parse(raw));
+        } catch (eLoad) {}
+      }
+
+      function splitName(full) {
+        var parts = String(full || '').trim().split(/\s+/).filter(Boolean);
+        if (!parts.length) return { firstName: '', lastName: '' };
+        if (parts.length === 1) return { firstName: '', lastName: parts[0] };
+        return { firstName: parts[0], lastName: parts.slice(1).join(' ') };
+      }
+
+      function readContact() {
+        return {
+          name: document.getElementById('name').value.trim(),
+          email: document.getElementById('email').value.trim(),
+          phone: document.getElementById('phone').value.trim(),
+          instructions: document.getElementById('instructions').value.trim(),
+        };
+      }
+
+      function validateContact(c) {
+        msg.textContent = '';
+        msg.className = '';
+        if (!c.name) { msg.textContent = 'Please enter your name.'; msg.className = 'err'; return false; }
+        if (!c.email || c.email.indexOf('@') < 1) { msg.textContent = 'Please enter a valid email.'; msg.className = 'err'; return false; }
+        if (!c.phone) { msg.textContent = 'Please enter your phone.'; msg.className = 'err'; return false; }
+        return true;
+      }
+
+      function buildCashTicket(c) {
+        var cart = window.TacoCart.load();
+        var catalog = window.TacoCart.catalogById();
+        var totals = window.TacoCart.totals();
+        var tipCents = tipCentsFromSubtotal(totals.subtotalCents);
+        var lines = [];
+        cart.forEach(function (row) {
+          var item = catalog[row.id];
+          if (!item) return;
+          lines.push({
+            title: item.name,
+            qty: row.qty,
+            price: (item.priceCents * row.qty) / 100,
+            taxIncluded: false,
+          });
+        });
+        var names = splitName(c.name);
+        return {
+          lines: lines,
+          customer: {
+            firstName: names.firstName,
+            lastName: names.lastName,
+            email: c.email,
+            phone: c.phone,
+          },
+          tip: tipCents / 100,
+          taxRate: 0.07,
+          total: (totals.subtotalCents + totals.taxCents + tipCents) / 100,
+          instructions: c.instructions || 'none',
+          fulfillment: 'pickup',
+        };
+      }
 
       function syncStepper(stepper, qty) {
         var count = stepper.querySelector('.qty-count');
@@ -197,7 +568,26 @@
           tipPercent = Number(value);
           tipOtherWrap.classList.remove('show');
         }
+        tipChosen = true;
         render();
+        updateGuide();
+      }
+
+      function zeroTotals() {
+        document.getElementById('subtotal').textContent = money(0);
+        document.getElementById('tax').textContent = money(0);
+        document.getElementById('tip').textContent = money(0);
+        document.getElementById('total').textContent = money(0);
+        tipLabel.textContent = 'Tip';
+        tipLine.classList.remove('show');
+        if (payBtn) {
+          payBtn.disabled = true;
+          payBtn.textContent = 'Pay with card';
+        }
+        if (cashBtn) {
+          cashBtn.disabled = true;
+          cashBtn.textContent = 'Pay with cash';
+        }
       }
 
       function render() {
@@ -210,7 +600,8 @@
           linesEl.innerHTML = '<p class="empty">Your cart is empty. <a href="/">Go back and use + on anything you want.</a></p>';
           if (payPanel) payPanel.hidden = true;
           if (tipPanel) tipPanel.hidden = true;
-          tipLine.classList.remove('show');
+          zeroTotals();
+          updateGuide();
           return;
         }
 
@@ -240,9 +631,11 @@
         });
 
         if (!rendered) {
-          linesEl.innerHTML = '<p class="empty">Loading your order…</p>';
-          if (payBtn) payBtn.disabled = true;
+          linesEl.innerHTML = '<p class="empty">Your cart is empty. <a href="/">Go back and use + on anything you want.</a></p>';
+          if (payPanel) payPanel.hidden = true;
           if (tipPanel) tipPanel.hidden = true;
+          zeroTotals();
+          updateGuide();
           return;
         }
 
@@ -265,10 +658,16 @@
         }
         tipLine.classList.toggle('show', tipCents > 0 || tipMode === 'other');
 
+        var tooSmall = grand < 50;
         if (payBtn) {
-          payBtn.disabled = grand < 50;
+          payBtn.disabled = tooSmall;
           payBtn.textContent = 'Pay with card · ' + money(grand);
         }
+        if (cashBtn) {
+          cashBtn.disabled = tooSmall;
+          cashBtn.textContent = 'Pay with cash · ' + money(grand);
+        }
+        updateGuide();
       }
 
       document.querySelectorAll('.tip-btn').forEach(function (btn) {
@@ -276,7 +675,26 @@
           setTipSelection(btn.getAttribute('data-tip'));
         });
       });
-      tipOtherAmount.addEventListener('input', render);
+      tipOtherAmount.addEventListener('input', function () {
+        tipChosen = true;
+        render();
+        updateGuide();
+      });
+      [nameInput, emailInput, phoneInput].forEach(function (el) {
+        if (!el) return;
+        el.addEventListener('input', updateGuide);
+        el.addEventListener('change', updateGuide);
+      });
+      if (instructionsInput) {
+        instructionsInput.addEventListener('focus', function () {
+          instructionsTouched = true;
+          updateGuide();
+        });
+        instructionsInput.addEventListener('input', function () {
+          instructionsTouched = true;
+          updateGuide();
+        });
+      }
 
       if (new URLSearchParams(window.location.search).get('canceled') === '1') {
         msg.textContent = 'Payment canceled — your cart is still here.';
@@ -284,16 +702,11 @@
       }
 
       payBtn.addEventListener('click', function () {
-        var name = document.getElementById('name').value.trim();
-        var email = document.getElementById('email').value.trim();
-        var phone = document.getElementById('phone').value.trim();
-        msg.textContent = '';
-        msg.className = '';
-        if (!name) { msg.textContent = 'Please enter your name.'; msg.className = 'err'; return; }
-        if (!email || email.indexOf('@') < 1) { msg.textContent = 'Please enter a valid email.'; msg.className = 'err'; return; }
-        if (!phone) { msg.textContent = 'Please enter your phone.'; msg.className = 'err'; return; }
+        var c = readContact();
+        if (!validateContact(c)) return;
 
         payBtn.disabled = true;
+        if (cashBtn) cashBtn.disabled = true;
         var payLabel = payBtn.textContent;
         payBtn.textContent = 'Opening Stripe…';
         fetch('/api/create-checkout', {
@@ -301,10 +714,10 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             cart: window.TacoCart.load(),
-            name: name,
-            email: email,
-            phone: phone,
-            instructions: document.getElementById('instructions').value.trim(),
+            name: c.name,
+            email: c.email,
+            phone: c.phone,
+            instructions: c.instructions,
             fulfillment: 'pickup',
             tip: tipPayload(),
           }),
@@ -323,9 +736,226 @@
           });
       });
 
+      if (cashBtn) {
+        cashBtn.addEventListener('click', function () {
+          var c = readContact();
+          if (!validateContact(c)) return;
+          var ticket = buildCashTicket(c);
+          if (!ticket.lines.length) {
+            msg.textContent = 'Your cart is empty.';
+            msg.className = 'err';
+            return;
+          }
+
+          cashBtn.disabled = true;
+          payBtn.disabled = true;
+          var cashLabel = cashBtn.textContent;
+          cashBtn.textContent = 'Sending to kitchen…';
+          fetch('/api/queue-kitchen-ticket', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ticket: ticket, paymentMethod: 'cash' }),
+          })
+            .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
+            .then(function (res) {
+              if (!res.ok || !res.data.ok) {
+                throw new Error((res.data && res.data.error) || 'Could not send cash order.');
+              }
+              try { window.TacoCart.clear(); } catch (eClear) {}
+              var q = '/order-success?cash=1&dial=1';
+              if (res.data.ticketNumber) q += '&ticket=' + encodeURIComponent(res.data.ticketNumber);
+              if (res.data.orderId) q += '&order=' + encodeURIComponent(res.data.orderId);
+              try {
+                var dial = document.createElement('a');
+                dial.href = 'tel:+19789821800';
+                dial.setAttribute('aria-hidden', 'true');
+                document.body.appendChild(dial);
+                dial.click();
+                dial.remove();
+              } catch (eDial) {}
+              window.location.href = q;
+            })
+            .catch(function (err) {
+              msg.textContent = err.message || 'Cash order failed.';
+              msg.className = 'err';
+              cashBtn.disabled = false;
+              cashBtn.textContent = cashLabel || 'Pay with cash';
+              render();
+            });
+        });
+      }
+
       document.addEventListener('taco-cart-ready', render);
       document.addEventListener('taco-cart-updated', render);
       render();
+    })();
+  </script>
+  <iframe id="diegoFrame" title="Diego voice" allow="microphone *; autoplay *"></iframe>
+  <script>
+    (function () {
+      var diegoBtn = document.getElementById('headerDiegoBtn');
+      var diegoFrame = document.getElementById('diegoFrame');
+      var diegoOpen = false;
+
+      function setDiegoIdleLabel() {
+        if (!diegoBtn) return;
+        diegoBtn.classList.remove('is-live');
+        diegoBtn.innerHTML = '<span>Diego</span><span class="voice-btn-sub">Press for help</span>';
+        diegoBtn.setAttribute('aria-label', 'Diego will help with checkout. Press button now.');
+      }
+
+      function setDiegoLiveLabel() {
+        if (!diegoBtn) return;
+        diegoBtn.classList.add('is-live');
+        diegoBtn.innerHTML = '<span>Hang Up</span>';
+        diegoBtn.setAttribute('aria-label', 'Hang up Diego');
+      }
+
+      function closeDiego(fromChild) {
+        diegoOpen = false;
+        if (diegoFrame) {
+          if (!fromChild && diegoFrame.getAttribute('src')) {
+            try {
+              diegoFrame.contentWindow.postMessage(
+                { source: 'taco-menu', type: 'hangup' },
+                window.location.origin
+              );
+            } catch (eMsg) {}
+          }
+          diegoFrame.removeAttribute('src');
+        }
+        setDiegoIdleLabel();
+      }
+
+      function openDiego(resumeCheckout) {
+        if (!diegoFrame) return;
+        diegoOpen = true;
+        setDiegoLiveLabel();
+        var q = '/voice?start=1&embed=1';
+        if (resumeCheckout) q += '&resume=checkout';
+        diegoFrame.src = q;
+      }
+
+      function startDiegoOnCheckout(resumeCheckout) {
+        if (diegoOpen) {
+          closeDiego(false);
+          return;
+        }
+        var go = function () {
+          openDiego(!!resumeCheckout);
+        };
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          navigator.mediaDevices
+            .getUserMedia({ audio: true })
+            .then(function (stream) {
+              try {
+                stream.getTracks().forEach(function (t) {
+                  t.stop();
+                });
+              } catch (eStop) {}
+              go();
+            })
+            .catch(function () {
+              go();
+            });
+        } else {
+          go();
+        }
+      }
+
+      if (diegoBtn) {
+        diegoBtn.addEventListener('click', function (ev) {
+          ev.preventDefault();
+          startDiegoOnCheckout(true);
+        });
+      }
+
+      window.addEventListener('message', function (ev) {
+        if (ev.origin !== window.location.origin) return;
+        var data = ev.data;
+        if (!data || data.source !== 'taco-diego') return;
+        if (data.type === 'hangup') {
+          closeDiego(true);
+          return;
+        }
+        if (data.type === 'scroll') {
+          var dir = String(data.direction || 'down').toLowerCase();
+          var speed = String(data.speed || 'normal').toLowerCase();
+          var amount = speed === 'slow' ? 280 : 480;
+          try {
+            window.scrollBy({
+              top: dir === 'up' ? -amount : amount,
+              behavior: 'smooth',
+            });
+          } catch (eScroll) {}
+          return;
+        }
+        if (data.type === 'scroll_to' || data.type === 'open_menu') {
+          var section = String(data.section || 'tacos')
+            .trim()
+            .toLowerCase();
+          window.location.href = '/#' + encodeURIComponent(section);
+          return;
+        }
+        if (data.type === 'open_checkout') {
+          /* already here */
+          return;
+        }
+        if (data.type === 'customer_update') {
+          applyCheckoutContact({
+            firstName: data.firstName,
+            lastName: data.lastName,
+            name: data.name,
+            email: data.email,
+            phone: data.phone,
+            force: true,
+          });
+          return;
+        }
+        if (data.type === 'sold_out_refresh') {
+          if (window.TacoSoldOut && window.TacoSoldOut.refresh) window.TacoSoldOut.refresh();
+          return;
+        }
+        if (data.type === 'sold_out_state') {
+          if (window.TacoSoldOut && window.TacoSoldOut.applyRemote && data.state) {
+            window.TacoSoldOut.applyRemote(data.state);
+          } else if (window.TacoSoldOut && window.TacoSoldOut.refresh) {
+            window.TacoSoldOut.refresh();
+          }
+          return;
+        }
+        if (data.type === 'cart_add' || data.type === 'cart_set' || data.type === 'cart_remove' || data.type === 'cart_clear') {
+          if (!window.TacoCart) return;
+          try {
+            if (data.type === 'cart_add' && window.TacoCart.addFromVoice) {
+              window.TacoCart.addFromVoice(data.title, data.qty, data.price);
+            } else if (data.type === 'cart_set' && window.TacoCart.setFromVoice) {
+              window.TacoCart.setFromVoice(data.title, data.qty, data.price);
+            } else if (data.type === 'cart_remove' && window.TacoCart.removeFromVoice) {
+              window.TacoCart.removeFromVoice(data.title, data.price);
+            } else if (data.type === 'cart_clear' && window.TacoCart.clear) {
+              window.TacoCart.clear();
+            }
+          } catch (eCart) {}
+        }
+      });
+
+      loadSavedCheckoutContact();
+      updateGuide();
+
+      var wantDiego = false;
+      try {
+        var params = new URLSearchParams(window.location.search || '');
+        wantDiego = params.get('diego') === '1' || sessionStorage.getItem('diegoResumeCheckout') === '1';
+        if (wantDiego) sessionStorage.removeItem('diegoResumeCheckout');
+      } catch (eWant) {
+        wantDiego = /[?&]diego=1/.test(window.location.search || '');
+      }
+      if (wantDiego) {
+        setTimeout(function () {
+          startDiegoOnCheckout(true);
+        }, 400);
+      }
     })();
   </script>
 </body>

@@ -4,6 +4,7 @@
  * Same DoorDash menu as api/tacoMenu.js (this repo only).
  */
 const { FULL_MENU } = require('./tacoMenu');
+const { DIEGO_KITCHEN_KNOWLEDGE } = require('./diegoKitchenKnowledge');
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -56,10 +57,14 @@ module.exports = async function handler(req, res) {
     'Host name is Diego. If they said Massimo, Diego answers: "I\'m Diego — Massimo\'s at the pasta bar next door."',
     'FULL MENU is law. Exact names/prices. If not listed: not on the menu + closest real option.',
     'NOT ON MENU: ribeye burrito, $5 one-taco, taco bowls, burrito bowls, party platters, steak taco, filet, veggie.',
+    'If they ask how food is cooked, use KITCHEN reference — short warm answer.',
     'No AI disclaimers. Only suggest calling (978) 982-1800 for live stock / true unknowns.',
     '',
     'FULL MENU:',
     FULL_MENU,
+    '',
+    'KITCHEN:',
+    DIEGO_KITCHEN_KNOWLEDGE,
   ].join('\n');
 
   const user = [
