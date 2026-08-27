@@ -804,6 +804,14 @@
       document.addEventListener('taco-cart-ready', render);
       document.addEventListener('taco-cart-updated', render);
       render();
+
+      /* Diego's voice iframe lives in a separate script block — hand it the pickup fields. */
+      window.TacoCheckoutContact = { apply: applyCheckoutContact };
+
+      loadSavedCheckoutContact();
+      /* Re-apply after cart/DOM settles — name must show even if Diego remounts. */
+      setTimeout(loadSavedCheckoutContact, 300);
+      setTimeout(loadSavedCheckoutContact, 1200);
     })();
   </script>
   <iframe id="diegoFrame" title="Diego voice" allow="microphone *; autoplay *"></iframe>
@@ -918,14 +926,16 @@
           return;
         }
         if (data.type === 'customer_update') {
-          applyCheckoutContact({
-            firstName: data.firstName,
-            lastName: data.lastName,
-            name: data.name,
-            email: data.email,
-            phone: data.phone,
-            force: true,
-          });
+          if (window.TacoCheckoutContact) {
+            window.TacoCheckoutContact.apply({
+              firstName: data.firstName,
+              lastName: data.lastName,
+              name: data.name,
+              email: data.email,
+              phone: data.phone,
+              force: true,
+            });
+          }
           return;
         }
         if (data.type === 'sold_out_refresh') {
@@ -955,12 +965,6 @@
           } catch (eCart) {}
         }
       });
-
-      loadSavedCheckoutContact();
-      updateGuide();
-      /* Re-apply after cart/DOM settles — name must show even if Diego remounts. */
-      setTimeout(loadSavedCheckoutContact, 300);
-      setTimeout(loadSavedCheckoutContact, 1200);
 
       var wantDiego = false;
       try {
