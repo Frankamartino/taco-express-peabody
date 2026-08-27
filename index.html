@@ -1562,16 +1562,15 @@
         }
         if (data.type === 'customer_update') {
           try {
-            sessionStorage.setItem(
-              'tacoCheckoutContact',
-              JSON.stringify({
-                firstName: data.firstName || '',
-                lastName: data.lastName || '',
-                name: data.name || [data.firstName, data.lastName].filter(Boolean).join(' '),
-                email: data.email || '',
-                phone: data.phone || '',
-              })
-            );
+            var contactPayload = JSON.stringify({
+              firstName: data.firstName || '',
+              lastName: data.lastName || '',
+              name: data.name || [data.firstName, data.lastName].filter(Boolean).join(' '),
+              email: data.email || '',
+              phone: data.phone || '',
+            });
+            sessionStorage.setItem('tacoCheckoutContact', contactPayload);
+            localStorage.setItem('tacoCheckoutContact', contactPayload);
           } catch (eCust) {}
           return;
         }

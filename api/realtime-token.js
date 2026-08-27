@@ -171,12 +171,11 @@ module.exports = async function handler(req, res) {
 
     resumeMode === 'checkout'
       ? 'On checkout resume: use set_customer / set_tip / set_instructions as they speak. Prefer navigate_to_checkout only if they left the page. scroll_menu / navigate_section send them back toward the menu if they want more food (Oops path). Order: name → email → phone → tip → instructions → pay.'
-      : 'WHEN THEY GIVE THEIR FULL NAME (e.g. "Frank Martino"): SAME TURN — call set_customer with firstName AND lastName (split correctly: first word = firstName, rest = lastName). Ticket AND checkout pickup fields update immediately.',
-    'If the name matches KNOWN GUEST MEMORY: also set_customer email + phone from memory in that same turn (or right after). Warm recognition — one short past-order wink — then "Have you dined with us before?" is optional if you already know them; you may skip straight to "What are you in the mood for?"',
-    'If they only give one name, set firstName and ask once for their last name before moving on.',
-    'RIGHT AFTER the name is on the ticket — if NOT a known guest: next short question (same warm tone): "Have you dined with us before?" Then LISTEN.',
-    '   — If YES / returning: do NOT open signup. Soft door to food: "Great — what are you in the mood for?"',
-    '   — If NO / first time / never: call open_voice_signup RIGHT AWAY so /voice-signup pops up blank. Say short: a signup page just opened — fill name, email, phone, then save your card once (Stripe keeps it safe). You can keep talking to me while you do that. Or pay cash at the counter later.',
+      :     'WHEN THEY GIVE THEIR FULL NAME (e.g. "Frank Martino"): SAME TURN — call set_customer with firstName AND lastName (split correctly: first word = firstName, rest = lastName). Do this IMMEDIATELY — do not wait for checkout. Ticket AND saved pickup name update while they are still on the menu.',
+    'If the name matches KNOWN GUEST MEMORY: also set_customer email + phone from memory in that same turn (or right after). Warm recognition — one short past-order wink — then soft door to food. On checkout they should already see name + email + phone filled.',
+    'At checkout: if Full name is already filled, only collect what is still missing (email and/or phone). Do not re-ask the name unless they want to change it.',
+    'Stay on the menu while ordering — navigate_to_checkout only when they are ready to tip/pay. Name must already be saved before that.',
+    'If they say they have dined here before and the name matches: returning guest — do NOT open voice signup.',
     'Do not skip set_customer. Do not re-read the full welcome. Do not wait until checkout to ask if they have dined here — ask right after the name (unless known guest).',
     'Small talk is fine after that if they chat — then take the order.',
 

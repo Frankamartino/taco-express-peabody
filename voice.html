@@ -588,6 +588,7 @@
         };
         try {
           sessionStorage.setItem('tacoCheckoutContact', JSON.stringify(payload));
+          localStorage.setItem('tacoCheckoutContact', JSON.stringify(payload));
         } catch (eStore) {}
         notifyMenuParent({
           type: 'customer_update',
@@ -598,6 +599,18 @@
           phone: payload.phone,
         });
         return payload;
+      }
+
+      /** As soon as we have a name, pull known-guest email/phone and save for checkout. */
+      function applyKnownGuestAndPersist() {
+        var matched = findKnownGuest();
+        if (matched) {
+          if (!customer.email && matched.email) customer.email = String(matched.email);
+          if (!customer.phone && matched.phone) customer.phone = String(matched.phone);
+        }
+        renderTicket();
+        persistCustomerForCheckout();
+        return matched;
       }
 
       /** Always open checkout WITH Diego resume — never dump to bare /checkout (kills voice). */
@@ -1332,14 +1345,8 @@
           if (args.phone != null && String(args.phone).trim()) {
             customer.phone = String(args.phone).trim();
           }
-          var matched = findKnownGuest();
-          if (matched) {
-            if (!customer.email && matched.email) customer.email = String(matched.email);
-            if (!customer.phone && matched.phone) customer.phone = String(matched.phone);
-          }
-          renderTicket();
-          persistCustomerForCheckout();
-          var out = { ok: true, ticket: ticketSnapshot() };
+          var matched = applyKnownGuestAndPersist();
+          var out = { ok: true, ticket: ticketSnapshot(), savedForCheckout: true };
           if (matched) {
             var mem = knownGuestPayload(matched);
             out.knownGuest = true;
@@ -1348,7 +1355,7 @@
           }
           out.speakHint =
             (out.speakHint ? out.speakHint + ' ' : '') +
-            'Pickup details on checkout should show name/email/phone. Confirm on screen if needed.';
+            'Name is saved NOW (menu page is fine). Checkout pickup Full name will already show it. If email/phone still missing, ask those next — one at a time.';
           replyTool(callId, out);
           return;
         }
@@ -2186,7 +2193,6 @@
       }
 
       function maybeCaptureFirstName(transcript) {
-        if (customer.firstName) return;
         var raw = String(transcript || '').trim();
         if (!raw) return;
         var t = raw
@@ -2195,20 +2201,43 @@
           .replace(/[.,!?]+$/g, '')
           .trim();
         var words = t.split(/\s+/).filter(Boolean);
-        if (words.length < 1 || words.length > 2) return;
-        if (/taco|burrito|beef|chicken|pork|shrimp|coke|drink|order|spicy|mild|please|thanks|thank/i.test(t)) {
+        /* Full name up front: "Frank Martino" or "Frank A Martino" */
+        if (words.length < 1 || words.length > 3) return;
+        if (
+          /taco|burrito|beef|chicken|pork|shrimp|coke|drink|order|spicy|mild|please|thanks|thank|checkout|email|phone/i.test(
+            t
+          )
+        ) {
           return;
         }
         var first = words[0].replace(/[^A-Za-z'-]/g, '');
         if (first.length < 2) return;
-        customer.firstName = first.charAt(0).toUpperCase() + first.slice(1);
-        if (words.length === 2) {
-          var last = words[1].replace(/[^A-Za-z'-]/g, '');
-          if (last.length > 1) {
-            customer.lastName = last.charAt(0).toUpperCase() + last.slice(1);
-          }
+        var last = '';
+        if (words.length >= 2) {
+          last = words
+            .slice(1)
+            .map(function (w) {
+              return w.replace(/[^A-Za-z'-]/g, '');
+            })
+            .filter(function (w) {
+              return w.length > 1;
+            })
+            .join(' ');
         }
-        renderTicket();
+        /* Don't overwrite a fuller name already saved */
+        if (customer.firstName && customer.lastName && last && customer.lastName.length >= last.length) {
+          return;
+        }
+        customer.firstName = first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
+        if (last) {
+          customer.lastName = last
+            .split(/\s+/)
+            .map(function (w) {
+              return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+            })
+            .join(' ');
+        }
+        applyKnownGuestAndPersist();
       }
 
       function captureAndDescribeScreen() {

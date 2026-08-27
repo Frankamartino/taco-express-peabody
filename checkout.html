@@ -468,9 +468,11 @@
 
       function loadSavedCheckoutContact() {
         try {
-          var raw = sessionStorage.getItem('tacoCheckoutContact');
+          var raw =
+            sessionStorage.getItem('tacoCheckoutContact') ||
+            localStorage.getItem('tacoCheckoutContact');
           if (!raw) return;
-          applyCheckoutContact(JSON.parse(raw));
+          applyCheckoutContact(Object.assign({ force: true }, JSON.parse(raw)));
         } catch (eLoad) {}
       }
 
