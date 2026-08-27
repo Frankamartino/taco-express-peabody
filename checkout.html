@@ -209,11 +209,12 @@
 
       function applyClosedCheckout() {
         var note = document.getElementById('closedCheckoutNote');
-        if (note) note.hidden = !storeClosed();
-        if (storeClosed()) {
-          if (payPanel) payPanel.querySelectorAll('input, textarea, button').forEach(function (el) {
-            el.disabled = true;
-          });
+        var closed = storeClosed();
+        if (note) note.hidden = !closed;
+        if (payPanel) payPanel.querySelectorAll('input, textarea, button').forEach(function (el) {
+          el.disabled = closed;
+        });
+        if (closed) {
           if (payBtn) {
             payBtn.disabled = true;
             payBtn.textContent = 'Closed early today';

@@ -91,8 +91,17 @@
         if (!cfg) return;
         var dd = document.querySelector('.order-doordash');
         var gh = document.querySelector('.order-grubhub');
-        if (dd && (cfg.orderOnlineUrl || cfg.doordashUrl)) dd.href = cfg.orderOnlineUrl || cfg.doordashUrl;
-        if (gh && cfg.grubhubUrl) gh.href = cfg.grubhubUrl;
+        function applyDeliveryHref(el, url) {
+          if (!el || !url) return;
+          el.setAttribute('data-href', url);
+          if (window.TacoStore && window.TacoStore.isClosed()) {
+            el.removeAttribute('href');
+          } else {
+            el.href = url;
+          }
+        }
+        applyDeliveryHref(dd, cfg.orderOnlineUrl || cfg.doordashUrl);
+        applyDeliveryHref(gh, cfg.grubhubUrl);
       })
       .catch(function () {});
   </script>

@@ -40,11 +40,20 @@
     if (hoursNote) hoursNote.hidden = !closed;
 
     document.querySelectorAll('.order-doordash, .order-grubhub').forEach(function (el) {
+      if (el.hasAttribute('href')) {
+        el.setAttribute('data-href', el.getAttribute('href'));
+      }
       if (closed) {
         el.setAttribute('aria-disabled', 'true');
         el.style.pointerEvents = 'none';
         el.style.opacity = '0.4';
         el.removeAttribute('href');
+      } else {
+        el.removeAttribute('aria-disabled');
+        el.style.pointerEvents = '';
+        el.style.opacity = '';
+        var href = el.getAttribute('data-href');
+        if (href) el.setAttribute('href', href);
       }
     });
 
