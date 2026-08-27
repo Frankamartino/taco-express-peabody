@@ -389,6 +389,28 @@
     });
   }
 
+  /** True when this document arrived via a browser refresh rather than a link. */
+  function arrivedByRefresh() {
+    try {
+      var nav = (performance.getEntriesByType('navigation') || [])[0];
+      if (nav && nav.type) return nav.type === 'reload';
+      if (performance.navigation) return performance.navigation.type === 1;
+    } catch (e) {}
+    return false;
+  }
+
+  /* Refresh is a clean slate: empty cart, and this order's chef note goes with it.
+     The remembered contact in localStorage stays, so returning guests still get
+     their name filled in. Runs before the first render so nothing flashes. */
+  if (arrivedByRefresh() && window.self === window.top) {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      sessionStorage.removeItem('tacoCheckoutContact');
+      sessionStorage.removeItem('tacoOpenCheckout');
+      sessionStorage.removeItem('tacoCheckoutCanceled');
+    } catch (eReset) {}
+  }
+
   function boot(items) {
     items.forEach(function (item) {
       catalogById[item.id] = item;
