@@ -7,6 +7,29 @@
   <link rel="canonical" href="https://www.tacoexpresspeabody.com/checkout" />
   <link rel="icon" href="images/taco-express-logo.jpg" type="image/jpeg" />
   <link rel="apple-touch-icon" href="images/taco-express-logo.jpg" />
+  <script>
+    /* Ordering lives at one address: the home page. Anyone landing on /checkout
+       directly — old link, bookmark, or Stripe's cancel URL — is sent to the front
+       page, which reopens checkout as a panel over the menu. The intent rides in
+       storage instead of the URL, so a refresh lands cleanly on the home page and
+       nothing personal from older links survives in the address bar.
+       Runs in <head> so it fires before anything renders. */
+    (function oneAddress() {
+      var embedded = false;
+      try {
+        embedded = new URLSearchParams(window.location.search || '').get('embed') === '1';
+      } catch (e) {}
+      if (embedded) return;
+      try {
+        sessionStorage.setItem('tacoOpenCheckout', '1');
+        if (new URLSearchParams(window.location.search || '').get('canceled') === '1') {
+          sessionStorage.setItem('tacoCheckoutCanceled', '1');
+        }
+      } catch (eFlag) {}
+      window.__tacoLeavingForHome = true;
+      window.location.replace('/');
+    })();
+  </script>
   <link rel="stylesheet" href="css/taco-cart.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
@@ -414,30 +437,12 @@
       var tipChosen = false;
       var instructionsTouched = false;
 
-      /* Older builds put the guest's name, email and phone in the query string.
-         Strip them from the address bar so they stop being written to history,
-         and do not read them — a shared link must never pre-fill someone else. */
-      (function scrubContactFromUrl() {
-        try {
-          var url = new URL(window.location.href);
-          var dirty = false;
-          ['name', 'email', 'phone'].forEach(function (k) {
-            if (url.searchParams.has(k)) {
-              url.searchParams.delete(k);
-              dirty = true;
-            }
-          });
-          if (dirty) {
-            history.replaceState({}, '', url.pathname + url.search + url.hash);
-          }
-        } catch (eScrub) {}
-      })();
-
       /* Shown inside the menu page as an overlay so Diego's call is never torn down. */
       var embedMode = false;
       try {
         embedMode = new URLSearchParams(window.location.search || '').get('embed') === '1';
       } catch (eEmbed) {}
+
 
       /** Leaving for Stripe or the receipt must move the whole tab, not just the overlay. */
       function goTo(href) {
@@ -1074,7 +1079,7 @@
       } catch (eWant) {
         wantDiego = /[?&]diego=1/.test(window.location.search || '');
       }
-      if (embedded) wantDiego = false;
+      if (embedded || window.__tacoLeavingForHome) wantDiego = false;
       if (wantDiego) {
         setTimeout(function () {
           startDiegoOnCheckout(true);

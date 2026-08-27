@@ -1501,10 +1501,10 @@
       var checkoutFrame = document.getElementById('checkoutFrame');
       var checkoutOpen = false;
 
-      function openCheckoutOverlay() {
+      function openCheckoutOverlay(canceled) {
         if (!checkoutOverlay || !checkoutFrame) return false;
         if (!checkoutOpen) {
-          checkoutFrame.src = '/checkout?embed=1';
+          checkoutFrame.src = '/checkout?embed=1' + (canceled ? '&canceled=1' : '');
           checkoutOpen = true;
         }
         checkoutOverlay.classList.add('show');
@@ -1542,11 +1542,11 @@
         if (d.type === 'close') closeCheckoutOverlay(d.section);
       });
 
-      /* Tapping Checkout during a call must not hang up on him either. */
+      /* Every Checkout link opens the panel — the address bar stays on the home
+         page, so a refresh always lands there and a live call is never dropped. */
       document.addEventListener(
         'click',
         function (ev) {
-          if (!diegoOpen) return;
           var link = ev.target && ev.target.closest ? ev.target.closest('a[href]') : null;
           if (!link) return;
           var href = link.getAttribute('href') || '';
@@ -1556,6 +1556,20 @@
         },
         true
       );
+
+      /* Arrived from /checkout (bookmark, old link, or Stripe cancel). The flag is
+         consumed here, so refreshing afterwards gives a plain home page. */
+      (function resumeCheckoutFromHandoff() {
+        var wanted = false;
+        var canceled = false;
+        try {
+          wanted = sessionStorage.getItem('tacoOpenCheckout') === '1';
+          canceled = sessionStorage.getItem('tacoCheckoutCanceled') === '1';
+          sessionStorage.removeItem('tacoOpenCheckout');
+          sessionStorage.removeItem('tacoCheckoutCanceled');
+        } catch (eResume) {}
+        if (wanted) openCheckoutOverlay(canceled);
+      })();
 
       function applyShopStatus(state) {
         var banner = document.getElementById('shopClosedBanner');
@@ -1666,8 +1680,8 @@
             sessionStorage.setItem('tacoCheckoutContact', contactPayload);
             localStorage.setItem('tacoCheckoutContact', withoutInstructions(contactPayload));
           } catch (eStore) {}
-          /* He is mid-sentence — show checkout over the menu and let him keep talking. */
-          if (diegoOpen && openCheckoutOverlay()) {
+          /* Show checkout over the menu so a live call is never torn down. */
+          if (openCheckoutOverlay()) {
             /* Nothing reloads on this path, so the resume flags must not linger. */
             try {
               sessionStorage.removeItem('diegoAutostart');
