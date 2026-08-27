@@ -7,15 +7,12 @@ module.exports = {
   SHOP_SHORT: 'Taco Express',
 
   /**
-   * Fixed opener — ENGLISH ONLY for now (Spanish bilingual parked).
-   * Ask first + last name up front so pickup details can fill.
+   * Fixed opener — ENGLISH ONLY. One breath. No mid-line drama pause.
    */
-  GREETING_EXACT:
-    'Hi, my name is Diego. May I have your first and last name?',
+  GREETING_EXACT: "Hi, I'm Diego — first and last name please?",
 
   /** After name is on the ticket (English). */
-  AFTER_PICK_ENGLISH:
-    'Thanks — what are you in the mood for?',
+  AFTER_PICK_ENGLISH: 'Thanks — what are you in the mood for?',
 
   /** Parked — do not use until Frank turns Spanish back on. */
   AFTER_PICK_SPANISH:
@@ -23,8 +20,7 @@ module.exports = {
 
   I_SPEAK_SPANISH_ES: 'Puedo hablar español.',
 
-  GREETING_ES:
-    'Hola, me llamo Diego. Puedo tomar tu pedido en español.',
+  GREETING_ES: 'Hola, me llamo Diego. ¿Me das tu nombre completo?',
 
   SPEAK_BOTH_EN: 'I can take your order in English.',
 
@@ -40,7 +36,8 @@ module.exports = {
 
   GREETING_TONE:
     'happy, pleasant, smiling, warm Mexican-American counter host — lightly goofy human humor — never angry, never flat, never robotic, never mean, never a cartoon caricature',
-  GREETING_PACE: 'steady, natural — not rushed, not slow yellow-bus',
+  GREETING_PACE:
+    'snappy and natural — one smooth breath on the opener, no long pause after Hi or my name, not rushed, not slow',
 
   /**
    * Speak with a warm, natural Mexican Spanish accent in English.

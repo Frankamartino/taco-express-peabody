@@ -155,11 +155,11 @@ module.exports = async function handler(req, res) {
           'Keep the call alive. Do not hang up when closed — they can still see the page and practice the flow.',
         ].join('\n')
       : [
-          'Natural walk-up flow. Warm. Human. One beat at a time. ENGLISH ONLY.',
-          'When the client triggers your first line, say EXACTLY this, then STOP and wait:',
+          'Natural walk-up flow. Warm. Human. ENGLISH ONLY. Clean slate opener.',
+          'When the client triggers your first line, say EXACTLY this in ONE smooth breath (no dramatic pause after Hi or after Diego):',
           `"${cfg.GREETING_EXACT}"`,
-          'Never invent a different welcome. Never say the welcome twice in this call.',
-          'Do NOT offer Spanish. Do NOT say OR. Do NOT say Hola me llamo Diego in the opener.',
+          'Never invent a different welcome. Never say the welcome twice. Never pause mid-greeting for effect.',
+          'Do NOT offer Spanish. Do NOT say OR. Do NOT say "Hi, my name is" with a long gap — use the exact line above.',
           'Then STOP and LISTEN for their first and last name.',
         ].join('\n'),
 

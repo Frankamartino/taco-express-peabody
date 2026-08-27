@@ -2572,9 +2572,9 @@
             ? customer.firstName
               ? "We're at checkout, " +
                 customer.firstName +
-                ". Your name should already be on pickup details. I'll confirm email and phone if needed, then tip, then card or cash."
-              : "We're at checkout. First — may I have your first and last name for pickup? Then email and phone."
-            : 'Hi, my name is Diego. May I have your first and last name?';
+                ". Your name should already be on pickup details — email and phone if needed, then tip, then card or cash."
+              : "We're at checkout — first and last name for pickup?"
+            : "Hi, I'm Diego — first and last name please?";
           var dcOpen = false;
           var greetingArmed = false;
           var greetingSpoken = false;
@@ -2584,13 +2584,13 @@
             greetingSpoken = true;
             greetingArmed = false;
             var follow = resumeCheckout
-              ? 'Then STOP and listen. Guide tip → full name → email → phone → pay. Do NOT re-introduce yourself. Do NOT say Hi my name is Diego. Do NOT ask language. Do NOT restart the order greeting.'
-              : 'Then stop. Pause. Listen for their language choice or name. Do not ask what they want yet. Nothing else. Do not repeat yourself. Do not say Welcome twice.';
+              ? 'Say that EXACT line once in one smooth breath — no long pause mid-sentence. Then STOP and listen. Do NOT re-introduce yourself. Do NOT restart the menu greeting.'
+              : 'Say that EXACT line once in one smooth breath — no dramatic pause after Hi or after your name. No language choice. Then STOP and listen for their name only. Nothing else. Do not repeat yourself.';
             dcSend({
               type: 'response.create',
               response: {
                 instructions:
-                  'Say EXACTLY and ONLY with a happy pleasant smiling warm tone and a steady natural pace: "' +
+                  'Happy pleasant smiling tone, snappy natural pace. Say EXACTLY and ONLY: "' +
                   greetingExact +
                   '" ' +
                   follow,
