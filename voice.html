@@ -585,10 +585,15 @@
           name: [customer.firstName, customer.lastName].filter(Boolean).join(' '),
           email: customer.email || '',
           phone: customer.phone || '',
+          /* Mild / spicy / pickup time — said on the menu, must survive the page change. */
+          instructions: order.instructions || '',
         };
         try {
           sessionStorage.setItem('tacoCheckoutContact', JSON.stringify(payload));
-          localStorage.setItem('tacoCheckoutContact', JSON.stringify(payload));
+          /* Contact is worth remembering across visits; this order's chef notes are not. */
+          var durable = Object.assign({}, payload);
+          delete durable.instructions;
+          localStorage.setItem('tacoCheckoutContact', JSON.stringify(durable));
         } catch (eStore) {}
         notifyMenuParent({
           type: 'customer_update',
@@ -597,6 +602,7 @@
           name: payload.name,
           email: payload.email,
           phone: payload.phone,
+          instructions: payload.instructions,
         });
         return payload;
       }
@@ -633,6 +639,7 @@
           name: payload.name,
           email: payload.email,
           phone: payload.phone,
+          instructions: payload.instructions,
           href: q,
         })) {
           return true;
@@ -675,6 +682,8 @@
           }
           if (!customer.email && c.email) customer.email = String(c.email);
           if (!customer.phone && c.phone) customer.phone = String(c.phone);
+          /* Mild / spicy said on the menu must still be on the ticket after the remount. */
+          if (!order.instructions && c.instructions) order.instructions = String(c.instructions);
         } catch (eStore) {}
         applyKnownGuestAndPersist();
       }
@@ -1887,6 +1896,7 @@
           order.tip = isFinite(tipAmt) && tipAmt >= 0 ? tipAmt : 0;
           order.tipAsked = true;
           renderTicket();
+          notifyMenuParent({ type: 'tip_update', amount: order.tip });
           replyTool(callId, { ok: true, ticket: ticketSnapshot() });
           return;
         }
@@ -1894,6 +1904,7 @@
         if (name === 'set_instructions') {
           order.instructions = args.text != null ? String(args.text) : '';
           renderTicket();
+          persistCustomerForCheckout();
           replyTool(callId, { ok: true, ticket: ticketSnapshot() });
           return;
         }

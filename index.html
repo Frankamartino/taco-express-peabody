@@ -1499,6 +1499,17 @@
       refreshShopStatus();
       setInterval(refreshShopStatus, 60000);
 
+      /** Contact is worth remembering across visits; this order's chef notes are not. */
+      function withoutInstructions(raw) {
+        try {
+          var c = JSON.parse(raw);
+          delete c.instructions;
+          return JSON.stringify(c);
+        } catch (eStrip) {
+          return raw;
+        }
+      }
+
       window.addEventListener('message', function (ev) {
         if (ev.origin !== window.location.origin) return;
         var data = ev.data;
@@ -1553,25 +1564,17 @@
           try {
             sessionStorage.setItem('diegoAutostart', '1');
             sessionStorage.setItem('diegoResumeCheckout', '1');
+            var np = String(data.name || '').trim().split(/\s+/).filter(Boolean);
             var contactPayload = JSON.stringify({
-              firstName: '',
-              lastName: '',
+              firstName: np[0] || '',
+              lastName: np.slice(1).join(' ') || '',
               name: data.name || '',
               email: data.email || '',
               phone: data.phone || '',
+              instructions: data.instructions || '',
             });
-            if (data.name) {
-              var np = String(data.name).trim().split(/\s+/).filter(Boolean);
-              contactPayload = JSON.stringify({
-                firstName: np[0] || '',
-                lastName: np.slice(1).join(' ') || '',
-                name: data.name || '',
-                email: data.email || '',
-                phone: data.phone || '',
-              });
-            }
             sessionStorage.setItem('tacoCheckoutContact', contactPayload);
-            localStorage.setItem('tacoCheckoutContact', contactPayload);
+            localStorage.setItem('tacoCheckoutContact', withoutInstructions(contactPayload));
           } catch (eStore) {}
           var href = String(data.href || '/checkout?diego=1');
           /* Short beat so Diego can say "opening checkout" — then keep him on the new page. */
@@ -1588,9 +1591,10 @@
               name: data.name || [data.firstName, data.lastName].filter(Boolean).join(' '),
               email: data.email || '',
               phone: data.phone || '',
+              instructions: data.instructions || '',
             });
             sessionStorage.setItem('tacoCheckoutContact', contactPayload);
-            localStorage.setItem('tacoCheckoutContact', contactPayload);
+            localStorage.setItem('tacoCheckoutContact', withoutInstructions(contactPayload));
           } catch (eCust) {}
           return;
         }

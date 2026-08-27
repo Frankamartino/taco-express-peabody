@@ -463,7 +463,39 @@
         if (data.phone && phoneInput) {
           if (!phoneInput.value.trim() || data.force) phoneInput.value = String(data.phone).trim();
         }
+        if (instructionsInput && data.instructions != null) {
+          var note = String(data.instructions).trim();
+          /* Diego is allowed to answer the allergy question with "none" — keep that off the ticket. */
+          if (note && !/^(none|no|nope|n\/a|nothing)\.?$/i.test(note)) {
+            if (!instructionsInput.value.trim() || data.force) {
+              instructionsInput.value = note;
+              instructionsTouched = true;
+            }
+          }
+        }
         updateGuide();
+      }
+
+      /** Diego sets the tip in dollars over the call — mirror it onto the picker. */
+      function applyTipDollars(amount) {
+        var dollars = Number(amount);
+        if (!isFinite(dollars) || dollars < 0) return;
+        var active = dollars > 0 ? 'other' : '0';
+        document.querySelectorAll('.tip-btn').forEach(function (btn) {
+          btn.classList.toggle('active', btn.getAttribute('data-tip') === active);
+        });
+        if (dollars > 0) {
+          tipMode = 'other';
+          tipOtherWrap.classList.add('show');
+          /* No focus() — this comes from voice, a keyboard popping up is not wanted. */
+          tipOtherAmount.value = dollars.toFixed(2);
+        } else {
+          tipMode = 'percent';
+          tipPercent = 0;
+          tipOtherWrap.classList.remove('show');
+        }
+        tipChosen = true;
+        render();
       }
 
       function loadSavedCheckoutContact() {
@@ -805,8 +837,11 @@
       document.addEventListener('taco-cart-updated', render);
       render();
 
-      /* Diego's voice iframe lives in a separate script block — hand it the pickup fields. */
-      window.TacoCheckoutContact = { apply: applyCheckoutContact };
+      /* Diego's voice iframe lives in a separate script block — hand it the fields it drives. */
+      window.TacoCheckout = {
+        applyContact: applyCheckoutContact,
+        setTipDollars: applyTipDollars,
+      };
 
       loadSavedCheckoutContact();
       /* Re-apply after cart/DOM settles — name must show even if Diego remounts. */
@@ -926,16 +961,21 @@
           return;
         }
         if (data.type === 'customer_update') {
-          if (window.TacoCheckoutContact) {
-            window.TacoCheckoutContact.apply({
+          if (window.TacoCheckout) {
+            window.TacoCheckout.applyContact({
               firstName: data.firstName,
               lastName: data.lastName,
               name: data.name,
               email: data.email,
               phone: data.phone,
+              instructions: data.instructions,
               force: true,
             });
           }
+          return;
+        }
+        if (data.type === 'tip_update') {
+          if (window.TacoCheckout) window.TacoCheckout.setTipDollars(data.amount);
           return;
         }
         if (data.type === 'sold_out_refresh') {
