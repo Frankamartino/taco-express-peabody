@@ -132,6 +132,50 @@
       priceDollars != null && isFinite(Number(priceDollars))
         ? Math.round(Number(priceDollars) * 100)
         : null;
+
+    var isPlate =
+      /\b(plate|dinner)\b/.test(norm) ||
+      /\b(two sides|rice and beans|rice & beans|with rice|add two sides)\b/.test(norm);
+    var protein = detectProtein(norm);
+    var prefix = '';
+    if (/\bburrito/.test(norm)) prefix = 'burrito';
+    else if (/\benchilada/.test(norm)) prefix = 'enchilada';
+    else if (/\bquesadilla/.test(norm)) prefix = 'quesadilla';
+    else if (/\btaco/.test(norm)) prefix = 'tacos';
+    else if (/\b(rice|brown rice)\b/.test(norm) && !/\bextra\b/.test(norm) && !isPlate) {
+      return items.find(function (i) {
+        return i.id === 'side-rice';
+      }) || null;
+    } else if (/\bblack beans?\b/.test(norm) && !/\bextra\b/.test(norm) && !isPlate) {
+      return items.find(function (i) {
+        return i.id === 'side-black-beans';
+      }) || null;
+    } else if (/\brefried beans?\b/.test(norm) && !isPlate) {
+      return items.find(function (i) {
+        return i.id === 'side-refried-beans';
+      }) || null;
+    }
+
+    /* Diego still sends combined dinner prices ($20.49 etc.) — map to *-plate ids. */
+    var combinedDinner =
+      priceCents === 2049 || priceCents === 2099 || priceCents === 2899;
+
+    if (prefix && protein && (isPlate || combinedDinner)) {
+      var plateId = prefix + '-' + protein + '-plate';
+      var plateHit = items.find(function (i) {
+        return i.id === plateId;
+      });
+      if (plateHit) return plateHit;
+    }
+
+    if (prefix && protein && !isPlate) {
+      var mainId = prefix + '-' + protein;
+      var mainHit = items.find(function (i) {
+        return i.id === mainId;
+      });
+      if (mainHit) return mainHit;
+    }
+
     if (priceCents != null) {
       var byPriceName = items.find(function (item) {
         return (
@@ -143,36 +187,7 @@
       if (byPriceName) return byPriceName;
     }
 
-    var isPlate = /\b(plate|dinner)\b/.test(norm);
-    var protein = detectProtein(norm);
-    var prefix = '';
-    if (/\bburrito/.test(norm)) prefix = 'burrito';
-    else if (/\benchilada/.test(norm)) prefix = 'enchilada';
-    else if (/\bquesadilla/.test(norm)) prefix = 'quesadilla';
-    else if (/\btaco/.test(norm)) prefix = 'tacos';
-    else if (/\b(rice|brown rice)\b/.test(norm) && !/\bextra\b/.test(norm)) {
-      return items.find(function (i) {
-        return i.id === 'side-rice';
-      }) || null;
-    } else if (/\bblack beans?\b/.test(norm) && !/\bextra\b/.test(norm)) {
-      return items.find(function (i) {
-        return i.id === 'side-black-beans';
-      }) || null;
-    } else if (/\brefried beans?\b/.test(norm)) {
-      return items.find(function (i) {
-        return i.id === 'side-refried-beans';
-      }) || null;
-    }
-
-    if (prefix && protein) {
-      var id = prefix + '-' + protein + (isPlate ? '-plate' : '');
-      var hit = items.find(function (i) {
-        return i.id === id;
-      });
-      if (hit) return hit;
-    }
-
-    if (priceCents != null) {
+    if (priceCents != null && protein) {
       var loose = items.find(function (item) {
         return item.priceCents === priceCents && normalizeMenuText(item.name).indexOf(protein) >= 0;
       });
@@ -180,6 +195,21 @@
     }
 
     return null;
+  }
+
+  /**
+   * Website UI: main row ($13.49) + optional "Add two sides" row (+$7).
+   * Voice dinner / Plate titles must bump BOTH so the burrito (etc.) shows qty ≥ 1.
+   */
+  function applyPlateWithMain(plateItem, qty) {
+    var n = isFinite(Number(qty)) && Number(qty) > 0 ? Math.floor(Number(qty)) : 1;
+    var mainId = String(plateItem.id || '').replace(/-plate$/, '');
+    if (mainId && mainId !== plateItem.id && catalogById[mainId]) {
+      var mainQty = getQty(mainId);
+      if (mainQty < n) setQty(mainId, n);
+    }
+    setQty(plateItem.id, getQty(plateItem.id) + n);
+    return plateItem;
   }
 
   /** Diego / voice: add (or bump qty) by DoorDash-style title. Returns item or null. */
@@ -190,6 +220,9 @@
       return { soldOut: true, item: item };
     }
     var n = isFinite(Number(qty)) && Number(qty) > 0 ? Math.floor(Number(qty)) : 1;
+    if (/-plate$/.test(item.id)) {
+      return applyPlateWithMain(item, n);
+    }
     setQty(item.id, getQty(item.id) + n);
     return item;
   }
@@ -198,6 +231,14 @@
     var item = resolveByMenuName(title, priceDollars);
     if (!item) return null;
     var n = Math.max(0, Math.floor(Number(qty) || 0));
+    if (/-plate$/.test(item.id)) {
+      var mainId = String(item.id || '').replace(/-plate$/, '');
+      if (n > 0 && mainId && catalogById[mainId] && getQty(mainId) < n) {
+        setQty(mainId, n);
+      }
+      setQty(item.id, n);
+      return item;
+    }
     setQty(item.id, n);
     return item;
   }

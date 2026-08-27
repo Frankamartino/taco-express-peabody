@@ -40,7 +40,8 @@ ENCHILADAS (two alone): Two Enchiladas · Shredded Beef $13.99 | Two Enchiladas 
 ENCHILADA DINNER (+$7 rice & beans): Enchilada Plate · Beef $20.99 | Chicken $20.99 | Pork $20.99 | Shrimp $28.99
 QUESADILLAS (alone): Loaded Quesadillas Beef $13.99 | Loaded Quesadillas Chicken $13.99 | Loaded Quesadillas Pork $13.99 | Loaded Quesadillas Shrimp $21.99
 QUESADILLA DINNER (+$7 rice & beans): Quesadilla Plate · Beef $20.99 | Chicken $20.99 | Pork $20.99 | Shrimp $28.99
-When they say dinner, plate, or with rice and beans on any of the above, use the matching DINNER / Plate item — ONE line only.
+When they say dinner, plate, or with rice and beans on any of the above, use the matching DINNER / Plate item — ONE voice ticket line.
+SCREEN CART: Dinner / Plate becomes MAIN qty + "Add two sides" (+$7) on the website — never sides alone without the burrito/tacos.
 If they only said tacos / three tacos / chicken tacos with NO dinner language → Three Tacos only, never Plate, never loose sides.
 
 SIDES: Seasoned Brown Rice $3.49 · Black Beans $3.49 · Refried Beans $3.49 · Salsa $1.50 · Pico de Gallo $4 · Tortilla Chips $2.50 · Guacamole $3

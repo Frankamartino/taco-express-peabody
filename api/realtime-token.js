@@ -199,6 +199,8 @@ module.exports = async function handler(req, res) {
     'TACOS: "beef taco(s)" = Three Tacos · Shredded Beef $13.49. Pork = Three Tacos · Shredded Pork $13.49. Shrimp = Three Tacos · Grilled Shrimp $21.99.',
     'TACO PLATE only if they say dinner / plate / with rice and beans: Taco Plate · [protein] — ONE line (includes rice & beans).',
     'BURRITOS: "beef burrito" = Burrito · Shredded Beef $13.49 — LOCK NOW. Chicken/pork/shrimp burritos lock the same way.',
+    'BURRITO + rice and beans / two sides / dinner / plate = Burrito Plate · Beef (etc.) $20.49 on YOUR ticket — ONE add_order_line. The website shows Burrito qty 1 AND Add two sides qty 1.',
+    'If the screen shows sides without the burrito (or vice versa), call add_order_line again for Burrito Plate · [protein] — do not invent loose rice/beans sides for a dinner plate.',
     'QUESADILLAS: "pork quesadilla" = Loaded Quesadillas Pork $13.99. Beef/chicken/shrimp same pattern.',
     'ENCHILADAS: "beef enchiladas" = Two Enchiladas · Shredded Beef $13.99. Shrimp = Two Enchiladas · Grilled Shrimp $21.99.',
     'NOT ON MENU: ribeye burrito, $5 one-taco special, taco bowls, burrito bowls, party platters, steak taco, filet, veggie.',
