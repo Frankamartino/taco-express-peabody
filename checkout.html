@@ -468,6 +468,20 @@
 
       function loadSavedCheckoutContact() {
         try {
+          var params = new URLSearchParams(window.location.search || '');
+          var urlName = String(params.get('name') || '').trim();
+          var urlEmail = String(params.get('email') || '').trim();
+          var urlPhone = String(params.get('phone') || '').trim();
+          if (urlName || urlEmail || urlPhone) {
+            applyCheckoutContact({
+              name: urlName,
+              email: urlEmail,
+              phone: urlPhone,
+              force: true,
+            });
+          }
+        } catch (eUrl) {}
+        try {
           var raw =
             sessionStorage.getItem('tacoCheckoutContact') ||
             localStorage.getItem('tacoCheckoutContact');
@@ -944,6 +958,9 @@
 
       loadSavedCheckoutContact();
       updateGuide();
+      /* Re-apply after cart/DOM settles — name must show even if Diego remounts. */
+      setTimeout(loadSavedCheckoutContact, 300);
+      setTimeout(loadSavedCheckoutContact, 1200);
 
       var wantDiego = false;
       try {

@@ -1553,11 +1553,31 @@
           try {
             sessionStorage.setItem('diegoAutostart', '1');
             sessionStorage.setItem('diegoResumeCheckout', '1');
+            var contactPayload = JSON.stringify({
+              firstName: '',
+              lastName: '',
+              name: data.name || '',
+              email: data.email || '',
+              phone: data.phone || '',
+            });
+            if (data.name) {
+              var np = String(data.name).trim().split(/\s+/).filter(Boolean);
+              contactPayload = JSON.stringify({
+                firstName: np[0] || '',
+                lastName: np.slice(1).join(' ') || '',
+                name: data.name || '',
+                email: data.email || '',
+                phone: data.phone || '',
+              });
+            }
+            sessionStorage.setItem('tacoCheckoutContact', contactPayload);
+            localStorage.setItem('tacoCheckoutContact', contactPayload);
           } catch (eStore) {}
-          /* Let Diego finish his "opening checkout" line before we leave the menu. */
+          var href = String(data.href || '/checkout?diego=1');
+          /* Short beat so Diego can say "opening checkout" — then keep him on the new page. */
           setTimeout(function () {
-            window.location.href = '/checkout?diego=1';
-          }, 1800);
+            window.location.href = href;
+          }, 900);
           return;
         }
         if (data.type === 'customer_update') {

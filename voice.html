@@ -615,16 +615,68 @@
 
       /** Always open checkout WITH Diego resume — never dump to bare /checkout (kills voice). */
       function goToCheckoutWithDiego() {
-        persistCustomerForCheckout();
+        if (hangUpTimer) {
+          clearTimeout(hangUpTimer);
+          hangUpTimer = null;
+        }
+        var payload = persistCustomerForCheckout();
         try {
           sessionStorage.setItem('diegoAutostart', '1');
           sessionStorage.setItem('diegoResumeCheckout', '1');
         } catch (eFlags) {}
-        if (notifyMenuParent({ type: 'open_checkout' })) return true;
+        var q = '/checkout?diego=1';
+        if (payload.name) q += '&name=' + encodeURIComponent(payload.name);
+        if (payload.email) q += '&email=' + encodeURIComponent(payload.email);
+        if (payload.phone) q += '&phone=' + encodeURIComponent(payload.phone);
+        if (notifyMenuParent({
+          type: 'open_checkout',
+          name: payload.name,
+          email: payload.email,
+          phone: payload.phone,
+          href: q,
+        })) {
+          return true;
+        }
         try {
-          window.location.href = '/checkout?diego=1';
+          window.location.href = q;
         } catch (eCo) {}
         return false;
+      }
+
+      function restoreCustomerFromStorage() {
+        try {
+          var params = new URLSearchParams(window.location.search || '');
+          var urlName = String(params.get('name') || '').trim();
+          var urlEmail = String(params.get('email') || '').trim();
+          var urlPhone = String(params.get('phone') || '').trim();
+          if (urlName) {
+            var parts = urlName.split(/\s+/).filter(Boolean);
+            if (parts.length) customer.firstName = parts[0];
+            if (parts.length > 1) customer.lastName = parts.slice(1).join(' ');
+          }
+          if (urlEmail) customer.email = urlEmail;
+          if (urlPhone) customer.phone = urlPhone;
+        } catch (eUrl) {}
+        try {
+          var raw =
+            sessionStorage.getItem('tacoCheckoutContact') ||
+            localStorage.getItem('tacoCheckoutContact');
+          if (!raw) {
+            persistCustomerForCheckout();
+            return;
+          }
+          var c = JSON.parse(raw);
+          if (!customer.firstName && c.firstName) customer.firstName = String(c.firstName);
+          if (!customer.lastName && c.lastName) customer.lastName = String(c.lastName);
+          if (!customer.firstName && c.name) {
+            var bits = String(c.name).trim().split(/\s+/).filter(Boolean);
+            if (bits.length) customer.firstName = bits[0];
+            if (bits.length > 1) customer.lastName = bits.slice(1).join(' ');
+          }
+          if (!customer.email && c.email) customer.email = String(c.email);
+          if (!customer.phone && c.phone) customer.phone = String(c.phone);
+        } catch (eStore) {}
+        applyKnownGuestAndPersist();
       }
 
       function normalizeMenuSection(raw) {
@@ -1510,7 +1562,7 @@
           replyTool(callId, {
             ok: true,
             speakHint:
-              'Opening Checkout with Diego still on the line. Guide: first and last name → email → phone → tip → special instructions (optional) → pay. Fill fields with set_customer as they speak.',
+              'Checkout is opening. Do NOT hang up. Do NOT say goodbye. Do NOT say the kitchen ticket was sent. Do NOT end on "your total". Stay on the call. If name is already saved, confirm it; then email/phone if missing, then tip, then ask card or cash. Keep talking.',
           });
           return;
         }
@@ -2464,6 +2516,8 @@
         setStatus('Talking to Diego…');
         resetOrder();
         resetCustomer();
+        /* Checkout remount must NOT wipe the name we already saved on the menu. */
+        restoreCustomerFromStorage();
         renderTicket();
 
         // Unlock playback under the click gesture (autoplay after awaits is flaky).
@@ -2515,8 +2569,12 @@
           };
 
           var greetingExact = resumeCheckout
-            ? "We're at checkout together. Tip is glowing first — No tip is fine, or pick a percent when you're ready. I'll walk you through name, email, and phone next."
-            : 'Welcome to Taco Express. My name is Diego. May I have your full name?';
+            ? customer.firstName
+              ? "We're at checkout, " +
+                customer.firstName +
+                ". Your name should already be on pickup details. I'll confirm email and phone if needed, then tip, then card or cash."
+              : "We're at checkout. First — may I have your first and last name for pickup? Then email and phone."
+            : 'Hi, my name is Diego. May I have your first and last name?';
           var dcOpen = false;
           var greetingArmed = false;
           var greetingSpoken = false;
@@ -2575,7 +2633,18 @@
           if (Array.isArray(tokenPayload.knownGuests)) {
             knownGuests = tokenPayload.knownGuests;
           }
-
+          restoreCustomerFromStorage();
+          renderTicket();
+          if (tokenPayload.greetingExact && !resumeCheckout) {
+            greetingExact = String(tokenPayload.greetingExact);
+          } else if (resumeCheckout && customer.firstName) {
+            greetingExact =
+              "We're at checkout, " +
+              customer.firstName +
+              '. Your name should already be on pickup details. Confirm email and phone if needed, then tip, then card or cash.';
+          } else if (tokenPayload.greetingExact) {
+            greetingExact = String(tokenPayload.greetingExact);
+          }
           // Arm BEFORE SDP answer — ontrack fires on setRemoteDescription; if
           // sessionAlive is still false, older code stopped the remote track (silence).
           greetingArmed = true;
