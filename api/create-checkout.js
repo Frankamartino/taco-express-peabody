@@ -1,4 +1,5 @@
 const { buildLinesFromCart, computeTotals, resolveTipCents } = require('./menuCatalog');
+const { shopClosedCheck } = require('./tacoShopHours');
 
 function clean(v) {
   return String(v || '')
@@ -34,6 +35,12 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  /* Never take card money for food a closed kitchen will not make. */
+  const gate = await shopClosedCheck();
+  if (gate.closed) {
+    return res.status(409).json({ ok: false, code: 'shop_closed', error: gate.message });
   }
 
   const secret = clean(process.env.STRIPE_SECRET_KEY);

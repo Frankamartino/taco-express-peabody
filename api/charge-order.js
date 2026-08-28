@@ -10,6 +10,7 @@
  *   SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY (same kitchen print_jobs as Martino)
  */
 const { queueKitchenPrint, receiptFromVoiceTicket } = require('./kitchenPrint');
+const { shopClosedCheck } = require('./tacoShopHours');
 function clean(v) {
   return String(v || '')
     .replace(/^\uFEFF/, '')
@@ -57,6 +58,12 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  /* No hands-free charges while the kitchen is dark. */
+  const gate = await shopClosedCheck();
+  if (gate.closed) {
+    return res.status(409).json({ ok: false, code: 'shop_closed', error: gate.message });
   }
 
   const secret = clean(process.env.STRIPE_SECRET_KEY);
