@@ -31,6 +31,7 @@ function getTacoShopStatus(now = new Date()) {
     return {
       formatted,
       day,
+      mins,
       open: false,
       closedToday: true,
       line:
@@ -54,6 +55,7 @@ function getTacoShopStatus(now = new Date()) {
   return {
     formatted,
     day,
+    mins,
     open,
     closedToday: !open,
     hoursLabel,
@@ -63,4 +65,58 @@ function getTacoShopStatus(now = new Date()) {
   };
 }
 
-module.exports = { getTacoShopStatus };
+/** Short spoken phrase for when the shop opens next. */
+function nextOpenPhrase(status) {
+  const day = status.day;
+  const beforeOpen = (status.mins || 0) < 11 * 60;
+  if (day === 'Monday') return 'Wednesday at 11 AM';
+  if (day === 'Tuesday') return 'tomorrow at 11 AM';
+  if (beforeOpen) return 'today at 11 AM';
+  // After close: Sunday's next open day is Wednesday (Mon–Tue closed).
+  return day === 'Sunday' ? 'Wednesday at 11 AM' : 'tomorrow at 11 AM';
+}
+
+/**
+ * One gate for anything that puts food on the kitchen's plate: cash tickets,
+ * Stripe checkout, saved-card charges. Hours first, then the staff early-close
+ * override. Returns { closed, message } with a customer-friendly message.
+ */
+async function shopClosedCheck(now) {
+  const hours = getTacoShopStatus(now);
+  if (!hours.open) {
+    const when = nextOpenPhrase(hours);
+    return {
+      closed: true,
+      code: 'shop_closed',
+      message:
+        day2(hours.day)
+          ? 'Taco Express is closed today — we are closed Mondays and Tuesdays. We open Wednesday at 11 AM.'
+          : 'Taco Express is closed right now — today\u2019s hours are ' +
+            (hours.hoursLabel || '11 AM\u20138 PM') +
+            '. We open ' +
+            when +
+            '.',
+    };
+  }
+  try {
+    const { fetchShopOverride, publicPayload } = require('./shopStatusStore');
+    const ov = publicPayload(await fetchShopOverride());
+    if (ov && ov.closed) {
+      return {
+        closed: true,
+        code: 'shop_closed',
+        message:
+          'Taco Express closed early today' +
+          (ov.reason ? ' \u2014 ' + ov.reason : '') +
+          ". We'll be back at our regular hours.",
+      };
+    }
+  } catch (e) {}
+  return { closed: false, code: '', message: '' };
+}
+
+function day2(day) {
+  return day === 'Monday' || day === 'Tuesday';
+}
+
+module.exports = { getTacoShopStatus, shopClosedCheck, nextOpenPhrase };

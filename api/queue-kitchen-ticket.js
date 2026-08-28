@@ -6,6 +6,7 @@ const {
   queueKitchenPrint,
   receiptFromVoiceTicket,
 } = require('./kitchenPrint');
+const { shopClosedCheck } = require('./tacoShopHours');
 
 function clean(v) {
   return String(v || '')
@@ -21,6 +22,13 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  /* No tickets to a dark kitchen. Frank test-ordered at 8:29pm and a burrito
+     ticket queued half an hour after close — staff would find it in the morning. */
+  const gate = await shopClosedCheck();
+  if (gate.closed) {
+    return res.status(409).json({ ok: false, code: 'shop_closed', error: gate.message });
   }
 
   let body = req.body;
