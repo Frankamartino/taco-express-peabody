@@ -908,8 +908,9 @@
       }
 
       if (embedded) {
-        /* One Diego per call. The host owns the voice; we must not start a second one. */
-        if (diegoBtn) diegoBtn.remove();
+        /* One Diego per call. The host page owns the voice, so drop our own frame —
+           but keep the header button: it is part of the checkout UI, and it drives
+           the host's call instead of starting a second one. */
         if (diegoFrame) diegoFrame.remove();
         diegoFrame = null;
         var forget = document.querySelector('.forget-btn');
@@ -919,6 +920,8 @@
             goToMenuSection('');
           });
         }
+        /* Ask the host for its call state so the button opens with the right label. */
+        tellHost({ type: 'ready' });
       }
 
       function setDiegoIdleLabel() {
@@ -990,6 +993,11 @@
       if (diegoBtn) {
         diegoBtn.addEventListener('click', function (ev) {
           ev.preventDefault();
+          /* In the panel the call belongs to the page behind us — toggle that one. */
+          if (embedded) {
+            tellHost({ type: 'diego_toggle' });
+            return;
+          }
           startDiegoOnCheckout(true);
         });
       }
@@ -998,6 +1006,12 @@
         if (ev.origin !== window.location.origin) return;
         var data = ev.data;
         if (!data || data.source !== 'taco-diego') return;
+        if (data.type === 'diego_state') {
+          /* Host tells us whether its call is live so the button reads correctly. */
+          if (data.live) setDiegoLiveLabel();
+          else setDiegoIdleLabel();
+          return;
+        }
         if (data.type === 'hangup') {
           closeDiego(true);
           return;

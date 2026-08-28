@@ -1446,6 +1446,7 @@
           diegoFrame.removeAttribute('src');
         }
         setDiegoIdleLabel();
+        pushDiegoStateToCheckout();
       }
 
       function openDiego() {
@@ -1457,6 +1458,7 @@
           sessionStorage.setItem('diegoAutostart', '1');
         } catch (eStore) {}
         diegoFrame.src = '/voice?start=1&embed=1';
+        pushDiegoStateToCheckout();
       }
 
       function startDiegoOnMenu() {
@@ -1535,11 +1537,27 @@
         } catch (eSend) {}
       }
 
+      /** Keep the panel's Diego button showing the real state of our call. */
+      function pushDiegoStateToCheckout() {
+        sendToCheckout({ type: 'diego_state', live: diegoOpen });
+      }
+
       window.addEventListener('message', function (ev) {
         if (ev.origin !== window.location.origin) return;
         var d = ev.data;
         if (!d || d.source !== 'taco-checkout') return;
-        if (d.type === 'close') closeCheckoutOverlay(d.section);
+        if (d.type === 'close') {
+          closeCheckoutOverlay(d.section);
+          return;
+        }
+        if (d.type === 'ready') {
+          pushDiegoStateToCheckout();
+          return;
+        }
+        if (d.type === 'diego_toggle') {
+          startDiegoOnMenu();
+          setTimeout(pushDiegoStateToCheckout, 300);
+        }
       });
 
       /* Every Checkout link opens the panel — the address bar stays on the home
