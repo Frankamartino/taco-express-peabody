@@ -7,6 +7,29 @@
   <link rel="canonical" href="https://www.tacoexpresspeabody.com/checkout" />
   <link rel="icon" href="images/taco-express-logo.jpg" type="image/jpeg" />
   <link rel="apple-touch-icon" href="images/taco-express-logo.jpg" />
+  <script>
+    /* Ordering lives at one address: the home page. Anyone landing on /checkout
+       directly — old link, bookmark, or Stripe's cancel URL — is sent to the front
+       page, which reopens checkout as a panel over the menu. The intent rides in
+       storage instead of the URL, so a refresh lands cleanly on the home page and
+       nothing personal from older links survives in the address bar.
+       Runs in <head> so it fires before anything renders. */
+    (function oneAddress() {
+      var embedded = false;
+      try {
+        embedded = new URLSearchParams(window.location.search || '').get('embed') === '1';
+      } catch (e) {}
+      if (embedded) return;
+      try {
+        sessionStorage.setItem('tacoOpenCheckout', '1');
+        if (new URLSearchParams(window.location.search || '').get('canceled') === '1') {
+          sessionStorage.setItem('tacoCheckoutCanceled', '1');
+        }
+      } catch (eFlag) {}
+      window.__tacoLeavingForHome = true;
+      window.location.replace('/');
+    })();
+  </script>
   <link rel="stylesheet" href="css/taco-cart.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
@@ -414,6 +437,24 @@
       var tipChosen = false;
       var instructionsTouched = false;
 
+      /* Shown inside the menu page as an overlay so Diego's call is never torn down. */
+      var embedMode = false;
+      try {
+        embedMode = new URLSearchParams(window.location.search || '').get('embed') === '1';
+      } catch (eEmbed) {}
+
+
+      /** Leaving for Stripe or the receipt must move the whole tab, not just the overlay. */
+      function goTo(href) {
+        try {
+          if (embedMode && window.top && window.top !== window) {
+            window.top.location.href = href;
+            return;
+          }
+        } catch (eTop) {}
+        window.location.href = href;
+      }
+
       function money(cents) { return '$' + (cents / 100).toFixed(2); }
 
       function clearFieldGlows() {
@@ -463,24 +504,42 @@
         if (data.phone && phoneInput) {
           if (!phoneInput.value.trim() || data.force) phoneInput.value = String(data.phone).trim();
         }
+        if (instructionsInput && data.instructions != null) {
+          var note = String(data.instructions).trim();
+          /* Diego is allowed to answer the allergy question with "none" — keep that off the ticket. */
+          if (note && !/^(none|no|nope|n\/a|nothing)\.?$/i.test(note)) {
+            if (!instructionsInput.value.trim() || data.force) {
+              instructionsInput.value = note;
+              instructionsTouched = true;
+            }
+          }
+        }
         updateGuide();
       }
 
+      /** Diego sets the tip in dollars over the call — mirror it onto the picker. */
+      function applyTipDollars(amount) {
+        var dollars = Number(amount);
+        if (!isFinite(dollars) || dollars < 0) return;
+        var active = dollars > 0 ? 'other' : '0';
+        document.querySelectorAll('.tip-btn').forEach(function (btn) {
+          btn.classList.toggle('active', btn.getAttribute('data-tip') === active);
+        });
+        if (dollars > 0) {
+          tipMode = 'other';
+          tipOtherWrap.classList.add('show');
+          /* No focus() — this comes from voice, a keyboard popping up is not wanted. */
+          tipOtherAmount.value = dollars.toFixed(2);
+        } else {
+          tipMode = 'percent';
+          tipPercent = 0;
+          tipOtherWrap.classList.remove('show');
+        }
+        tipChosen = true;
+        render();
+      }
+
       function loadSavedCheckoutContact() {
-        try {
-          var params = new URLSearchParams(window.location.search || '');
-          var urlName = String(params.get('name') || '').trim();
-          var urlEmail = String(params.get('email') || '').trim();
-          var urlPhone = String(params.get('phone') || '').trim();
-          if (urlName || urlEmail || urlPhone) {
-            applyCheckoutContact({
-              name: urlName,
-              email: urlEmail,
-              phone: urlPhone,
-              force: true,
-            });
-          }
-        } catch (eUrl) {}
         try {
           var raw =
             sessionStorage.getItem('tacoCheckoutContact') ||
@@ -741,7 +800,7 @@
           .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
           .then(function (res) {
             if (!res.ok || !res.data.checkoutUrl) throw new Error((res.data && res.data.error) || 'Could not start checkout.');
-            window.location.href = res.data.checkoutUrl;
+            goTo(res.data.checkoutUrl);
           })
           .catch(function (err) {
             msg.textContent = err.message || 'Checkout failed.';
@@ -789,7 +848,7 @@
                 dial.click();
                 dial.remove();
               } catch (eDial) {}
-              window.location.href = q;
+              goTo(q);
             })
             .catch(function (err) {
               msg.textContent = err.message || 'Cash order failed.';
@@ -804,6 +863,17 @@
       document.addEventListener('taco-cart-ready', render);
       document.addEventListener('taco-cart-updated', render);
       render();
+
+      /* Diego's voice iframe lives in a separate script block — hand it the fields it drives. */
+      window.TacoCheckout = {
+        applyContact: applyCheckoutContact,
+        setTipDollars: applyTipDollars,
+      };
+
+      loadSavedCheckoutContact();
+      /* Re-apply after cart/DOM settles — name must show even if Diego remounts. */
+      setTimeout(loadSavedCheckoutContact, 300);
+      setTimeout(loadSavedCheckoutContact, 1200);
     })();
   </script>
   <iframe id="diegoFrame" title="Diego voice" allow="microphone *; autoplay *"></iframe>
@@ -812,6 +882,47 @@
       var diegoBtn = document.getElementById('headerDiegoBtn');
       var diegoFrame = document.getElementById('diegoFrame');
       var diegoOpen = false;
+      var embedded = false;
+      try {
+        embedded = new URLSearchParams(window.location.search || '').get('embed') === '1';
+      } catch (eEm) {}
+
+      /** Overlay mode: the menu page behind us already has Diego on the line. */
+      function tellHost(payload) {
+        try {
+          if (embedded && window.parent && window.parent !== window) {
+            window.parent.postMessage(
+              Object.assign({ source: 'taco-checkout' }, payload),
+              window.location.origin
+            );
+            return true;
+          }
+        } catch (eHost) {}
+        return false;
+      }
+
+      /** Back to the menu — close the overlay if we are in one, otherwise navigate. */
+      function goToMenuSection(section) {
+        if (tellHost({ type: 'close', section: section || '' })) return;
+        window.location.href = '/#' + encodeURIComponent(section || '');
+      }
+
+      if (embedded) {
+        /* One Diego per call. The host page owns the voice, so drop our own frame —
+           but keep the header button: it is part of the checkout UI, and it drives
+           the host's call instead of starting a second one. */
+        if (diegoFrame) diegoFrame.remove();
+        diegoFrame = null;
+        var forget = document.querySelector('.forget-btn');
+        if (forget) {
+          forget.addEventListener('click', function (ev) {
+            ev.preventDefault();
+            goToMenuSection('');
+          });
+        }
+        /* Ask the host for its call state so the button opens with the right label. */
+        tellHost({ type: 'ready' });
+      }
 
       function setDiegoIdleLabel() {
         if (!diegoBtn) return;
@@ -882,6 +993,11 @@
       if (diegoBtn) {
         diegoBtn.addEventListener('click', function (ev) {
           ev.preventDefault();
+          /* In the panel the call belongs to the page behind us — toggle that one. */
+          if (embedded) {
+            tellHost({ type: 'diego_toggle' });
+            return;
+          }
           startDiegoOnCheckout(true);
         });
       }
@@ -890,6 +1006,12 @@
         if (ev.origin !== window.location.origin) return;
         var data = ev.data;
         if (!data || data.source !== 'taco-diego') return;
+        if (data.type === 'diego_state') {
+          /* Host tells us whether its call is live so the button reads correctly. */
+          if (data.live) setDiegoLiveLabel();
+          else setDiegoIdleLabel();
+          return;
+        }
         if (data.type === 'hangup') {
           closeDiego(true);
           return;
@@ -910,7 +1032,7 @@
           var section = String(data.section || 'tacos')
             .trim()
             .toLowerCase();
-          window.location.href = '/#' + encodeURIComponent(section);
+          goToMenuSection(section);
           return;
         }
         if (data.type === 'open_checkout') {
@@ -918,14 +1040,21 @@
           return;
         }
         if (data.type === 'customer_update') {
-          applyCheckoutContact({
-            firstName: data.firstName,
-            lastName: data.lastName,
-            name: data.name,
-            email: data.email,
-            phone: data.phone,
-            force: true,
-          });
+          if (window.TacoCheckout) {
+            window.TacoCheckout.applyContact({
+              firstName: data.firstName,
+              lastName: data.lastName,
+              name: data.name,
+              email: data.email,
+              phone: data.phone,
+              instructions: data.instructions,
+              force: true,
+            });
+          }
+          return;
+        }
+        if (data.type === 'tip_update') {
+          if (window.TacoCheckout) window.TacoCheckout.setTipDollars(data.amount);
           return;
         }
         if (data.type === 'sold_out_refresh') {
@@ -956,12 +1085,6 @@
         }
       });
 
-      loadSavedCheckoutContact();
-      updateGuide();
-      /* Re-apply after cart/DOM settles — name must show even if Diego remounts. */
-      setTimeout(loadSavedCheckoutContact, 300);
-      setTimeout(loadSavedCheckoutContact, 1200);
-
       var wantDiego = false;
       try {
         var params = new URLSearchParams(window.location.search || '');
@@ -970,6 +1093,7 @@
       } catch (eWant) {
         wantDiego = /[?&]diego=1/.test(window.location.search || '');
       }
+      if (embedded || window.__tacoLeavingForHome) wantDiego = false;
       if (wantDiego) {
         setTimeout(function () {
           startDiegoOnCheckout(true);

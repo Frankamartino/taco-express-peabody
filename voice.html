@@ -585,10 +585,15 @@
           name: [customer.firstName, customer.lastName].filter(Boolean).join(' '),
           email: customer.email || '',
           phone: customer.phone || '',
+          /* Mild / spicy / pickup time — said on the menu, must survive the page change. */
+          instructions: order.instructions || '',
         };
         try {
           sessionStorage.setItem('tacoCheckoutContact', JSON.stringify(payload));
-          localStorage.setItem('tacoCheckoutContact', JSON.stringify(payload));
+          /* Contact is worth remembering across visits; this order's chef notes are not. */
+          var durable = Object.assign({}, payload);
+          delete durable.instructions;
+          localStorage.setItem('tacoCheckoutContact', JSON.stringify(durable));
         } catch (eStore) {}
         notifyMenuParent({
           type: 'customer_update',
@@ -597,6 +602,7 @@
           name: payload.name,
           email: payload.email,
           phone: payload.phone,
+          instructions: payload.instructions,
         });
         return payload;
       }
@@ -624,15 +630,15 @@
           sessionStorage.setItem('diegoAutostart', '1');
           sessionStorage.setItem('diegoResumeCheckout', '1');
         } catch (eFlags) {}
+        /* Contact travels in storage, never in the address bar — a URL ends up in
+           browser history, server logs and anything the guest shares. */
         var q = '/checkout?diego=1';
-        if (payload.name) q += '&name=' + encodeURIComponent(payload.name);
-        if (payload.email) q += '&email=' + encodeURIComponent(payload.email);
-        if (payload.phone) q += '&phone=' + encodeURIComponent(payload.phone);
         if (notifyMenuParent({
           type: 'open_checkout',
           name: payload.name,
           email: payload.email,
           phone: payload.phone,
+          instructions: payload.instructions,
           href: q,
         })) {
           return true;
@@ -644,19 +650,6 @@
       }
 
       function restoreCustomerFromStorage() {
-        try {
-          var params = new URLSearchParams(window.location.search || '');
-          var urlName = String(params.get('name') || '').trim();
-          var urlEmail = String(params.get('email') || '').trim();
-          var urlPhone = String(params.get('phone') || '').trim();
-          if (urlName) {
-            var parts = urlName.split(/\s+/).filter(Boolean);
-            if (parts.length) customer.firstName = parts[0];
-            if (parts.length > 1) customer.lastName = parts.slice(1).join(' ');
-          }
-          if (urlEmail) customer.email = urlEmail;
-          if (urlPhone) customer.phone = urlPhone;
-        } catch (eUrl) {}
         try {
           var raw =
             sessionStorage.getItem('tacoCheckoutContact') ||
@@ -675,6 +668,8 @@
           }
           if (!customer.email && c.email) customer.email = String(c.email);
           if (!customer.phone && c.phone) customer.phone = String(c.phone);
+          /* Mild / spicy said on the menu must still be on the ticket after the remount. */
+          if (!order.instructions && c.instructions) order.instructions = String(c.instructions);
         } catch (eStore) {}
         applyKnownGuestAndPersist();
       }
@@ -1887,6 +1882,7 @@
           order.tip = isFinite(tipAmt) && tipAmt >= 0 ? tipAmt : 0;
           order.tipAsked = true;
           renderTicket();
+          notifyMenuParent({ type: 'tip_update', amount: order.tip });
           replyTool(callId, { ok: true, ticket: ticketSnapshot() });
           return;
         }
@@ -1894,6 +1890,7 @@
         if (name === 'set_instructions') {
           order.instructions = args.text != null ? String(args.text) : '';
           renderTicket();
+          persistCustomerForCheckout();
           replyTool(callId, { ok: true, ticket: ticketSnapshot() });
           return;
         }

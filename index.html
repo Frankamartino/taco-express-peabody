@@ -800,6 +800,26 @@
     body.diego-open .hero {
       display: none;
     }
+    /* Checkout rides on top of the menu so a live call is never torn down. */
+    #checkoutOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: var(--bg, #0a0a0a);
+      display: none;
+    }
+    #checkoutOverlay.show {
+      display: block;
+    }
+    #checkoutOverlay iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+    }
+    body.checkout-open {
+      overflow: hidden;
+    }
     .voice-btn.is-live {
       animation: none;
       background: linear-gradient(180deg, #dc2626 0%, #b91c1c 55%, #991b1b 100%);
@@ -1381,6 +1401,10 @@
 
   <iframe id="diegoFrame" title="Diego voice" allow="microphone *; autoplay *"></iframe>
 
+  <div id="checkoutOverlay" aria-hidden="true">
+    <iframe id="checkoutFrame" title="Checkout"></iframe>
+  </div>
+
   <script src="/js/menu-catalog-data.js"></script>
   <script src="/js/taco-sold-out.js"></script>
   <script src="/js/taco-cart.js"></script>
@@ -1422,6 +1446,7 @@
           diegoFrame.removeAttribute('src');
         }
         setDiegoIdleLabel();
+        pushDiegoStateToCheckout();
       }
 
       function openDiego() {
@@ -1433,6 +1458,7 @@
           sessionStorage.setItem('diegoAutostart', '1');
         } catch (eStore) {}
         diegoFrame.src = '/voice?start=1&embed=1';
+        pushDiegoStateToCheckout();
       }
 
       function startDiegoOnMenu() {
@@ -1469,6 +1495,100 @@
         });
       }
 
+      /* ---- Checkout without leaving the page ----
+         Navigating to /checkout destroys this document, and Diego's WebRTC call
+         with it. While he is on the line the checkout is shown as an overlay
+         instead, so the same call keeps running underneath. */
+      var checkoutOverlay = document.getElementById('checkoutOverlay');
+      var checkoutFrame = document.getElementById('checkoutFrame');
+      var checkoutOpen = false;
+
+      function openCheckoutOverlay(canceled) {
+        if (!checkoutOverlay || !checkoutFrame) return false;
+        if (!checkoutOpen) {
+          checkoutFrame.src = '/checkout?embed=1' + (canceled ? '&canceled=1' : '');
+          checkoutOpen = true;
+        }
+        checkoutOverlay.classList.add('show');
+        checkoutOverlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('checkout-open');
+        return true;
+      }
+
+      function closeCheckoutOverlay(section) {
+        if (!checkoutOverlay) return;
+        checkoutOverlay.classList.remove('show');
+        checkoutOverlay.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('checkout-open');
+        if (section) {
+          var target = document.getElementById(section);
+          if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+
+      /** Relay Diego's instructions into the overlay so he still drives the form. */
+      function sendToCheckout(payload) {
+        if (!checkoutOpen || !checkoutFrame || !checkoutFrame.contentWindow) return;
+        try {
+          checkoutFrame.contentWindow.postMessage(
+            Object.assign({ source: 'taco-diego' }, payload),
+            window.location.origin
+          );
+        } catch (eSend) {}
+      }
+
+      /** Keep the panel's Diego button showing the real state of our call. */
+      function pushDiegoStateToCheckout() {
+        sendToCheckout({ type: 'diego_state', live: diegoOpen });
+      }
+
+      window.addEventListener('message', function (ev) {
+        if (ev.origin !== window.location.origin) return;
+        var d = ev.data;
+        if (!d || d.source !== 'taco-checkout') return;
+        if (d.type === 'close') {
+          closeCheckoutOverlay(d.section);
+          return;
+        }
+        if (d.type === 'ready') {
+          pushDiegoStateToCheckout();
+          return;
+        }
+        if (d.type === 'diego_toggle') {
+          startDiegoOnMenu();
+          setTimeout(pushDiegoStateToCheckout, 300);
+        }
+      });
+
+      /* Every Checkout link opens the panel — the address bar stays on the home
+         page, so a refresh always lands there and a live call is never dropped. */
+      document.addEventListener(
+        'click',
+        function (ev) {
+          var link = ev.target && ev.target.closest ? ev.target.closest('a[href]') : null;
+          if (!link) return;
+          var href = link.getAttribute('href') || '';
+          if (!/^\/checkout(\?|#|$)/.test(href)) return;
+          ev.preventDefault();
+          openCheckoutOverlay();
+        },
+        true
+      );
+
+      /* Arrived from /checkout (bookmark, old link, or Stripe cancel). The flag is
+         consumed here, so refreshing afterwards gives a plain home page. */
+      (function resumeCheckoutFromHandoff() {
+        var wanted = false;
+        var canceled = false;
+        try {
+          wanted = sessionStorage.getItem('tacoOpenCheckout') === '1';
+          canceled = sessionStorage.getItem('tacoCheckoutCanceled') === '1';
+          sessionStorage.removeItem('tacoOpenCheckout');
+          sessionStorage.removeItem('tacoCheckoutCanceled');
+        } catch (eResume) {}
+        if (wanted) openCheckoutOverlay(canceled);
+      })();
+
       function applyShopStatus(state) {
         var banner = document.getElementById('shopClosedBanner');
         var reasonEl = document.getElementById('shopClosedReason');
@@ -1499,6 +1619,17 @@
       refreshShopStatus();
       setInterval(refreshShopStatus, 60000);
 
+      /** Contact is worth remembering across visits; this order's chef notes are not. */
+      function withoutInstructions(raw) {
+        try {
+          var c = JSON.parse(raw);
+          delete c.instructions;
+          return JSON.stringify(c);
+        } catch (eStrip) {
+          return raw;
+        }
+      }
+
       window.addEventListener('message', function (ev) {
         if (ev.origin !== window.location.origin) return;
         var data = ev.data;
@@ -1520,6 +1651,8 @@
           return;
         }
         if (data.type === 'scroll_to') {
+          /* "Oops, add a coke" — drop the checkout overlay and show him the menu again. */
+          closeCheckoutOverlay();
           var section = String(data.section || '')
             .trim()
             .toLowerCase();
@@ -1553,28 +1686,36 @@
           try {
             sessionStorage.setItem('diegoAutostart', '1');
             sessionStorage.setItem('diegoResumeCheckout', '1');
+            var np = String(data.name || '').trim().split(/\s+/).filter(Boolean);
             var contactPayload = JSON.stringify({
-              firstName: '',
-              lastName: '',
+              firstName: np[0] || '',
+              lastName: np.slice(1).join(' ') || '',
               name: data.name || '',
               email: data.email || '',
               phone: data.phone || '',
+              instructions: data.instructions || '',
             });
-            if (data.name) {
-              var np = String(data.name).trim().split(/\s+/).filter(Boolean);
-              contactPayload = JSON.stringify({
-                firstName: np[0] || '',
-                lastName: np.slice(1).join(' ') || '',
-                name: data.name || '',
-                email: data.email || '',
-                phone: data.phone || '',
-              });
-            }
             sessionStorage.setItem('tacoCheckoutContact', contactPayload);
-            localStorage.setItem('tacoCheckoutContact', contactPayload);
+            localStorage.setItem('tacoCheckoutContact', withoutInstructions(contactPayload));
           } catch (eStore) {}
+          /* Show checkout over the menu so a live call is never torn down. */
+          if (openCheckoutOverlay()) {
+            /* Nothing reloads on this path, so the resume flags must not linger. */
+            try {
+              sessionStorage.removeItem('diegoAutostart');
+              sessionStorage.removeItem('diegoResumeCheckout');
+            } catch (eFlags) {}
+            sendToCheckout({
+              type: 'customer_update',
+              name: data.name || '',
+              email: data.email || '',
+              phone: data.phone || '',
+              instructions: data.instructions || '',
+              force: true,
+            });
+            return;
+          }
           var href = String(data.href || '/checkout?diego=1');
-          /* Short beat so Diego can say "opening checkout" — then keep him on the new page. */
           setTimeout(function () {
             window.location.href = href;
           }, 900);
@@ -1588,10 +1729,25 @@
               name: data.name || [data.firstName, data.lastName].filter(Boolean).join(' '),
               email: data.email || '',
               phone: data.phone || '',
+              instructions: data.instructions || '',
             });
             sessionStorage.setItem('tacoCheckoutContact', contactPayload);
-            localStorage.setItem('tacoCheckoutContact', contactPayload);
+            localStorage.setItem('tacoCheckoutContact', withoutInstructions(contactPayload));
           } catch (eCust) {}
+          sendToCheckout({
+            type: 'customer_update',
+            firstName: data.firstName || '',
+            lastName: data.lastName || '',
+            name: data.name || '',
+            email: data.email || '',
+            phone: data.phone || '',
+            instructions: data.instructions || '',
+            force: true,
+          });
+          return;
+        }
+        if (data.type === 'tip_update') {
+          sendToCheckout({ type: 'tip_update', amount: data.amount });
           return;
         }
         if (data.type === 'shop_status') {
