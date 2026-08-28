@@ -25,9 +25,11 @@ module.exports = async function handler(req, res) {
 
   const shopStatus = getTacoShopStatus();
   let shopOverrideLine = '';
+  let shopOverrideClosed = false;
   try {
     const override = await fetchShopOverride();
     shopOverrideLine = buildOverrideLine(override) || '';
+    shopOverrideClosed = !!(override && override.closed);
   } catch (eOv) {}
 
   const OPENAI_API_KEY = process.env.OPENAI_API_KEY?.trim();
@@ -724,7 +726,7 @@ module.exports = async function handler(req, res) {
       taxRate: cfg.TAX_RATE,
       knownGuests: Array.isArray(cfg.KNOWN_GUESTS) ? cfg.KNOWN_GUESTS : [],
       shopStatus: shopStatus.line,
-      shopOpen: shopStatus.open,
+      shopOpen: shopStatus.open && !shopOverrideClosed,
       supervisor: process.env.OPENAI_SUPERVISOR_MODEL?.trim() || 'gpt-5.6',
     });
   } catch (e) {

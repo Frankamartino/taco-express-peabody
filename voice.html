@@ -916,19 +916,48 @@
         return day === 'Sunday' ? 'Wednesday at 11 AM' : 'tomorrow at 11 AM';
       }
 
+      function fetchStaffShopOverride() {
+        return fetch('/api/shop-status', { cache: 'no-store' })
+          .then(function (r) {
+            return r.ok ? r.json() : null;
+          })
+          .catch(function () {
+            return null;
+          });
+      }
+
       /** Refusal payload for order-placing tools while the shop is closed. */
-      function closedRefusal() {
+      function closedRefusal(override) {
         var st = easternShopStatus();
-        if (st.open) return null;
+        var early = !!(override && override.closed);
+        if (st.open && !early) return null;
+        var when = early ? 'at our regular hours' : nextOpenPhrase(st);
         return {
           ok: false,
           code: 'shop_closed',
           error:
             'The restaurant is CLOSED right now — do NOT place this order. Tell them warmly we are closed and we open ' +
-            nextOpenPhrase(st) +
+            when +
             '. Offer to see them then. Do not promise food today.',
           ticket: ticketSnapshot(),
         };
+      }
+
+      /** Hours first (sync), then staff early-close from /api/shop-status. */
+      function refuseIfClosed(callId, proceed) {
+        var hoursClosed = closedRefusal(null);
+        if (hoursClosed) {
+          replyTool(callId, hoursClosed);
+          return;
+        }
+        fetchStaffShopOverride().then(function (override) {
+          var blocked = closedRefusal(override);
+          if (blocked) {
+            replyTool(callId, blocked);
+            return;
+          }
+          proceed();
+        });
       }
 
       function money(n) {
@@ -1461,34 +1490,27 @@
 
         if (name === 'get_current_datetime' || name === 'get_current_time') {
           var st = easternShopStatus();
-          fetch('/api/shop-status', { cache: 'no-store' })
-            .then(function (r) {
-              return r.ok ? r.json() : null;
-            })
-            .catch(function () {
-              return null;
-            })
-            .then(function (override) {
-              var line = st.line;
-              var open = st.open;
-              if (override && override.closed) {
-                open = false;
-                line =
-                  'EMERGENCY / EARLY CLOSE — CLOSED for the rest of today. ' +
-                  (override.reason ? 'Reason: ' + override.reason + '. ' : '') +
-                  st.formatted +
-                  ' Eastern.';
-              }
-              replyTool(callId, {
-                ok: true,
-                datetime: st.formatted,
-                open: open,
-                status: line,
-                emergencyClosed: !!(override && override.closed),
-                reason: (override && override.reason) || '',
-                speakHint: line,
-              });
+          fetchStaffShopOverride().then(function (override) {
+            var line = st.line;
+            var open = st.open;
+            if (override && override.closed) {
+              open = false;
+              line =
+                'EMERGENCY / EARLY CLOSE — CLOSED for the rest of today. ' +
+                (override.reason ? 'Reason: ' + override.reason + '. ' : '') +
+                st.formatted +
+                ' Eastern.';
+            }
+            replyTool(callId, {
+              ok: true,
+              datetime: st.formatted,
+              open: open,
+              status: line,
+              emergencyClosed: !!(override && override.closed),
+              reason: (override && override.reason) || '',
+              speakHint: line,
             });
+          });
           return;
         }
 
@@ -1768,98 +1790,98 @@
             replyTool(callId, { ok: false, error: 'method must be cash or card' });
             return;
           }
-          var closedNowPay = closedRefusal();
-          if (closedNowPay) {
-            replyTool(callId, closedNowPay);
-            return;
-          }
-          // Cash AND card: kitchen ticket must show email + phone (never skip)
-          var contactGaps = contactReadyGaps();
-          if (contactGaps.length) {
-            replyTool(callId, {
-              ok: false,
-              code: 'missing_fields',
-              missing: contactGaps,
-              error:
-                'Cannot finalize pay yet. Still need on the ticket: ' +
-                contactGaps.join(', ') +
-                '. Ask one at a time, call set_customer each time, then set_payment again.',
-              ticket: ticketSnapshot(),
-            });
-            return;
-          }
-          if (pm === 'cash' && !fulfillment) {
-            replyTool(callId, {
-              ok: false,
-              code: 'missing_fields',
-              missing: ['fulfillment'],
-              error: 'Ask pickup or delivery, call set_fulfillment, then set_payment cash again.',
-              ticket: ticketSnapshot(),
-            });
-            return;
-          }
-          order.paymentMethod = pm;
-          if (pm === 'cash') {
-            order.paid = false;
-            order.paymentIntentId = '';
-            renderTicket();
-            setStatus('Sending ticket to kitchen…');
-            fetch('/api/queue-kitchen-ticket', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ ticket: ticketSnapshot(), paymentMethod: 'cash' }),
-            })
-              .then(function (r) {
-                return r.json().then(function (data) {
-                  return { httpOk: r.ok, data: data };
-                });
-              })
-              .then(function (res) {
-                setStatus('Diego is on — talk anytime');
-                var queued = !!(res.httpOk && res.data && res.data.ok);
-                var closedByServer = !!(res.data && res.data.code === 'shop_closed');
-                replyTool(callId, {
-                  ok: true,
-                  paymentMethod: 'cash',
-                  kitchenQueued: queued,
-                  orderId: (res.data && res.data.orderId) || '',
-                  ticket: ticketSnapshot(),
-                  speakHint: queued
-                    ? 'Say warmly: ticket is sent to the restaurant — they will start making the food right away; it will be ready in about 20 minutes. Pay cash at the counter when you pick up.'
-                    : closedByServer
-                      ? 'The kitchen did NOT get this ticket — the restaurant is CLOSED right now. Apologize warmly, tell them when we open (' +
-                        ((res.data && res.data.error) || 'regular hours') +
-                        '), and invite them back. Do NOT say food is being made.'
-                      : 'Cash marked. If kitchen queue failed, tell them to call (978) 982-1800 to confirm the order, or pay at Frankie’s Toast / counter.',
-                  hangUpHint: queued
-                    ? 'Short cash + pickup (~20 min), then a warm goodbye. The call ends after your goodbye — never cut them off mid-question.'
-                    : '',
-                });
-                /* No more blind 14-second fuse — Frank got cut off mid-question by it.
-                   The goodbye itself ends the call (see maybeAutoHangUp). */
-                if (queued) order.cashQueued = true;
-                delete pendingCalls[callId];
-              })
-              .catch(function () {
-                setStatus('Diego is on — talk anytime');
-                replyTool(callId, {
-                  ok: true,
-                  paymentMethod: 'cash',
-                  kitchenQueued: false,
-                  ticket: ticketSnapshot(),
-                  speakHint:
-                    'Cash marked but kitchen link failed — ask them to call (978) 982-1800 so the kitchen gets the order.',
-                });
-                delete pendingCalls[callId];
+          refuseIfClosed(callId, function () {
+            // Cash AND card: kitchen ticket must show email + phone (never skip)
+            var contactGaps = contactReadyGaps();
+            if (contactGaps.length) {
+              replyTool(callId, {
+                ok: false,
+                code: 'missing_fields',
+                missing: contactGaps,
+                error:
+                  'Cannot finalize pay yet. Still need on the ticket: ' +
+                  contactGaps.join(', ') +
+                  '. Ask one at a time, call set_customer each time, then set_payment again.',
+                ticket: ticketSnapshot(),
               });
-            return;
-          }
-          renderTicket();
-          replyTool(callId, {
-            ok: true,
-            paymentMethod: pm,
-            ticket: ticketSnapshot(),
-            speakHint: '',
+              return;
+            }
+            if (pm === 'cash' && !fulfillment) {
+              replyTool(callId, {
+                ok: false,
+                code: 'missing_fields',
+                missing: ['fulfillment'],
+                error: 'Ask pickup or delivery, call set_fulfillment, then set_payment cash again.',
+                ticket: ticketSnapshot(),
+              });
+              return;
+            }
+            order.paymentMethod = pm;
+            if (pm === 'cash') {
+              order.paid = false;
+              order.paymentIntentId = '';
+              renderTicket();
+              setStatus('Sending ticket to kitchen…');
+              fetch('/api/queue-kitchen-ticket', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ticket: ticketSnapshot(), paymentMethod: 'cash' }),
+              })
+                .then(function (r) {
+                  return r.json().then(function (data) {
+                    return { httpOk: r.ok, data: data };
+                  });
+                })
+                .then(function (res) {
+                  setStatus('Diego is on — talk anytime');
+                  var queued = !!(res.httpOk && res.data && res.data.ok);
+                  var closedByServer = !!(res.data && res.data.code === 'shop_closed');
+                  if (closedByServer) {
+                    var refused = closedRefusal({ closed: true });
+                    if (res.data && res.data.error) refused.error = res.data.error;
+                    replyTool(callId, refused);
+                    delete pendingCalls[callId];
+                    return;
+                  }
+                  replyTool(callId, {
+                    ok: true,
+                    paymentMethod: 'cash',
+                    kitchenQueued: queued,
+                    orderId: (res.data && res.data.orderId) || '',
+                    ticket: ticketSnapshot(),
+                    speakHint: queued
+                      ? 'Say warmly: ticket is sent to the restaurant — they will start making the food right away; it will be ready in about 20 minutes. Pay cash at the counter when you pick up.'
+                      : 'Cash marked. If kitchen queue failed, tell them to call (978) 982-1800 to confirm the order, or pay at Frankie’s Toast / counter.',
+                    hangUpHint: queued
+                      ? 'Short cash + pickup (~20 min), then a warm goodbye. The call ends after your goodbye — never cut them off mid-question.'
+                      : '',
+                  });
+                  /* No more blind 14-second fuse — Frank got cut off mid-question by it.
+                     The goodbye itself ends the call (see maybeAutoHangUp). */
+                  if (queued) order.cashQueued = true;
+                  delete pendingCalls[callId];
+                })
+                .catch(function () {
+                  setStatus('Diego is on — talk anytime');
+                  replyTool(callId, {
+                    ok: true,
+                    paymentMethod: 'cash',
+                    kitchenQueued: false,
+                    ticket: ticketSnapshot(),
+                    speakHint:
+                      'Cash marked but kitchen link failed — ask them to call (978) 982-1800 so the kitchen gets the order.',
+                  });
+                  delete pendingCalls[callId];
+                });
+              return;
+            }
+            renderTicket();
+            replyTool(callId, {
+              ok: true,
+              paymentMethod: pm,
+              ticket: ticketSnapshot(),
+              speakHint: '',
+            });
           });
           return;
         }
@@ -2053,89 +2075,86 @@
             replyTool(callId, { ok: false, paid: false, error: 'No items on ticket.' });
             return;
           }
-          var closedNowCharge = closedRefusal();
-          if (closedNowCharge) {
-            replyTool(callId, closedNowCharge);
-            return;
-          }
-          var gaps = payReadyGaps();
-          if (gaps.length) {
-            replyTool(callId, {
-              ok: false,
-              paid: false,
-              code: 'missing_fields',
-              missing: gaps,
-              error:
-                'Cannot charge yet. Still need: ' +
-                gaps.join(', ') +
-                '. Ask for those one at a time, then confirm_and_pay again after verbal yes.',
-              ticket: ticketSnapshot(),
-            });
-            return;
-          }
-          setStatus('Charging card…');
-          fetch('/api/charge-order', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ticket: ticketSnapshot() }),
-          })
-            .then(function (r) {
-              return r.json().then(function (data) {
-                return { httpOk: r.ok, data: data };
+          refuseIfClosed(callId, function () {
+            var gaps = payReadyGaps();
+            if (gaps.length) {
+              replyTool(callId, {
+                ok: false,
+                paid: false,
+                code: 'missing_fields',
+                missing: gaps,
+                error:
+                  'Cannot charge yet. Still need: ' +
+                  gaps.join(', ') +
+                  '. Ask for those one at a time, then confirm_and_pay again after verbal yes.',
+                ticket: ticketSnapshot(),
               });
+              return;
+            }
+            setStatus('Charging card…');
+            fetch('/api/charge-order', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ ticket: ticketSnapshot() }),
             })
-            .then(function (res) {
-              if (res.httpOk && res.data && res.data.paid) {
-                order.paid = true;
-                order.paymentMethod = 'card';
-                order.paymentIntentId = res.data.paymentIntentId || '';
-                renderTicket();
-                setStatus('Paid — Taco Voice');
-                replyTool(callId, {
-                  ok: true,
-                  paid: true,
-                  paymentMethod: 'card',
-                  paymentIntentId: order.paymentIntentId,
-                  amount: res.data.amount,
-                  orderId: res.data.orderId || '',
-                  ticket: ticketSnapshot(),
-                  hangUpHint:
-                    'Say short paid + pickup line (~20 min), warm goodbye, then STOP. Call ends automatically.',
+              .then(function (r) {
+                return r.json().then(function (data) {
+                  return { httpOk: r.ok, data: data };
                 });
-                // Backup hang-up after Diego's closing lines — don't leave dead air
-                if (hangUpTimer) clearTimeout(hangUpTimer);
-                hangUpTimer = setTimeout(function () {
-                  if (!callInProgress()) return;
-                  if (!order.paid) return;
-                  hangUp();
-                }, 14000);
-              } else {
-                var failCode = (res.data && res.data.code) || 'charge_failed';
-                if (failCode === 'needs_card_setup') {
-                  openVoiceSignupPopup();
+              })
+              .then(function (res) {
+                if (res.httpOk && res.data && res.data.paid) {
+                  order.paid = true;
+                  order.paymentMethod = 'card';
+                  order.paymentIntentId = res.data.paymentIntentId || '';
+                  renderTicket();
+                  setStatus('Paid — Taco Voice');
+                  replyTool(callId, {
+                    ok: true,
+                    paid: true,
+                    paymentMethod: 'card',
+                    paymentIntentId: order.paymentIntentId,
+                    amount: res.data.amount,
+                    orderId: res.data.orderId || '',
+                    ticket: ticketSnapshot(),
+                    hangUpHint:
+                      'Say short paid + pickup line (~20 min), warm goodbye, then STOP. Call ends automatically.',
+                  });
+                  // Backup hang-up after Diego's closing lines — don't leave dead air
+                  if (hangUpTimer) clearTimeout(hangUpTimer);
+                  hangUpTimer = setTimeout(function () {
+                    if (!callInProgress()) return;
+                    if (!order.paid) return;
+                    hangUp();
+                  }, 14000);
+                } else {
+                  var failCode = (res.data && res.data.code) || 'charge_failed';
+                  if (failCode === 'needs_card_setup') {
+                    openVoiceSignupPopup();
+                  }
+                  setStatus('Diego is on — talk anytime');
+                  replyTool(callId, {
+                    ok: false,
+                    paid: false,
+                    code: failCode,
+                    error: (res.data && res.data.error) || 'Charge failed',
+                    signupOpened: failCode === 'needs_card_setup',
+                    ticket: ticketSnapshot(),
+                  });
                 }
+                delete pendingCalls[callId];
+              })
+              .catch(function () {
                 setStatus('Diego is on — talk anytime');
                 replyTool(callId, {
                   ok: false,
                   paid: false,
-                  code: failCode,
-                  error: (res.data && res.data.error) || 'Charge failed',
-                  signupOpened: failCode === 'needs_card_setup',
+                  error: 'Network error charging card',
                   ticket: ticketSnapshot(),
                 });
-              }
-              delete pendingCalls[callId];
-            })
-            .catch(function () {
-              setStatus('Diego is on — talk anytime');
-              replyTool(callId, {
-                ok: false,
-                paid: false,
-                error: 'Network error charging card',
-                ticket: ticketSnapshot(),
+                delete pendingCalls[callId];
               });
-              delete pendingCalls[callId];
-            });
+          });
           return;
         }
 
@@ -2696,10 +2715,12 @@
           /* Frank: "you have to tell me if the restaurant is closed — give me a
              heads up." Closed goes in the FIRST breath, not after the order. */
           var shopNow = easternShopStatus();
-          if (tokenPayload.shopOpen === false || !shopNow.open) {
+          var staffOverride = await fetchStaffShopOverride();
+          var earlyClosed = !!(staffOverride && staffOverride.closed);
+          if (tokenPayload.shopOpen === false || !shopNow.open || earlyClosed) {
             greetingExact +=
               " Quick heads up — we're closed right now; we open " +
-              nextOpenPhrase(shopNow) +
+              (earlyClosed ? 'at our regular hours' : nextOpenPhrase(shopNow)) +
               '. Happy to answer questions or plan your next order.';
           }
           // Arm BEFORE SDP answer — ontrack fires on setRemoteDescription; if
