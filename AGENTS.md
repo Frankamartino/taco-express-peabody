@@ -1,6 +1,6 @@
 # Agents — you are in Taco Express Peabody
 
-Read [`THE-MILL.md`](THE-MILL.md) first. That is the map of all three shops at The Mill so you do not jump around looking for them.
+Read [`FOOD-HALL.md`](FOOD-HALL.md) first. That is the map of all three shops at the food hall so you do not jump around looking for them.
 
 | Shop | Site | Where to work |
 |---|---|---|

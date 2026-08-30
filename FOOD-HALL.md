@@ -1,6 +1,6 @@
-# The Mill — three shops, one map
+# Food hall — three shops, one map
 
-**58 Pulaski St, Peabody, MA 01960** — Eatery 58 / The Mill.
+**58 Pulaski St, Peabody, MA 01960** — Eatery 58 / The Mill food hall.
 
 Open this file and you have all three. You do not need to hunt GitHub, Vercel, or Squarespace.
 
@@ -19,9 +19,9 @@ Taco Express and Martino Pasta Bar are the same *kind* of build (own repo, own V
 
 **Shared (physical, not code):**
 
-- Same building, same hallway
+- Same food hall, same hallway
 - Same phone: **(978) 982-1800**
-- Same Star kitchen printer / kitchen laptop at The Mill (taco tickets print with header `TACO EXPRESS`)
+- Same Star kitchen printer / kitchen laptop at the food hall (taco tickets print with header `TACO EXPRESS`)
 
 **Not shared:** GitHub repos, Vercel projects, Stripe keys, OpenAI keys, menus, voice hosts.
 
