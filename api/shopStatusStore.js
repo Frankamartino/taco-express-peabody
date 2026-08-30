@@ -8,6 +8,11 @@ const STATUS_SLUG =
   String(process.env.TACO_HOURS_SLUG || 'taco-express-peabody-hours').trim() ||
   'taco-express-peabody-hours';
 
+/** One-off early closes (yyyy-mm-dd Eastern) — sticky even if Supabase override is memory-only. */
+const EARLY_CLOSE_DATES = {
+  '2026-08-30': 'Closed early today — chef out sick. Sorry for the inconvenience.',
+};
+
 /** @type {{ closed: boolean, reason: string, closedDate: string, updatedAt?: string, updatedBy?: string }} */
 let memoryStatus = {
   closed: false,
@@ -68,6 +73,16 @@ function normalizeStatus(raw) {
 
 function publicPayload(state) {
   const n = normalizeStatus(state);
+  const today = easternDateKey();
+  if (!n.closed && EARLY_CLOSE_DATES[today]) {
+    return {
+      closed: true,
+      reason: EARLY_CLOSE_DATES[today],
+      closedDate: today,
+      updatedAt: n.updatedAt || null,
+      updatedBy: n.updatedBy || 'early_close_dates',
+    };
+  }
   return {
     closed: n.closed,
     reason: n.reason || null,
