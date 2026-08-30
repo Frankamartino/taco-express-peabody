@@ -84,6 +84,26 @@ async function main() {
   assert.strictEqual(tue.open, false);
   assert.strictEqual(nextOpenPhrase(tue), 'tomorrow at 11 AM');
 
+  const { readTurnOffToday } = require('../api/turnOffToday');
+  const { staffSetAvailability, fetchLiveState } = require('../api/soldOutStore');
+  const off = readTurnOffToday(easternDate(2026, 7, 30, 20, 30));
+  assert.ok(off && off.closed && off.soldOutAll);
+  assert.strictEqual(off.closedDate, '2026-08-30');
+  const expired = readTurnOffToday(easternDate(2026, 8, 2, 12, 0));
+  assert.strictEqual(expired, null);
+
+  const all = await staffSetAvailability({
+    owner_name: 'Frank Martino',
+    pin: '2468',
+    sold_out: true,
+    all: true,
+  });
+  assert.strictEqual(all.ok, true);
+  assert.ok(all.state.ids.length >= 63);
+
+  const live = await fetchLiveState();
+  assert.ok(live.ids.length >= 63);
+
   console.log('tacoShopHours Wed–Fri only: all assertions passed');
 }
 

@@ -108,7 +108,7 @@ async function shopClosedCheck(now) {
   }
   try {
     const { fetchShopOverride, publicPayload } = require('./shopStatusStore');
-    const ov = publicPayload(await fetchShopOverride());
+    const ov = publicPayload(await fetchShopOverride(now));
     if (ov && ov.closed) {
       return {
         closed: true,
