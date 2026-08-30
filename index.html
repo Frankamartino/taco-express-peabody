@@ -610,7 +610,7 @@
       color: #fecaca;
     }
     #shopClosedBanner {
-      display: none;
+      display: block;
       background: rgba(127, 29, 29, 0.95);
       color: #fecaca;
       text-align: center;
@@ -618,14 +618,6 @@
       font-weight: 700;
       font-size: 0.95rem;
       border-bottom: 1px solid rgba(248, 113, 113, 0.5);
-    }
-    #shopClosedBanner.show { display: block; }
-    #shopClosedBanner .shop-closed-reason {
-      display: block;
-      font-weight: 600;
-      font-size: 0.85rem;
-      margin-top: 4px;
-      color: #fee2e2;
     }
     .card.is-sold-out .sold-out-badge {
       margin: 8px 0 0;
@@ -859,9 +851,8 @@
   </style>
 </head>
 <body>
-  <div id="shopClosedBanner" role="status" aria-live="polite">
-    <span>Temporarily closed for today</span>
-    <span class="shop-closed-reason" id="shopClosedReason"></span>
+  <div id="shopClosedBanner" class="show" role="status" aria-live="polite">
+    <span>Wednesday, Thursday, Friday 11 AM – 8:00 PM</span>
   </div>
   <header>
     <div class="header-inner">
@@ -1588,19 +1579,9 @@
 
       function applyShopStatus(state) {
         var banner = document.getElementById('shopClosedBanner');
-        var reasonEl = document.getElementById('shopClosedReason');
         if (!banner) return;
-        if (state && state.closed) {
-          banner.classList.add('show');
-          if (reasonEl) {
-            reasonEl.textContent = state.reason
-              ? String(state.reason)
-              : 'We had to close early. Please check back next visit.';
-          }
-        } else {
-          banner.classList.remove('show');
-          if (reasonEl) reasonEl.textContent = '';
-        }
+        banner.classList.add('show');
+        void state;
       }
 
       function refreshShopStatus() {
