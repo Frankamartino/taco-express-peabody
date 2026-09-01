@@ -342,7 +342,13 @@
       z-index: -1;
     }
   </style>
+  <script>
+    window.va = window.va || function () {
+      (window.vaq = window.vaq || []).push(arguments);
+    };
+  </script>
   <script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
+  <script src="/js/taco-analytics.js"></script>
 </head>
 <body>
   <div class="wrap">
@@ -801,6 +807,7 @@
           .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
           .then(function (res) {
             if (!res.ok || !res.data.checkoutUrl) throw new Error((res.data && res.data.error) || 'Could not start checkout.');
+            if (typeof window.tacoTrack === 'function') window.tacoTrack('Card Checkout Started');
             goTo(res.data.checkoutUrl);
           })
           .catch(function (err) {
@@ -837,6 +844,7 @@
               if (!res.ok || !res.data.ok) {
                 throw new Error((res.data && res.data.error) || 'Could not send cash order.');
               }
+              if (typeof window.tacoTrack === 'function') window.tacoTrack('Cash Order Completed');
               try { window.TacoCart.clear(); } catch (eClear) {}
               var q = '/order-success?cash=1&dial=1';
               if (res.data.ticketNumber) q += '&ticket=' + encodeURIComponent(res.data.ticketNumber);
