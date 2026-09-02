@@ -51,6 +51,19 @@ async function main() {
   const satGate = await shopClosedCheck(easternDate(2026, 7, 29, 15, 0));
   assert.strictEqual(satGate.closed, false);
 
+  /* Customers must be able to pay / print tickets these four days, 11 AM–8 PM. */
+  for (const [label, when] of [
+    ['Wednesday', easternDate(2026, 8, 2, 12, 0)],
+    ['Thursday', easternDate(2026, 8, 3, 12, 0)],
+    ['Friday', easternDate(2026, 8, 4, 12, 0)],
+    ['Saturday', easternDate(2026, 8, 5, 12, 0)],
+    ['Saturday 7:59 PM', easternDate(2026, 8, 5, 19, 59)],
+  ]) {
+    const gate = await shopClosedCheck(when);
+    assert.strictEqual(gate.closed, false, label + ' must allow purchase');
+    assert.strictEqual(gate.code, '');
+  }
+
   const satNight = getTacoShopStatus(easternDate(2026, 7, 29, 20, 30));
   assert.strictEqual(satNight.day, 'Saturday');
   assert.strictEqual(satNight.open, false);
