@@ -41,6 +41,9 @@
     if (next > 0) cart.push({ id: itemId, qty: next });
     saveCart(cart);
     if (next > prev) {
+      if (prev === 0 && typeof window.tacoTrack === 'function') {
+        window.tacoTrack('Order Started');
+      }
       var bar = document.getElementById('tacoCartBar');
       if (bar) {
         bar.classList.add('cart-pulse');
