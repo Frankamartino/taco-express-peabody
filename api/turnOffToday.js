@@ -20,6 +20,7 @@ function readTurnOffToday(now = new Date()) {
       fs.readFileSync(path.join(__dirname, 'turn-off-today.json'), 'utf8')
     );
     if (!raw || raw.closedDate !== easternDateKey(now)) return null;
+    if (!raw.closed && !raw.soldOutAll) return null;
     return raw;
   } catch (e) {
     return null;

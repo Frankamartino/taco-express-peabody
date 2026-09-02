@@ -871,12 +871,7 @@
           minute: '2-digit',
           hour12: true,
         }).format(now);
-        if (
-          day === 'Monday' ||
-          day === 'Tuesday' ||
-          day === 'Saturday' ||
-          day === 'Sunday'
-        ) {
+        if (day === 'Monday' || day === 'Tuesday' || day === 'Sunday') {
           return {
             formatted: formatted,
             day: day,
@@ -887,7 +882,7 @@
               formatted +
               ' Eastern. CLOSED TODAY — ' +
               day +
-              ' we are always closed. Open Wednesday–Friday 11 AM–8 PM only. Closed Saturday–Tuesday. Next open ' +
+              ' we are always closed. Open Wednesday–Saturday 11 AM–8 PM. Closed Sunday–Tuesday. Next open ' +
               nextOpenPhrase({ day: day, mins: mins }) +
               '.',
           };
@@ -913,16 +908,14 @@
         };
       }
 
-      /** "today at 11 AM" / "tomorrow at 11 AM" / "Wednesday at 11 AM" (Sat–Tue closed). */
+      /** "today at 11 AM" / "tomorrow at 11 AM" / "Wednesday at 11 AM" (Sun–Tue closed). */
       function nextOpenPhrase(st) {
         var day = st.day;
         var beforeOpen = (st.mins || 0) < 11 * 60;
-        if (day === 'Monday' || day === 'Saturday' || day === 'Sunday') {
-          return 'Wednesday at 11 AM';
-        }
+        if (day === 'Monday' || day === 'Sunday') return 'Wednesday at 11 AM';
         if (day === 'Tuesday') return 'tomorrow at 11 AM';
         if (beforeOpen) return 'today at 11 AM';
-        return day === 'Friday' ? 'Wednesday at 11 AM' : 'tomorrow at 11 AM';
+        return day === 'Saturday' ? 'Wednesday at 11 AM' : 'tomorrow at 11 AM';
       }
 
       /** Refusal payload for order-placing tools while the shop is closed. */

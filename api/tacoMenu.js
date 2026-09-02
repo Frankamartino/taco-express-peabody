@@ -4,7 +4,7 @@
  */
 const FULL_MENU = `
 Taco Express Peabody — 58 Pulaski Street Unit B, Peabody MA 01960 · (978) 982-1800
-Hours: Wed–Fri 11AM–8PM. Sat–Tue CLOSED.
+Hours: Wed–Sat 11AM–8PM. Sun–Tue CLOSED.
 Prices match DoorDash Menu Manager.
 
 RULES (always):

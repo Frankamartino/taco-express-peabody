@@ -1,11 +1,10 @@
 /**
  * Taco Express Peabody — shop hours (US Eastern).
- * Wed–Fri 11–8. Sat–Tue CLOSED.
+ * Wed–Sat 11–8. Sun–Tue CLOSED.
  */
 const CLOSED_DAYS = {
   Monday: true,
   Tuesday: true,
-  Saturday: true,
   Sunday: true,
 };
 
@@ -47,7 +46,7 @@ function getTacoShopStatus(now = new Date()) {
       open: false,
       closedToday: true,
       line:
-        `OPEN/CLOSED RIGHT NOW (AUTHORITATIVE): ${formatted} Eastern. CLOSED TODAY — ${day} we are always closed. Open Wednesday–Friday 11 AM–8 PM only. Closed Saturday–Tuesday. Next open: ${next}. ` +
+        `OPEN/CLOSED RIGHT NOW (AUTHORITATIVE): ${formatted} Eastern. CLOSED TODAY — ${day} we are always closed. Open Wednesday–Saturday 11 AM–8 PM. Closed Sunday–Tuesday. Next open: ${next}. ` +
         'If they want food today, say clearly we are CLOSED — do NOT imply pickup in 20 minutes, do NOT joke about grabbing tacos today. ' +
         'You may still walk the menu for their next visit. If Frank Martino (creator): acknowledge he built this site with Rex in Cursor — warm inside joke, one beat.',
     };
@@ -74,13 +73,11 @@ function getTacoShopStatus(now = new Date()) {
 function nextOpenPhrase(status) {
   const day = status.day;
   const beforeOpen = (status.mins || 0) < 11 * 60;
-  if (day === 'Monday' || day === 'Saturday' || day === 'Sunday') {
-    return 'Wednesday at 11 AM';
-  }
+  if (day === 'Monday' || day === 'Sunday') return 'Wednesday at 11 AM';
   if (day === 'Tuesday') return 'tomorrow at 11 AM';
   if (beforeOpen) return 'today at 11 AM';
-  // After close on an open day: Fri → next Wed; Wed/Thu → tomorrow.
-  return day === 'Friday' ? 'Wednesday at 11 AM' : 'tomorrow at 11 AM';
+  // After close on an open day: Sat → next Wed; Wed–Fri → tomorrow.
+  return day === 'Saturday' ? 'Wednesday at 11 AM' : 'tomorrow at 11 AM';
 }
 
 /**
@@ -96,7 +93,7 @@ async function shopClosedCheck(now) {
       closed: true,
       code: 'shop_closed',
       message: isClosedDay(hours.day)
-        ? 'Taco Express is closed today — we are open Wednesday through Friday only. We open ' +
+        ? 'Taco Express is closed today — we are open Wednesday through Saturday. We open ' +
           when +
           '.'
         : 'Taco Express is closed right now — today\u2019s hours are ' +
