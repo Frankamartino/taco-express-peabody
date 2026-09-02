@@ -3,6 +3,7 @@
  * Persists via Supabase menu_sold_out_live slug taco-express-peabody-hours when available.
  */
 const { verifyStaffCredentials } = require('./soldOutStore');
+const { readTurnOffToday } = require('./turnOffToday');
 
 const STATUS_SLUG =
   String(process.env.TACO_HOURS_SLUG || 'taco-express-peabody-hours').trim() ||
@@ -92,7 +93,17 @@ function publicPayload(state) {
   };
 }
 
-async function fetchShopOverride() {
+async function fetchShopOverride(now = new Date()) {
+  const fileOff = readTurnOffToday(now);
+  if (fileOff && fileOff.closed) {
+    return normalizeStatus({
+      closed: true,
+      reason: fileOff.reason || 'Closed early today',
+      closedDate: fileOff.closedDate,
+      updatedAt: fileOff.updatedAt,
+      updatedBy: fileOff.updatedBy || 'Frank Martino',
+    });
+  }
   const cfg = getSupabase();
   if (!cfg) {
     return normalizeStatus(memoryStatus);

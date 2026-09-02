@@ -57,12 +57,6 @@
           "dayOfWeek": ["Wednesday", "Thursday", "Friday", "Saturday"],
           "opens": "11:00",
           "closes": "20:00"
-        },
-        {
-          "@type": "OpeningHoursSpecification",
-          "dayOfWeek": "Sunday",
-          "opens": "11:00",
-          "closes": "18:00"
         }
       ],
       "potentialAction": {
@@ -99,7 +93,7 @@
           "name": "What are Taco Express Peabody hours?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Closed Monday and Tuesday. Wednesday through Saturday 11 AM–8 PM. Sunday 11 AM–6 PM. US Eastern time."
+            "text": "Open Wednesday through Saturday 11 AM–8 PM. Closed Sunday, Monday, and Tuesday. US Eastern time."
           }
         },
         {
@@ -620,7 +614,7 @@
       color: #fecaca;
     }
     #shopClosedBanner {
-      display: none;
+      display: block;
       background: rgba(127, 29, 29, 0.95);
       color: #fecaca;
       text-align: center;
@@ -628,14 +622,6 @@
       font-weight: 700;
       font-size: 0.95rem;
       border-bottom: 1px solid rgba(248, 113, 113, 0.5);
-    }
-    #shopClosedBanner.show { display: block; }
-    #shopClosedBanner .shop-closed-reason {
-      display: block;
-      font-weight: 600;
-      font-size: 0.85rem;
-      margin-top: 4px;
-      color: #fee2e2;
     }
     .card.is-sold-out .sold-out-badge {
       margin: 8px 0 0;
@@ -869,9 +855,8 @@
   </style>
 </head>
 <body>
-  <div id="shopClosedBanner" role="status" aria-live="polite">
-    <span>Temporarily closed for today</span>
-    <span class="shop-closed-reason" id="shopClosedReason"></span>
+  <div id="shopClosedBanner" class="show" role="status" aria-live="polite">
+    <span>Wednesday through Saturday 11 AM – 8:00 PM</span>
   </div>
   <header>
     <div class="header-inner">
@@ -1363,8 +1348,11 @@
       <table class="hours-table" aria-label="Hours">
         <tr><td>Monday</td><td>Closed</td></tr>
         <tr><td>Tuesday</td><td>Closed</td></tr>
-        <tr><td>Wed – Sat</td><td>11 AM – 8 PM</td></tr>
-        <tr><td>Sunday</td><td>11 AM – 6 PM</td></tr>
+        <tr><td>Wednesday</td><td>11 AM – 8 PM</td></tr>
+        <tr><td>Thursday</td><td>11 AM – 8 PM</td></tr>
+        <tr><td>Friday</td><td>11 AM – 8 PM</td></tr>
+        <tr><td>Saturday</td><td>11 AM – 8 PM</td></tr>
+        <tr><td>Sunday</td><td>Closed</td></tr>
       </table>
       <p style="margin-top:20px;font-size:0.95rem;">
         <strong>Taco Express Peabody</strong><br>
@@ -1595,19 +1583,9 @@
 
       function applyShopStatus(state) {
         var banner = document.getElementById('shopClosedBanner');
-        var reasonEl = document.getElementById('shopClosedReason');
         if (!banner) return;
-        if (state && state.closed) {
-          banner.classList.add('show');
-          if (reasonEl) {
-            reasonEl.textContent = state.reason
-              ? String(state.reason)
-              : 'We had to close early. Please check back next visit.';
-          }
-        } else {
-          banner.classList.remove('show');
-          if (reasonEl) reasonEl.textContent = '';
-        }
+        banner.classList.add('show');
+        void state;
       }
 
       function refreshShopStatus() {

@@ -4,6 +4,7 @@
  * falls back to in-memory for the current serverless instance.
  */
 const { MENU_ITEMS } = require('./menuCatalog');
+const { readTurnOffToday } = require('./turnOffToday');
 
 const RESTAURANT_SLUG =
   String(process.env.TACO_RESTAURANT_SLUG || 'taco-express-peabody').trim() ||
@@ -140,7 +141,17 @@ function labelsForIds(ids) {
   });
 }
 
-async function fetchLiveState() {
+async function fetchLiveState(now = new Date()) {
+  const fileOff = readTurnOffToday(now);
+  if (fileOff && fileOff.soldOutAll) {
+    const ids = MENU_ITEMS.map((item) => item.id);
+    return {
+      ids,
+      updatedAt: fileOff.updatedAt,
+      updatedBy: fileOff.updatedBy || 'Frank Martino',
+      source: 'turn-off-today',
+    };
+  }
   const cfg = getSupabase();
   if (!cfg) {
     return {
@@ -273,7 +284,14 @@ async function staffSetAvailability(req) {
   const soldOut =
     soldRaw === true || soldRaw === 'true' || soldRaw === 1 || soldRaw === '1';
 
-  const targetIds = resolveItemIds(req.item_name || req.itemName, req.match_contains || req.matchContains);
+  const wantAll =
+    req.all === true ||
+    req.all === 'true' ||
+    /^(all|everything|entire.?menu)$/i.test(String(req.item_name || req.itemName || req.match_contains || req.matchContains || req.action || ''));
+
+  const targetIds = wantAll
+    ? MENU_ITEMS.map((item) => item.id)
+    : resolveItemIds(req.item_name || req.itemName, req.match_contains || req.matchContains);
   if (!targetIds.length) {
     return {
       ok: false,

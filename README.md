@@ -9,7 +9,7 @@
 | **Hosting** | Vercel project `taco-express-peabody` (its own project, its own keys) |
 | **Address** | 58 Pulaski St, Peabody, MA 01960 — inside The Mill (Eatery 58) |
 | **Phone** | (978) 982-1800 |
-| **Hours** | Wed–Sat 11 AM–8 PM · Sun 11 AM–6 PM · Mon–Tue closed |
+| **Hours** | Wed–Sat 11 AM–8 PM · Sun–Tue closed |
 
 ## Its own entity
 
