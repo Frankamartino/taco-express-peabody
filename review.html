@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leave a Google review — Taco Express Peabody</title>
+  <meta name="robots" content="noindex, follow" />
+  <meta name="description" content="Scan or tap to leave a Google review for Taco Express Peabody at The Mill." />
+  <link rel="canonical" href="https://www.tacoexpresspeabody.com/review" />
+  <link rel="icon" href="images/taco-express-logo.jpg" type="image/jpeg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+  <script>
+    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+  </script>
+  <script defer src="/_vercel/insights/script.js"></script>
+  <style>
+    :root {
+      --lime: #84cc16;
+      --terra: #ea580c;
+      --cream: #fffbeb;
+      --ink: #1c1917;
+      --muted: rgba(255, 251, 235, 0.65);
+      --border: rgba(255, 255, 255, 0.1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      font-family: "DM Sans", system-ui, sans-serif;
+      background: var(--ink);
+      color: var(--cream);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 28px 18px 48px;
+      text-align: center;
+    }
+    .logo {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #fff;
+      margin-bottom: 14px;
+    }
+    h1 {
+      font-family: "Bebas Neue", sans-serif;
+      font-size: clamp(2.4rem, 10vw, 3.4rem);
+      letter-spacing: 0.05em;
+      color: var(--lime);
+      line-height: 1;
+    }
+    .lead {
+      margin-top: 10px;
+      color: var(--muted);
+      max-width: 28rem;
+      line-height: 1.5;
+    }
+    .qr-wrap {
+      margin-top: 28px;
+      padding: 18px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+    }
+    .qr-wrap img {
+      display: block;
+      width: min(280px, 72vw);
+      height: auto;
+    }
+    .review-btn {
+      display: inline-flex;
+      margin-top: 22px;
+      background: var(--terra);
+      color: #fff;
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 14px 28px;
+      border-radius: 999px;
+      text-decoration: none;
+    }
+    .review-btn:hover { filter: brightness(1.08); color: #fff; }
+    .meta {
+      margin-top: 18px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+    .meta a { color: var(--lime); font-weight: 700; text-decoration: none; }
+    .back {
+      margin-top: 28px;
+      color: #fff;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    @media print {
+      body { background: #fff; color: #111; padding: 24px; }
+      h1 { color: #111; }
+      .lead, .meta { color: #444; }
+      .review-btn, .back { display: none; }
+      .qr-wrap { box-shadow: none; border: 1px solid #ddd; }
+    }
+  </style>
+</head>
+<body>
+  <img class="logo" src="images/taco-express-logo.jpg" width="96" height="96" alt="Taco Express Peabody" />
+  <h1>Leave a Google review</h1>
+  <p class="lead">Scan the code or tap the button — it opens our Google Business Profile. Thanks for helping neighbors find Taco Express.</p>
+
+  <div class="qr-wrap">
+    <img
+      id="reviewQr"
+      width="280"
+      height="280"
+      alt="QR code to Google review for Taco Express Peabody"
+      src="https://api.qrserver.com/v1/create-qr-code/?size=280x280&amp;margin=12&amp;data=https%3A%2F%2Fwww.google.com%2Fmaps%3Fcid%3D2102545735255324937"
+    />
+  </div>
+
+  <a
+    class="review-btn"
+    id="reviewLink"
+    href="https://www.google.com/maps?cid=2102545735255324937"
+    target="_blank"
+    rel="noopener"
+  >Open Google review</a>
+
+  <p class="meta">
+    Taco Express Peabody<br />
+    58 Pulaski St Unit B · The Mill · Peabody MA<br />
+    <a href="tel:+19789821800">(978) 982-1800</a>
+    ·
+    <a href="/">tacoexpresspeabody.com</a>
+  </p>
+  <a class="back" href="/">← Back to menu</a>
+</body>
+</html>
