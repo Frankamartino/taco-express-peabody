@@ -1447,7 +1447,7 @@
           var fOut = { ok: true, ticket: ticketSnapshot() };
           if (fulfillment === 'delivery') {
             fOut.speakHint =
-              'Pickup only on our site — no delivery apps here. Offer call_restaurant to dial (978) 982-1800 if they want to phone in.';
+              'This voice order is pickup only. DoorDash and Grubhub are live for delivery; Uber Eats is not yet. Offer call_restaurant to dial (978) 982-1800 if they want to phone in.';
           }
           replyTool(callId, fOut);
           return;

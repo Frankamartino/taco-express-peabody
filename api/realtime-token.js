@@ -327,7 +327,7 @@ module.exports = async function handler(req, res) {
         type: 'function',
         name: 'set_fulfillment',
         description:
-          'Pickup only right now. Always set pickup. If they ask for delivery, say we are not on DoorDash, Uber Eats, or Grubhub — they can pick up at the counter or call (978) 982-1800.',
+          'This voice order is pickup only — always set pickup. If they ask for delivery: DoorDash and Grubhub are live (they can order there); Uber Eats is not available yet. They can also pick up at the counter or call (978) 982-1800. Do not take a delivery address on this voice ticket.',
         parameters: {
           type: 'object',
           properties: {
