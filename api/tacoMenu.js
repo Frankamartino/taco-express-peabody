@@ -1,11 +1,11 @@
 /**
- * Taco Express Peabody — one DoorDash menu for Diego voice + supervisor.
+ * Taco Express Peabody — menu for Diego voice + supervisor.
  * This GitHub repo only (taco-express-peabody). Do not load another restaurant's menu.
  */
 const FULL_MENU = `
 Taco Express Peabody — 58 Pulaski Street Unit B, Peabody MA 01960 · (978) 982-1800
 Hours: Mon–Tue CLOSED. Wed–Sat 11AM–8PM. Sun 11AM–6PM.
-Prices match DoorDash Menu Manager.
+Prices match the Taco Express menu.
 
 RULES (always):
 - FULL MENU below is the ONLY authority for food items/prices. Exact name + price. Never invent menu items.
@@ -31,7 +31,7 @@ ENCHILADA PITCH (first-time guests / when they ask how enchiladas are made — w
 "Our enchiladas are packed with braised shredded beef, slow-cooked like a rich beef stew, then wrapped in soft tortillas, smothered in sauce, melted cheese on top — ready to finish with sour cream or pico. Pure comfort right out of the oven."
 Adapt for chicken / pork / shrimp protein. Cheese: Mexican blend inside & on top for now — creamy and full-flavored. Do NOT offer cheese choices online or by voice (keeps ordering simple). Frank is looking for queso Oaxaca for an even creamier inside melt — if asked about cheese: Mexican blend, melts rich; no menu of cheese options.
 
-Ring DoorDash titles (exact) — show order: tacos, burritos, enchiladas, quesadillas. Proteins always Beef, Chicken, Pork, Shrimp:
+Ring these titles (exact) — show order: tacos, burritos, enchiladas, quesadillas. Proteins always Beef, Chicken, Pork, Shrimp:
 TACOS (three alone): Three Tacos · Shredded Beef $13.49 | Three Tacos · Shredded Chicken $13.49 | Three Tacos · Shredded Pork $13.49 | Three Tacos · Grilled Shrimp $21.99
 TACO DINNER (Add two sides = rice & beans, +$7): Taco Plate · Beef $20.49 | Taco Plate · Chicken $20.49 | Taco Plate · Pork $20.49 | Taco Plate · Shrimp $28.99
 BURRITOS (alone): Burrito · Shredded Beef $13.49 | Burrito · Shredded Chicken $13.49 | Burrito · Pork $13.49 | Burrito · Grilled Shrimp $21.99
