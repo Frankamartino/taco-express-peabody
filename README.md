@@ -41,10 +41,8 @@ while ordering, so a refresh always lands back on the front page.
    fills in name/email/phone and chef notes, sets the tip, and takes cash or
    the saved card. The call never drops at checkout.
 3. **Phone** — (978) 982-1800.
-4. **DoorDash** — store ID **13952485** → https://order.online/store/13952485
-5. **Grubhub** — https://www.grubhub.com/restaurant/taco-express-peabody-58-pulaski-street-peabody/15286648
 
-Uber Eats is not hooked up yet. DoorDash + Grubhub buttons are on the homepage under the menu nav.
+Pickup at the counter. This site does not link out to other ordering apps.
 
 ## The rules this build enforces (in code, not just prompts)
 
