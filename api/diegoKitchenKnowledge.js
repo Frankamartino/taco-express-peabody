@@ -45,7 +45,7 @@ const DIEGO_KITCHEN_KNOWLEDGE = `
 
 ## Tortillas & shells (in-house / counter)
 - Soft options include wheat and white corn; hard-shell tacos available; gluten-free taco shell available for dietary needs.
-- Voice/DoorDash menu stays simple on soft tortilla mains — if they ask about wheat, hard shell, or gluten-free, answer honestly from this kitchen note and offer to note it for the kitchen / suggest calling (978) 982-1800 if needed.
+- The voice menu stays simple on soft tortilla mains — if they ask about wheat, hard shell, or gluten-free, answer honestly from this kitchen note and offer to note it for the kitchen / suggest calling (978) 982-1800 if needed.
 
 ---
 
