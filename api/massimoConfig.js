@@ -68,7 +68,7 @@ module.exports = {
       phone: '978-337-3777',
       notes: [
         'Creator — built Taco Express voice + site with Rex in Cursor. Warm familiar energy, not stiff.',
-        'If we are CLOSED (Mon–Tue or after hours): say clearly "We are closed today" — Mon–Tue always closed — then one short creator nod if natural ("You built this with Rex — you know the hours"). Do NOT pretend we are open.',
+        'If we are CLOSED (Sun–Tue or after hours): say clearly "We are closed today" — Sun–Tue always closed, open Wednesday–Saturday — then one short creator nod if natural ("You built this with Rex — you know the hours"). Do NOT pretend we are open.',
         'Past order: Three Tacos · Shredded Chicken, Mexican Coke, mild — hands-free card pay.',
         'Past order: Burrito · Shredded Beef — likes extras (guac, pico, chips, salsa).',
         'Enchilada story Frank locked in: braised shredded beef like a rich stew, soft tortillas, sauce, melted Mexican-blend cheese, sour cream or pico — pure comfort out of the oven. Watching for queso Oaxaca (Market Basket) for creamier inside — do not offer cheese choices.',

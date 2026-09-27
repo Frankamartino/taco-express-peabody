@@ -35,6 +35,10 @@ module.exports = async function handler(req, res) {
   if (!body || typeof body !== 'object') body = {};
 
   const action = String(body.action || 'set').toLowerCase();
+  if (action === 'all' || action === 'sold_out_all') {
+    body.all = true;
+    if (body.sold_out == null && body.soldOut == null) body.sold_out = true;
+  }
   if (action === 'list') {
     const result = await staffListSoldOut(body.owner_name || body.ownerName, body.pin);
     return res.status(result.ok ? 200 : 403).json(result);
