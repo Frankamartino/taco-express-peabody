@@ -77,6 +77,13 @@
     }
     .review-cta a.review-btn:hover { filter: brightness(1.08); color: #fff; }
   </style>
+  <script>
+    window.va = window.va || function () {
+      (window.vaq = window.vaq || []).push(arguments);
+    };
+  </script>
+  <script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
+  <script src="/js/taco-analytics.js"></script>
 </head>
 <body>
   <div class="card">
@@ -145,6 +152,14 @@
           body.textContent =
             'Your card was charged. Pickup at 58 Pulaski St Unit B, Peabody. Stripe emailed your receipt.';
           if (data.orderId) status.textContent = 'Order ' + data.orderId;
+          try {
+            if (sessionStorage.getItem('tacoCardOrderCompleted') !== sessionId) {
+              sessionStorage.setItem('tacoCardOrderCompleted', sessionId);
+              if (typeof window.tacoTrack === 'function') window.tacoTrack('Card Order Completed');
+            }
+          } catch (eTrack) {
+            if (typeof window.tacoTrack === 'function') window.tacoTrack('Card Order Completed');
+          }
           if (window.TacoCart) window.TacoCart.clear();
           showReviewAsk();
         })
