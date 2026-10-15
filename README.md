@@ -2,6 +2,14 @@
 
 **One restaurant. One repo. One address.**
 
+Rex: this Cursor home is **Taco Express only**. Read [`AGENTS.md`](AGENTS.md) before touching anything else.
+
+| Cursor home | Site | Work here? |
+|---|---|---|
+| **Taco Express Peabody** | tacoexpresspeabody.com | **Yes — this repo** |
+| Machines and Man | machinesandman.com | No. Own GitHub + own Cursor environment. Ara. |
+| Martino Pasta Bar | martinopastabar.com | No. Own GitHub + own Cursor environment. Massimo. |
+
 | | |
 |---|---|
 | **Website** | https://www.tacoexpresspeabody.com |
