@@ -156,19 +156,20 @@
     .header-inner {
       max-width: 960px;
       margin: 0 auto;
-      padding: 12px 18px 4px;
+      padding: 8px 12px;
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
     }
     .header-logo {
       display: block;
-      width: 104px;
-      height: 104px;
-      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
       object-fit: cover;
       background: #fff;
+      flex-shrink: 0;
     }
     .header-phone {
       color: var(--lime);
@@ -236,25 +237,28 @@
       margin: 0 0 10px;
     }
     nav {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 0 18px 14px;
+      flex: 1;
+      min-width: 0;
+      margin: 0;
+      padding: 0;
       display: flex;
-      gap: 6px 20px;
-      flex-wrap: wrap;
+      gap: 14px;
+      flex-wrap: nowrap;
       justify-content: flex-start;
-      align-items: baseline;
+      align-items: center;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
     }
     nav a {
       font-family: "Bebas Neue", sans-serif;
-      font-size: clamp(1.35rem, 3.6vw, 1.85rem);
+      font-size: 1.05rem;
       font-weight: 400;
       text-transform: none;
       letter-spacing: 0.04em;
-      line-height: 1.05;
+      line-height: 1;
       color: var(--lime);
       text-decoration: none;
-      padding: 0;
+      padding: 6px 0;
       border: 0;
       border-radius: 0;
       background: none;
@@ -268,7 +272,7 @@
     nav a:active {
       color: var(--white);
     }
-    .wrap { max-width: 960px; margin: 0 auto; padding: 0 18px 64px; }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 8px 18px 64px; }
     .hero {
       text-align: center;
       padding: 36px 0 28px;
@@ -298,7 +302,7 @@
       margin: 2px 0 0;
     }
     section { padding-top: 28px; }
-    #tacos { padding-top: 18px; }
+    #tacos { padding-top: 8px; }
     .section-label {
       font-size: 0.68rem;
       font-weight: 700;
@@ -702,12 +706,11 @@
       letter-spacing: 0.06em;
     }
     @media (max-width: 720px) {
-      nav { justify-content: center; }
+      .header-inner { padding: 6px 10px; }
       .header-logo {
-        width: 64px;
-        height: 64px;
+        width: 32px;
+        height: 32px;
       }
-      .header-inner { padding: 10px 16px 2px; }
       .grid-2,
       .grid-3,
       .drink-grid {
@@ -729,18 +732,18 @@
   </div>
   <header>
     <div class="header-inner">
-      <img class="header-logo" src="images/taco-express-logo.jpg" width="104" height="104" alt="Taco Express Peabody" />
+      <img class="header-logo" src="images/taco-express-logo.jpg" width="36" height="36" alt="Taco Express Peabody" />
+      <nav aria-label="Menu sections">
+        <a href="#tacos">Tacos</a>
+        <a href="#burritos">Burritos</a>
+        <a href="#enchiladas">Enchiladas</a>
+        <a href="#quesadillas">Quesadillas</a>
+        <a href="#sides">Sides</a>
+        <a href="#fryer">Fried Foods</a>
+        <a href="#drinks">Drinks</a>
+        <a href="/checkout">Checkout</a>
+      </nav>
     </div>
-    <nav aria-label="Menu sections">
-      <a href="#tacos">Tacos</a>
-      <a href="#burritos">Burritos</a>
-      <a href="#enchiladas">Enchiladas</a>
-      <a href="#quesadillas">Quesadillas</a>
-      <a href="#sides">Sides</a>
-      <a href="#fryer">Fried Foods</a>
-      <a href="#drinks">Drinks</a>
-      <a href="/checkout">Checkout</a>
-    </nav>
   </header>
 
   <main class="wrap">
