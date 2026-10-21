@@ -298,42 +298,24 @@
 
     /* Diego background voice on checkout (same pattern as homepage) */
     .checkout-top {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 12px;
       margin-bottom: 8px;
     }
-    .checkout-top .brand { flex: 1; margin-bottom: 0; }
+    .checkout-top .brand { margin-bottom: 0; }
     .voice-btn {
-      flex-shrink: 0;
-      cursor: pointer;
-      font-family: inherit;
-      font-size: 0.78rem;
-      font-weight: 650;
-      line-height: 1.15;
-      color: rgba(255, 251, 235, 0.7);
-      background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      border-radius: 999px;
-      padding: 10px 14px;
-      max-width: 140px;
-      text-align: center;
-    }
-    .voice-btn .voice-btn-sub {
-      display: block;
-      font-size: 0.62rem;
+      display: inline;
+      margin-top: 8px;
+      padding: 0;
+      border: 0;
+      background: none;
+      color: var(--muted);
+      font: inherit;
+      font-size: 0.82rem;
       font-weight: 600;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      opacity: 0.8;
-      margin-top: 2px;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 2px;
     }
-    .voice-btn.is-live {
-      color: #fff;
-      background: #b91c1c;
-      border-color: #dc2626;
-    }
+    .voice-btn.is-live { color: #fca5a5; }
     #diegoFrame {
       position: fixed;
       width: 1px;
@@ -353,11 +335,10 @@
       <div class="brand">
         <img src="images/taco-express-logo.jpg" width="88" height="88" alt="Taco Express Peabody" />
         <h1>Checkout</h1>
+        <button type="button" class="voice-btn" id="headerDiegoBtn" aria-label="Optional voice help at checkout">
+          Need voice help?
+        </button>
       </div>
-      <button type="button" class="voice-btn" id="headerDiegoBtn" aria-label="Ask Diego for checkout help">
-        <span>Ask Diego</span>
-        <span class="voice-btn-sub">voice help</span>
-      </button>
     </div>
     <div class="panel">
       <div class="order-heading">
@@ -931,15 +912,15 @@
       function setDiegoIdleLabel() {
         if (!diegoBtn) return;
         diegoBtn.classList.remove('is-live');
-        diegoBtn.innerHTML = '<span>Ask Diego</span><span class="voice-btn-sub">voice help</span>';
-        diegoBtn.setAttribute('aria-label', 'Ask Diego for checkout help');
+        diegoBtn.textContent = 'Need voice help?';
+        diegoBtn.setAttribute('aria-label', 'Optional voice help at checkout');
       }
 
       function setDiegoLiveLabel() {
         if (!diegoBtn) return;
         diegoBtn.classList.add('is-live');
-        diegoBtn.innerHTML = '<span>Hang Up</span>';
-        diegoBtn.setAttribute('aria-label', 'Hang up Diego');
+        diegoBtn.textContent = 'Hang up voice';
+        diegoBtn.setAttribute('aria-label', 'Hang up voice helper');
       }
 
       function closeDiego(fromChild) {

@@ -109,7 +109,7 @@
           "name": "Who is Diego at Taco Express?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Diego is an optional voice helper on tacoexpresspeabody.com. Tap Ask Diego if you want hands-free help. Most guests tap the menu."
+            "text": "Diego is an optional voice helper. Most guests tap the menu. Voice help is at the bottom of the page or /voice if you want it."
           }
         }
       ]
@@ -156,32 +156,19 @@
     .header-inner {
       max-width: 960px;
       margin: 0 auto;
-      padding: 16px 18px 10px;
-      position: relative;
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      padding: 16px 18px 8px;
+      display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 10px 16px;
-    }
-    .header-start {
-      justify-self: start;
-      z-index: 2;
+      gap: 8px;
     }
     .header-logo {
-      justify-self: center;
       display: block;
       width: 140px;
       height: 140px;
       border-radius: 50%;
       object-fit: cover;
       background: #fff;
-    }
-    .header-end {
-      justify-self: end;
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      z-index: 2;
     }
     .header-phone {
       color: var(--lime);
@@ -224,43 +211,7 @@
       color: var(--cream);
     }
     .call-btn-secondary:hover { border-color: var(--muted); }
-    .voice-helper {
-      appearance: none;
-      display: inline-flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 1px;
-      border: 1px solid var(--border);
-      background: transparent;
-      color: var(--muted);
-      font-family: inherit;
-      font-weight: 650;
-      font-size: 0.78rem;
-      line-height: 1.2;
-      padding: 8px 12px;
-      border-radius: 999px;
-      cursor: pointer;
-      min-height: 44px;
-      min-width: 44px;
-    }
-    .voice-helper:hover {
-      color: var(--cream);
-      border-color: var(--muted);
-    }
-    .voice-helper-sub {
-      font-size: 0.62rem;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: inherit;
-      opacity: 0.8;
-    }
-    .voice-helper.is-live {
-      border-color: #dc2626;
-      color: #fff;
-      background: #b91c1c;
-    }
+    footer a.is-live { color: #fca5a5; }
     .order-paths {
       display: grid;
       gap: 14px;
@@ -711,8 +662,8 @@
       bottom: 0;
       z-index: -1;
     }
-    body.diego-open .voice-helper {
-      border-color: #dc2626;
+    body.diego-open footer a#diegoHelperLink {
+      color: #fca5a5;
     }
     /* Checkout rides on top of the menu so a live call is never torn down. */
     #checkoutOverlay {
@@ -734,11 +685,7 @@
     body.checkout-open {
       overflow: hidden;
     }
-    .voice-helper.is-live {
-      border-color: #dc2626;
-      color: #fff;
-      background: #b91c1c;
-    }
+    footer a.is-live { color: #fca5a5; }
     footer {
       margin-top: 48px;
       padding: 28px 18px 40px;
@@ -754,22 +701,6 @@
       letter-spacing: 0.06em;
     }
     @media (max-width: 720px) {
-      .header-inner {
-        grid-template-columns: 1fr 1fr;
-        grid-template-areas:
-          "logo logo"
-          "phone helper";
-        text-align: center;
-      }
-      .header-logo { grid-area: logo; }
-      .header-start {
-        grid-area: phone;
-        justify-self: center;
-      }
-      .header-end {
-        grid-area: helper;
-        justify-self: center;
-      }
       nav { justify-content: center; }
     }
   </style>
@@ -781,16 +712,8 @@
   </div>
   <header>
     <div class="header-inner">
-      <div class="header-start">
-        <a class="header-phone" href="tel:+19789821800">(978) 982-1800</a>
-      </div>
       <img class="header-logo" src="images/taco-express-logo.jpg" width="140" height="140" alt="Taco Express Peabody" />
-      <div class="header-end">
-        <button type="button" class="voice-helper" id="headerDiegoBtn" aria-label="Ask Diego for voice-order help">
-          <span>Ask Diego</span>
-          <span class="voice-helper-sub">voice help</span>
-        </button>
-      </div>
+      <a class="header-phone" href="tel:+19789821800">(978) 982-1800</a>
     </div>
     <nav aria-label="Menu sections">
       <a href="#tacos">Tacos</a>
@@ -1297,7 +1220,7 @@
   <footer>
     <p class="brand-footer">Taco Express Peabody</p>
     <p style="margin-top:6px;"><a href="https://tacoexpresspeabody.com">tacoexpresspeabody.com</a></p>
-    <p style="margin-top:8px;"><a href="/checkout">Checkout</a> · <a href="/voice">Ask Diego</a> · <a href="/order">How to order</a></p>
+    <p style="margin-top:8px;"><a href="/checkout">Checkout</a> · <a href="/voice" id="diegoHelperLink">Voice help</a> · <a href="/order">How to order</a></p>
     <p style="margin-top:8px;">
       <a href="/review">Review</a>
       ·
@@ -1324,25 +1247,23 @@
   <script src="/js/taco-cart.js"></script>
   <script>
     (function () {
-      /* Ask Diego: quiet helper. Hang up in header only. Menu stays. Voice in background. */
-      var diegoBtn = document.getElementById('headerDiegoBtn');
+      /* Diego is a footer helper only — never a header button. */
+      var diegoBtn = document.getElementById('diegoHelperLink');
       var diegoFrame = document.getElementById('diegoFrame');
       var diegoOpen = false;
 
       function setDiegoIdleLabel() {
         if (!diegoBtn) return;
         diegoBtn.classList.remove('is-live');
-        diegoBtn.innerHTML =
-          '<span>Ask Diego</span>' +
-          '<span class="voice-helper-sub">voice help</span>';
-        diegoBtn.setAttribute('aria-label', 'Ask Diego for voice-order help');
+        diegoBtn.textContent = 'Voice help';
+        diegoBtn.setAttribute('aria-label', 'Optional voice help');
       }
 
       function setDiegoLiveLabel() {
         if (!diegoBtn) return;
         diegoBtn.classList.add('is-live');
-        diegoBtn.innerHTML = '<span>Hang Up</span>';
-        diegoBtn.setAttribute('aria-label', 'Hang up Diego');
+        diegoBtn.textContent = 'Hang up voice';
+        diegoBtn.setAttribute('aria-label', 'Hang up voice helper');
       }
 
       function closeDiego(fromChild) {
