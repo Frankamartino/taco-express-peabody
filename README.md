@@ -168,7 +168,7 @@ Shipped, in order ([PR #3](https://github.com/Frankamartino/taco-express-peabody
    page.
 6. Refresh clears the cart to zero.
 7. Kept the checkout header's Diego button (it drives the one live call) and
-   the "Oops! Forgot something · Menu" button — UI untouched.
+   the ← Menu link — UI untouched.
 8. Diego announces closed hours up front; closed blocks tickets and charges
    everywhere; killed the 14-second auto-hangup that cut customers off.
 

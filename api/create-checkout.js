@@ -15,12 +15,16 @@ function formEncode(obj) {
     .join('&');
 }
 
+/* wallet_options.link.display needs 2025-04-30.basil or newer. */
+const STRIPE_VERSION = '2025-09-30.clover';
+
 async function stripeForm(secret, path, params) {
   const r = await fetch('https://api.stripe.com/v1/' + path, {
     method: 'POST',
     headers: {
       Authorization: 'Bearer ' + secret,
       'Content-Type': 'application/x-www-form-urlencoded',
+      'Stripe-Version': STRIPE_VERSION,
     },
     body: formEncode(params),
   });
@@ -108,10 +112,13 @@ module.exports = async function handler(req, res) {
     success_url: baseUrl + '/order-success?session_id={CHECKOUT_SESSION_ID}',
     cancel_url: baseUrl + '/checkout?canceled=1',
     customer_email: email,
-    /* Card only. Stripe Link steals the email box and blocks a normal card pay. */
+    /* Card only. Do not use excluded_payment_method_types=link — Stripe errors and Link stays. */
     'payment_method_types[0]': 'card',
-    'excluded_payment_method_types[0]': 'link',
+    'wallet_options[link][display]': 'never',
     'phone_number_collection[enabled]': 'false',
+    'custom_text[submit][message]': 'Pay Taco Express Peabody — pickup at The Mill',
+    'payment_intent_data[description]': 'Taco Express Peabody pickup — ' + name,
+    'payment_intent_data[statement_descriptor_suffix]': 'TACOS',
     'metadata[shop]': 'taco-express-peabody-web',
     'metadata[orderId]': orderId,
     'metadata[name]': name,
@@ -152,8 +159,8 @@ module.exports = async function handler(req, res) {
   if (!session.ok) {
     const firstMsg =
       (session.data && session.data.error && session.data.error.message) || '';
-    if (/excluded_payment_method_types|payment_method_types/i.test(firstMsg)) {
-      delete params['excluded_payment_method_types[0]'];
+    if (/statement_descriptor/i.test(firstMsg)) {
+      delete params['payment_intent_data[statement_descriptor_suffix]'];
       session = await stripeForm(secret, 'checkout/sessions', params);
     }
   }
