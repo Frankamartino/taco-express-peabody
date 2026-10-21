@@ -703,6 +703,28 @@
     }
     @media (max-width: 720px) {
       nav { justify-content: center; }
+      .header-logo {
+        width: 64px;
+        height: 64px;
+      }
+      .header-inner { padding: 10px 16px 2px; }
+      .grid-2,
+      .grid-3,
+      .drink-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+      .card img,
+      .card-media img,
+      .card .img-placeholder {
+        aspect-ratio: 1 / 1;
+      }
+      .order-row { flex-wrap: wrap; }
+      .order-row .qty-stepper {
+        width: 100%;
+        justify-content: center;
+        margin-top: 8px;
+      }
     }
   </style>
 </head>
