@@ -766,8 +766,17 @@
       color: #fff;
     }
     body.menu-app .wrap { max-width: 720px; padding: 0 0 80px; }
-    body.menu-app section { padding: 8px 16px 4px; }
+    body.menu-app section { padding: 8px 0 4px; }
     body.menu-app #tacos { padding-top: 8px; }
+    body.menu-app section h2,
+    body.menu-app .subhead { padding-left: 16px; padding-right: 16px; }
+    body.menu-app .hours-table,
+    body.menu-app .map-embed,
+    body.menu-app .map-links { margin-left: 16px; margin-right: 16px; }
+    body.menu-app .card:not(:has(.card-media)),
+    body.menu-app .drink-card:not(:has(.drink-photo)) {
+      grid-template-columns: 1fr;
+    }
     body.menu-app section h2 {
       font-family: "DM Sans", system-ui, sans-serif;
       font-size: 1.15rem;
