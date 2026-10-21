@@ -34,12 +34,11 @@ and never copy these anywhere else.
 Everything happens at **one address** — the home page. The URL never changes
 while ordering, so a refresh always lands back on the front page.
 
-1. **Tap to order** — Add buttons on the menu fill the cart. Checkout opens as
-   a panel over the menu. Pay by card (Stripe) or choose cash at the counter.
-2. **Talk to Diego** — the voice host. One button, one call, start to finish:
-   he takes the order, opens the checkout panel *while staying on the line*,
-   fills in name/email/phone and chef notes, sets the tip, and takes cash or
-   the saved card. The call never drops at checkout.
+1. **Tap to order** — the homepage is the logo and the menu. Add buttons fill
+   the cart. Checkout opens as a panel over the menu. Pay by card (Stripe) or
+   choose cash at the counter.
+2. **Ask Diego** — optional voice helper, not the front of the shop. One call
+   start to finish if they want hands-free help. The call never drops at checkout.
 3. **Phone** — (978) 982-1800.
 
 Pickup at the counter. This site does not link out to other ordering apps.
