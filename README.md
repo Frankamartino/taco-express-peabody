@@ -34,9 +34,9 @@ and never copy these anywhere else.
 Everything happens at **one address** — the home page. The URL never changes
 while ordering, so a refresh always lands back on the front page.
 
-1. **Tap to order** — the homepage is the logo and the menu. Add buttons fill
-   the cart. Checkout opens as a panel over the menu. Pay by card (Stripe) or
-   choose cash at the counter.
+1. **Tap to order** — the homepage is the logo and the menu. Each item is a
+   large photo with − 0 + under it. Checkout opens as a panel over the menu.
+   Pay by card (Stripe) or choose cash at the counter.
 2. **Voice help** — optional, in the footer if they want it. Not on the header.
    The call never drops at checkout.
 3. **Phone** — (978) 982-1800.
