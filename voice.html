@@ -25,10 +25,10 @@
   <script defer src="/_vercel/insights/script.js"></script>
   <style>
     :root {
-      --lime: #84cc16;
-      --terra: #ea580c;
+      --lime: #e8c36a;
+      --terra: #7a1518;
       --white: #ffffff;
-      --charcoal: #1c1917;
+      --charcoal: #140808;
     }
     html {
       background: var(--charcoal);
@@ -44,8 +44,8 @@
       padding: 0 20px 40px;
     }
     .top-bar {
-      background: #14532d;
-      color: #bbf7d0;
+      background: #5c1012;
+      color: #f8efd8;
       text-align: center;
       padding: 8px 14px;
       font-size: 0.78rem;
@@ -59,13 +59,14 @@
     }
     .top { text-align: center; flex-shrink: 0; }
     .voice-logo {
-      width: 96px;
-      height: 96px;
+      width: 128px;
+      height: 128px;
       border-radius: 50%;
       object-fit: cover;
       display: block;
       margin: 0 auto 12px;
       background: #fff;
+      box-shadow: 0 0 0 3px #e8c36a, 0 8px 24px rgba(122, 21, 24, 0.45);
     }
     h1 {
       font-family: "Bebas Neue", sans-serif;
@@ -279,7 +280,7 @@
       justify-content: center;
       background:
         radial-gradient(120% 80% at 50% 0%, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0.08) 32%, transparent 55%),
-        linear-gradient(180deg, #fb923c 0%, #ea580c 38%, #c2410c 100%);
+        linear-gradient(180deg, #9b1d22 0%, #7a1518 38%, #5c1012 100%);
       animation: diegoGelPulse 2.6s ease-in-out infinite;
       transition: filter 0.2s ease;
     }
@@ -287,16 +288,16 @@
       0%, 100% {
         transform: scale(1);
         box-shadow:
-          0 8px 24px rgba(234, 88, 12, 0.42),
-          0 0 0 0 rgba(132, 204, 22, 0),
+          0 8px 24px rgba(122, 21, 24, 0.5),
+          0 0 0 0 rgba(232, 195, 106, 0),
           inset 0 2px 0 rgba(255, 255, 255, 0.4),
           inset 0 -12px 20px rgba(0, 0, 0, 0.28);
       }
       50% {
         transform: scale(1.03);
         box-shadow:
-          0 16px 40px rgba(234, 88, 12, 0.55),
-          0 0 36px 4px rgba(132, 204, 22, 0.32),
+          0 16px 40px rgba(122, 21, 24, 0.62),
+          0 0 36px 4px rgba(232, 195, 106, 0.38),
           inset 0 2px 0 rgba(255, 255, 255, 0.5),
           inset 0 -12px 20px rgba(0, 0, 0, 0.2);
       }
@@ -308,8 +309,8 @@
       58%, 100% { transform: translateX(220%) skewX(-18deg); opacity: 0; }
     }
     @keyframes diegoGelRipple {
-      0% { box-shadow: 0 0 0 0 rgba(132, 204, 22, 0.42); opacity: 1; }
-      100% { box-shadow: 0 0 0 22px rgba(132, 204, 22, 0); opacity: 0; }
+      0% { box-shadow: 0 0 0 0 rgba(232, 195, 106, 0.42); opacity: 1; }
+      100% { box-shadow: 0 0 0 22px rgba(232, 195, 106, 0); opacity: 0; }
     }
     #orderNowBtn::before {
       content: '';
@@ -378,7 +379,7 @@
     }
     #orderNowBtn.live {
       background: var(--lime);
-      color: #14532d;
+      color: #5c1012;
       box-shadow: none;
     }
     #status {
