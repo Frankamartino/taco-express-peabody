@@ -202,6 +202,14 @@
     label { display: block; font-size: 0.82rem; font-weight: 700; margin: 12px 0 6px; }
     input, textarea { width: 100%; border-radius: 10px; border: 1px solid var(--border); background: rgba(0,0,0,0.25); color: #fff; padding: 11px 12px; font: inherit; }
     textarea { min-height: 72px; resize: vertical; }
+    .name-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 12px;
+    }
+    @media (max-width: 420px) {
+      .name-row { grid-template-columns: 1fr; }
+    }
     #msg { margin-top: 14px; min-height: 1.2em; font-weight: 600; text-align: center; }
     #msg.err { color: #fca5a5; }
     .note { margin-top: 12px; font-size: 0.82rem; color: rgba(255,251,235,0.65); text-align: center; line-height: 1.45; }
@@ -376,14 +384,22 @@
     </div>
     <div class="panel" id="payPanel">
       <h2 id="pickupHeading">Pickup details</h2>
-      <label for="name" id="labelName" class="guide-glow">Full name</label>
-      <input id="name" type="text" autocomplete="name" required />
-      <label for="email" id="labelEmail">Email</label>
-      <input id="email" type="email" autocomplete="email" required />
-      <label for="phone" id="labelPhone">Phone</label>
+      <div class="name-row">
+        <div>
+          <label for="firstName" id="labelFirstName" class="guide-glow">First name</label>
+          <input id="firstName" type="text" autocomplete="given-name" required />
+        </div>
+        <div>
+          <label for="lastName" id="labelLastName">Last name</label>
+          <input id="lastName" type="text" autocomplete="family-name" required />
+        </div>
+      </div>
+      <label for="phone" id="labelPhone">Phone number</label>
       <input id="phone" type="tel" autocomplete="tel" inputmode="tel" required />
-      <label for="instructions" id="labelInstructions">Special instructions (optional)</label>
-      <textarea id="instructions" placeholder="Mild or spicy, pickup time, etc."></textarea>
+      <label for="email" id="labelEmail">Email address</label>
+      <input id="email" type="email" autocomplete="email" required />
+      <label for="instructions" id="labelInstructions">Comments for the chef (optional)</label>
+      <textarea id="instructions" placeholder="Food allergies, mild or spicy, anything the kitchen should know"></textarea>
       <div class="pay-actions">
         <button type="button" class="pay-btn" id="payBtn">Pay with card</button>
         <button type="button" class="pay-btn" id="cashBtn">Pay with cash</button>
@@ -406,13 +422,15 @@
       var tipLabel = document.getElementById('tipLabel');
       var tipHeading = document.getElementById('tipHeading');
       var pickupHeading = document.getElementById('pickupHeading');
-      var labelName = document.getElementById('labelName');
+      var labelFirstName = document.getElementById('labelFirstName');
+      var labelLastName = document.getElementById('labelLastName');
       var labelEmail = document.getElementById('labelEmail');
       var labelPhone = document.getElementById('labelPhone');
       var labelInstructions = document.getElementById('labelInstructions');
       var payActions = document.querySelector('.pay-actions');
       var msg = document.getElementById('msg');
-      var nameInput = document.getElementById('name');
+      var firstNameInput = document.getElementById('firstName');
+      var lastNameInput = document.getElementById('lastName');
       var emailInput = document.getElementById('email');
       var phoneInput = document.getElementById('phone');
       var instructionsInput = document.getElementById('instructions');
@@ -443,7 +461,7 @@
       function money(cents) { return '$' + (cents / 100).toFixed(2); }
 
       function clearFieldGlows() {
-        [labelName, labelEmail, labelPhone, labelInstructions, pickupHeading].forEach(function (el) {
+        [labelFirstName, labelLastName, labelEmail, labelPhone, labelInstructions, pickupHeading].forEach(function (el) {
           if (el) el.classList.remove('guide-glow');
         });
         if (payActions) payActions.classList.remove('guide-pay');
@@ -452,37 +470,49 @@
       function updateGuide() {
         clearFieldGlows();
         var c = readContact();
-        /* Name → email → phone first, then tip (Frank: credentials before tip glow). */
-        if (!c.name) {
-          if (labelName) labelName.classList.add('guide-glow');
+        if (!c.firstName) {
+          if (labelFirstName) labelFirstName.classList.add('guide-glow');
           return;
         }
-        if (!c.email || c.email.indexOf('@') < 1) {
-          if (labelEmail) labelEmail.classList.add('guide-glow');
+        if (!c.lastName) {
+          if (labelLastName) labelLastName.classList.add('guide-glow');
           return;
         }
         if (!c.phone) {
           if (labelPhone) labelPhone.classList.add('guide-glow');
           return;
         }
+        if (!c.email || c.email.indexOf('@') < 1) {
+          if (labelEmail) labelEmail.classList.add('guide-glow');
+          return;
+        }
         if (!tipChosen) {
           if (tipHeading) tipHeading.classList.add('guide-glow');
           return;
         }
-        /* Instructions optional — glow the label and light pay so they can skip. */
         if (!instructionsTouched) {
           if (labelInstructions) labelInstructions.classList.add('guide-glow');
         }
         if (payActions) payActions.classList.add('guide-pay');
       }
 
+      function fillNameField(input, value, force) {
+        var next = String(value || '').trim();
+        if (!input || !next) return;
+        if (!input.value.trim() || force) input.value = next;
+      }
+
       function applyCheckoutContact(data) {
         if (!data || typeof data !== 'object') return;
-        var full =
-          String(data.name || '').trim() ||
-          [data.firstName, data.lastName].filter(Boolean).join(' ').trim();
-        if (full && nameInput && !nameInput.value.trim()) nameInput.value = full;
-        else if (full && nameInput && data.force) nameInput.value = full;
+        var first = String(data.firstName || '').trim();
+        var last = String(data.lastName || '').trim();
+        if (!first && !last && data.name) {
+          var split = splitName(data.name);
+          first = split.firstName;
+          last = split.lastName;
+        }
+        fillNameField(firstNameInput, first, data.force);
+        fillNameField(lastNameInput, last, data.force);
         if (data.email && emailInput) {
           if (!emailInput.value.trim() || data.force) emailInput.value = String(data.email).trim();
         }
@@ -542,20 +572,25 @@
       }
 
       function readContact() {
+        var firstName = firstNameInput ? firstNameInput.value.trim() : '';
+        var lastName = lastNameInput ? lastNameInput.value.trim() : '';
         return {
-          name: document.getElementById('name').value.trim(),
-          email: document.getElementById('email').value.trim(),
-          phone: document.getElementById('phone').value.trim(),
-          instructions: document.getElementById('instructions').value.trim(),
+          firstName: firstName,
+          lastName: lastName,
+          name: [firstName, lastName].filter(Boolean).join(' '),
+          email: emailInput ? emailInput.value.trim() : '',
+          phone: phoneInput ? phoneInput.value.trim() : '',
+          instructions: instructionsInput ? instructionsInput.value.trim() : '',
         };
       }
 
       function validateContact(c) {
         msg.textContent = '';
         msg.className = '';
-        if (!c.name) { msg.textContent = 'Please enter your name.'; msg.className = 'err'; return false; }
-        if (!c.email || c.email.indexOf('@') < 1) { msg.textContent = 'Please enter a valid email.'; msg.className = 'err'; return false; }
-        if (!c.phone) { msg.textContent = 'Please enter your phone.'; msg.className = 'err'; return false; }
+        if (!c.firstName) { msg.textContent = 'Please enter your first name.'; msg.className = 'err'; return false; }
+        if (!c.lastName) { msg.textContent = 'Please enter your last name.'; msg.className = 'err'; return false; }
+        if (!c.phone) { msg.textContent = 'Please enter your phone number.'; msg.className = 'err'; return false; }
+        if (!c.email || c.email.indexOf('@') < 1) { msg.textContent = 'Please enter a valid email address.'; msg.className = 'err'; return false; }
         return true;
       }
 
@@ -575,12 +610,11 @@
             taxIncluded: false,
           });
         });
-        var names = splitName(c.name);
         return {
           lines: lines,
           customer: {
-            firstName: names.firstName,
-            lastName: names.lastName,
+            firstName: c.firstName,
+            lastName: c.lastName,
             email: c.email,
             phone: c.phone,
           },
@@ -740,7 +774,7 @@
         render();
         updateGuide();
       });
-      [nameInput, emailInput, phoneInput].forEach(function (el) {
+      [firstNameInput, lastNameInput, emailInput, phoneInput].forEach(function (el) {
         if (!el) return;
         el.addEventListener('input', updateGuide);
         el.addEventListener('change', updateGuide);
