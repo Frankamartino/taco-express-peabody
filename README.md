@@ -91,7 +91,8 @@ with "none" is not printed on the ticket.
 | `checkout.html` | The checkout form. Loaded inside the panel (`?embed=1`). Visited directly, it bounces home and reopens as the panel. |
 | `voice.html` | Diego's engine: WebRTC to OpenAI Realtime, the ticket, all his tools. Runs hidden in an iframe. |
 | `voice-signup.html` | One-time card save for hands-free voice pay. |
-| `order.html` / `order-success.html` | Order landing / receipt page. |
+| `order.html` | Redirects to the homepage menu. |
+| `order-success.html` | Receipt page. |
 | `menu-print.html` / `menu-descriptions.html` | Printable menu, menu copy. |
 | `drop-photos.html` | Photo install status board (see `OPEN-LOCAL-REX.md`). |
 
