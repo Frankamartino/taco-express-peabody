@@ -108,9 +108,14 @@ module.exports = async function handler(req, res) {
     success_url: baseUrl + '/order-success?session_id={CHECKOUT_SESSION_ID}',
     cancel_url: baseUrl + '/checkout?canceled=1',
     customer_email: email,
+    /* Card only. Stripe Link steals the email box and blocks a normal card pay. */
+    'payment_method_types[0]': 'card',
+    'excluded_payment_method_types[0]': 'link',
+    'phone_number_collection[enabled]': 'false',
     'metadata[shop]': 'taco-express-peabody-web',
     'metadata[orderId]': orderId,
     'metadata[name]': name,
+    'metadata[email]': email,
     'metadata[phone]': phone,
     'metadata[fulfillment]': fulfillment,
     'metadata[instructions]': instructions,
@@ -143,7 +148,15 @@ module.exports = async function handler(req, res) {
     params['line_items[' + nextIndex + '][price_data][product_data][name]'] = tipLabel || 'Tip';
   }
 
-  const session = await stripeForm(secret, 'checkout/sessions', params);
+  let session = await stripeForm(secret, 'checkout/sessions', params);
+  if (!session.ok) {
+    const firstMsg =
+      (session.data && session.data.error && session.data.error.message) || '';
+    if (/excluded_payment_method_types|payment_method_types/i.test(firstMsg)) {
+      delete params['excluded_payment_method_types[0]'];
+      session = await stripeForm(secret, 'checkout/sessions', params);
+    }
+  }
   if (!session.ok) {
     const msg =
       (session.data && session.data.error && session.data.error.message) || 'Stripe checkout failed';
