@@ -238,6 +238,13 @@ window.TACO_MENU_ITEMS = [
     "priceCents": 2199
   },
   {
+    "id": "quesadilla-cod",
+    "section": "quesadillas",
+    "title": "Crispy Cod",
+    "name": "Loaded Quesadilla · Crispy Cod",
+    "priceCents": 2199
+  },
+  {
     "id": "quesadilla-beef-plate",
     "section": "quesadillas",
     "title": "Beef Dinner",
@@ -263,6 +270,13 @@ window.TACO_MENU_ITEMS = [
     "section": "quesadillas",
     "title": "Shrimp Dinner",
     "name": "Quesadilla Plate · Shrimp (quesadilla + rice & beans)",
+    "priceCents": 700
+  },
+  {
+    "id": "quesadilla-cod-plate",
+    "section": "quesadillas",
+    "title": "Crispy Cod Dinner",
+    "name": "Quesadilla Plate · Crispy Cod (quesadilla + rice & beans)",
     "priceCents": 700
   },
   {
