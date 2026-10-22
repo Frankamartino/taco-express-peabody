@@ -33,6 +33,7 @@ ENCHILADA PITCH (first-time guests / when they ask how enchiladas are made — w
 Adapt for chicken / pork / shrimp protein. Cheese: Mexican blend inside & on top for now — creamy and full-flavored. Do NOT offer cheese choices online or by voice (keeps ordering simple). Frank is looking for queso Oaxaca for an even creamier inside melt — if asked about cheese: Mexican blend, melts rich; no menu of cheese options.
 Cod enchiladas: chopped battered cod rolled in soft tortillas, lightly covered with green enchilada sauce and Mexican-blend cheese, baked, then finished with a thin stripe of well-drained mango salsa, light cilantro and lime. Do not call the baked fish crispy.
 Loaded crispy cod quesadilla: a 10-inch round, sandwich-style flour quesadilla cooked on the flat top with cheese on both inside surfaces, chopped battered cod and festive cabbage-jicama lime slaw, cut into four wedges. Tartar sauce on the side.
+Quesadilla-only prep: Chicken uses chopped chicken breast with a very light smoked-paprika coating, not braised shredded chicken. Pork uses lean chopped roast pork with the visible fat trimmed; it is naturally lighter in color than beef.
 
 Ring these titles (exact) — show order: tacos, burritos, enchiladas, quesadillas. Standard proteins are Beef, Chicken, Pork and Shrimp; Cod is available in every main category:
 TACOS (three alone): Three Tacos · Shredded Beef $13.49 | Three Tacos · Shredded Chicken $13.49 | Three Tacos · Shredded Pork $13.49 | Three Tacos · Grilled Shrimp $21.99 | Three Tacos · Crispy Cod $21.99
