@@ -28,6 +28,13 @@ window.TACO_MENU_ITEMS = [
     "priceCents": 2199
   },
   {
+    "id": "tacos-cod",
+    "section": "tacos",
+    "title": "Crispy Cod",
+    "name": "Three Tacos · Crispy Cod",
+    "priceCents": 2199
+  },
+  {
     "id": "tacos-beef-plate",
     "section": "tacos",
     "title": "Beef Dinner",
@@ -53,6 +60,13 @@ window.TACO_MENU_ITEMS = [
     "section": "tacos",
     "title": "Shrimp Dinner",
     "name": "Taco Plate · Shrimp (3 tacos + rice & beans)",
+    "priceCents": 700
+  },
+  {
+    "id": "tacos-cod-plate",
+    "section": "tacos",
+    "title": "Crispy Cod Dinner",
+    "name": "Taco Plate · Crispy Cod (3 tacos + rice & beans)",
     "priceCents": 700
   },
   {
