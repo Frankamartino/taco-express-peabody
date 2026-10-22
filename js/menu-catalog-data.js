@@ -168,6 +168,13 @@ window.TACO_MENU_ITEMS = [
     "priceCents": 2199
   },
   {
+    "id": "enchilada-cod",
+    "section": "enchiladas",
+    "title": "Cod",
+    "name": "Two Enchiladas · Cod with Mango Salsa",
+    "priceCents": 2199
+  },
+  {
     "id": "enchilada-beef-plate",
     "section": "enchiladas",
     "title": "Beef Dinner",
@@ -193,6 +200,13 @@ window.TACO_MENU_ITEMS = [
     "section": "enchiladas",
     "title": "Shrimp Dinner",
     "name": "Enchilada Plate · Shrimp (2 enchiladas + rice & beans)",
+    "priceCents": 700
+  },
+  {
+    "id": "enchilada-cod-plate",
+    "section": "enchiladas",
+    "title": "Cod Dinner",
+    "name": "Enchilada Plate · Cod (2 enchiladas + rice & beans)",
     "priceCents": 700
   },
   {

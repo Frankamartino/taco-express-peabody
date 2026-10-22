@@ -15,5 +15,6 @@ Food photos for DoorDash menu cards. Exact filenames:
   enchiladas-chicken.jpg
   enchiladas-pork.jpg
   enchiladas-shrimp.jpg
+  enchiladas-cod.jpg
 
 index.html auto-loads each file when present — see drop-photos.html or OPEN-LOCAL-REX.md.
