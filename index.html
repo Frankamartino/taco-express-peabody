@@ -126,15 +126,15 @@
   <script defer src="/_vercel/insights/script.js"></script>
   <style>
     :root {
-      --lime: #84cc16;
-      --lime-dark: #65a30d;
-      --terra: #ea580c;
-      --cream: #fffbeb;
+      --lime: #e8c36a;
+      --lime-dark: #c9a14a;
+      --terra: #7a1518;
+      --cream: #f8efd8;
       --white: #ffffff;
-      --ink: #1c1917;
-      --muted: rgba(255, 251, 235, 0.6);
+      --ink: #140808;
+      --muted: rgba(248, 239, 216, 0.62);
       --card: rgba(255, 255, 255, 0.04);
-      --border: rgba(255, 255, 255, 0.1);
+      --border: rgba(232, 195, 106, 0.16);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
@@ -149,7 +149,7 @@
       position: sticky;
       top: 0;
       z-index: 50;
-      background: rgba(28, 25, 23, 0.95);
+      background: rgba(20, 8, 8, 0.96);
       backdrop-filter: blur(10px);
       border-bottom: 1px solid var(--border);
     }
@@ -162,7 +162,7 @@
       grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
       align-items: center;
       gap: 12px 16px;
-      min-height: 200px;
+      min-height: 228px;
     }
     .header-start {
       justify-self: start;
@@ -171,11 +171,12 @@
     .header-logo {
       justify-self: center;
       display: block;
-      width: 168px;
-      height: 168px;
+      width: 196px;
+      height: 196px;
       border-radius: 50%;
       object-fit: cover;
       background: #fff;
+      box-shadow: 0 0 0 3px #e8c36a, 0 10px 32px rgba(122, 21, 24, 0.5);
     }
     .header-end {
       justify-self: end;
@@ -206,7 +207,7 @@
       text-decoration: none;
       white-space: nowrap;
     }
-    .order-btn:hover { background: #c2410c; }
+    .order-btn:hover { background: #5c1012; }
     .call-btn {
       display: inline-flex;
       align-items: center;
@@ -230,16 +231,16 @@
       0%, 100% {
         transform: scale(1);
         box-shadow:
-          0 8px 24px rgba(234, 88, 12, 0.42),
-          0 0 0 0 rgba(132, 204, 22, 0),
+          0 8px 24px rgba(122, 21, 24, 0.5),
+          0 0 0 0 rgba(232, 195, 106, 0),
           inset 0 2px 0 rgba(255, 255, 255, 0.4),
           inset 0 -12px 20px rgba(0, 0, 0, 0.28);
       }
       50% {
         transform: scale(1.03);
         box-shadow:
-          0 16px 40px rgba(234, 88, 12, 0.55),
-          0 0 36px 4px rgba(132, 204, 22, 0.32),
+          0 16px 40px rgba(122, 21, 24, 0.62),
+          0 0 36px 4px rgba(232, 195, 106, 0.38),
           inset 0 2px 0 rgba(255, 255, 255, 0.5),
           inset 0 -12px 20px rgba(0, 0, 0, 0.2);
       }
@@ -251,8 +252,8 @@
       58%, 100% { transform: translateX(220%) skewX(-18deg); opacity: 0; }
     }
     @keyframes diegoGelRipple {
-      0% { box-shadow: 0 0 0 0 rgba(132, 204, 22, 0.42); opacity: 1; }
-      100% { box-shadow: 0 0 0 22px rgba(132, 204, 22, 0); opacity: 0; }
+      0% { box-shadow: 0 0 0 0 rgba(232, 195, 106, 0.42); opacity: 1; }
+      100% { box-shadow: 0 0 0 22px rgba(232, 195, 106, 0); opacity: 0; }
     }
     .voice-btn {
       position: relative;
@@ -279,7 +280,7 @@
       cursor: pointer;
       background:
         radial-gradient(120% 80% at 50% 0%, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0.08) 32%, transparent 55%),
-        linear-gradient(180deg, #fb923c 0%, #ea580c 38%, #c2410c 100%);
+        linear-gradient(180deg, #9b1d22 0%, #7a1518 38%, #5c1012 100%);
       animation: diegoGelPulse 2.6s ease-in-out infinite;
       transition: filter 0.2s ease;
     }
@@ -409,7 +410,7 @@
       gap: 8px 10px;
       padding: 10px 16px 14px;
       border-bottom: 1px solid var(--border);
-      background: rgba(132, 204, 22, 0.06);
+      background: rgba(122, 21, 24, 0.28);
     }
     .order-strip-label {
       width: 100%;
@@ -493,8 +494,8 @@
     }
     .section-intro { color: var(--muted); font-size: 0.92rem; margin-bottom: 20px; max-width: 680px; }
     .note-box {
-      background: rgba(234, 88, 12, 0.1);
-      border: 1px solid rgba(234, 88, 12, 0.35);
+      background: rgba(122, 21, 24, 0.28);
+      border: 1px solid rgba(232, 195, 106, 0.35);
       border-radius: 12px;
       padding: 14px 16px;
       font-size: 0.86rem;
@@ -527,7 +528,7 @@
       width: 100%;
       aspect-ratio: 4 / 3;
       border-radius: 10px;
-      background: linear-gradient(135deg, rgba(132,204,22,0.12), rgba(234,88,12,0.12));
+      background: linear-gradient(135deg, rgba(122,21,24,0.35), rgba(232,195,106,0.12));
       display: flex;
       align-items: center;
       justify-content: center;
@@ -582,10 +583,10 @@
     }
     .order-row .qty-stepper .qty-count { font-size: 0.92rem; min-width: 1.25rem; }
 
-    /* In-cart / Diego add: bright lime on the order ROW only (not the whole protein card) */
+    /* In-cart / Diego add: gold on the order ROW only (not the whole protein card) */
     .order-row.is-in-cart {
-      background: rgba(132, 204, 22, 0.2);
-      box-shadow: inset 0 0 0 2px #84cc16;
+      background: rgba(232, 195, 106, 0.18);
+      box-shadow: inset 0 0 0 2px #e8c36a;
       border-radius: 10px;
       border-top-color: transparent;
       padding: 10px 10px;
@@ -594,38 +595,38 @@
     .order-row.is-in-cart .order-row-label,
     .order-row.is-in-cart .price,
     .order-row.is-in-cart .qty-count {
-      color: #bbf726;
+      color: #f3d98a;
     }
     .order-row.is-in-cart .qty-stepper button {
-      border-color: #a3e635;
-      background: rgba(132, 204, 22, 0.28);
-      color: #ecfccb;
+      border-color: #e8c36a;
+      background: rgba(232, 195, 106, 0.22);
+      color: #f8efd8;
     }
     .order-row.just-added {
       animation: orderRowGlow 1.45s ease;
     }
     @keyframes orderRowGlow {
       0% {
-        background: rgba(132, 204, 22, 0.55);
+        background: rgba(232, 195, 106, 0.45);
         box-shadow:
-          inset 0 0 0 2px #bef264,
-          0 0 0 0 rgba(132, 204, 22, 0.8);
+          inset 0 0 0 2px #f3d98a,
+          0 0 0 0 rgba(232, 195, 106, 0.8);
       }
       45% {
-        background: rgba(132, 204, 22, 0.38);
+        background: rgba(232, 195, 106, 0.3);
         box-shadow:
-          inset 0 0 0 2px #a3e635,
-          0 0 28px 6px rgba(132, 204, 22, 0.55);
+          inset 0 0 0 2px #e8c36a,
+          0 0 28px 6px rgba(232, 195, 106, 0.45);
       }
       100% {
-        background: rgba(132, 204, 22, 0.2);
-        box-shadow: inset 0 0 0 2px #84cc16;
+        background: rgba(232, 195, 106, 0.18);
+        box-shadow: inset 0 0 0 2px #e8c36a;
       }
     }
     /* Sides / drinks: glow the +/- strip only */
     .qty-stepper.stepper-in-cart {
-      background: rgba(132, 204, 22, 0.2);
-      box-shadow: inset 0 0 0 2px #84cc16;
+      background: rgba(232, 195, 106, 0.18);
+      box-shadow: inset 0 0 0 2px #e8c36a;
       border-radius: 12px;
       padding: 8px 10px;
     }
@@ -696,7 +697,7 @@
     }
     .feature {
       margin: 4px 0 12px;
-      background: linear-gradient(135deg, rgba(234,88,12,0.20), rgba(132,204,22,0.10));
+      background: linear-gradient(135deg, rgba(122,21,24,0.42), rgba(232,195,106,0.12));
       border: 1px solid var(--terra);
       border-radius: 16px;
       padding: 22px 22px;
@@ -723,7 +724,7 @@
       font-size: 3.6rem;
       font-weight: 900;
       color: var(--lime);
-      text-shadow: 0 0 20px rgba(132,204,22,0.6);
+      text-shadow: 0 0 20px rgba(232,195,106,0.55);
       letter-spacing: -0.02em;
     }
     .feature-price .tax {
@@ -920,7 +921,7 @@
           <span class="voice-btn-sub">Press button now</span>
         </button>
       </div>
-      <img class="header-logo" src="images/taco-express-logo.jpg" width="168" height="168" alt="Taco Express Peabody" />
+      <img class="header-logo" src="images/taco-express-logo.jpg" width="196" height="196" alt="Taco Express Peabody" />
       <div class="header-end">
         <a class="header-phone" href="tel:+19789821800">(978) 982-1800</a>
       </div>
