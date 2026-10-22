@@ -3,6 +3,7 @@ Food photos for DoorDash menu cards. Exact filenames:
   quesadilla.jpg
   quesadilla-chicken.jpg
   quesadilla-pork.jpg
+  quesadilla-shrimp.jpg
   quesadilla-cod.jpg
   tacos-beef.jpg
   tacos-chicken.jpg
