@@ -3,8 +3,8 @@
  * This GitHub repo only (taco-express-peabody). Do not load another restaurant's menu.
  */
 const FULL_MENU = `
-Taco Express Peabody — 58 Pulaski Street Unit B, Peabody MA 01960 · (978) 982-1800
-Hours: Wed–Sun 11AM–5:45PM. Mon–Tue CLOSED.
+Taco Express Peabody — Inside Eatery 58 at Mills 58 · 58 Pulaski Street, Unit B, Peabody, MA 01960 · (978) 982-1800
+Hours: Wed–Sun 11AM–6PM. Mon–Tue CLOSED.
 Prices match the Taco Express menu.
 
 RULES (always):

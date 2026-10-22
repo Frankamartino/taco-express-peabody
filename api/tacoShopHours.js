@@ -1,11 +1,11 @@
 /**
  * Taco Express Peabody — shop hours (US Eastern).
- * Open Wed–Sun 11 AM–5:45 PM. Closed Mon–Tue.
+ * Open Wed–Sun 11 AM–6 PM. Closed Mon–Tue.
  * Same close time as Martino Pasta Bar (limited staff / no cashier help).
  */
 const OPEN_START_MINS = 11 * 60;
-const CLOSE_MINS = 17 * 60 + 45; // 5:45 PM
-const HOURS_LABEL = '11 AM–5:45 PM';
+const CLOSE_MINS = 18 * 60; // 6 PM
+const HOURS_LABEL = '11 AM–6 PM';
 
 function getTacoShopStatus(now = new Date()) {
   const tz = 'America/New_York';
@@ -41,7 +41,7 @@ function getTacoShopStatus(now = new Date()) {
       closedToday: true,
       line:
         `OPEN/CLOSED RIGHT NOW (AUTHORITATIVE): ${formatted} Eastern. CLOSED TODAY — ${day} we are always closed. ` +
-        'Open Wednesday–Sunday 11 AM–5:45 PM. Closed Monday and Tuesday. Next open: ' +
+        'Open Wednesday–Sunday 11 AM–6 PM. Closed Monday and Tuesday. Next open: ' +
         nextOpenFromClosedDay(day) +
         '. ' +
         'If they want food today, say clearly we are CLOSED — do NOT imply pickup in 20 minutes. ' +
@@ -97,7 +97,7 @@ async function shopClosedCheck(now) {
       closed: true,
       code: 'shop_closed',
       message: isAlwaysClosedDay(hours.day)
-        ? 'Taco Express is closed today — we are open Wednesday through Sunday, 11 AM–5:45 PM. We open ' +
+        ? 'Taco Express is closed today — we are open Wednesday through Sunday, 11 AM–6 PM. We open ' +
           when +
           '.'
         : 'Taco Express is closed right now — today\u2019s hours are ' +

@@ -97,7 +97,7 @@ async function queueKitchenPrint(receipt) {
   }
 
   const finalReceipt = {
-    address: '58 Pulaski St, Peabody MA 01960',
+    address: 'Inside Eatery 58 at Mills 58 · 58 Pulaski Street, Unit B, Peabody, MA 01960',
     phone: '(978) 982-1800',
     date: new Date().toISOString(),
     orderedAt: new Date().toISOString(),

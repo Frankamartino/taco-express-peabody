@@ -7,9 +7,9 @@
 | **Website** | https://www.tacoexpresspeabody.com |
 | **GitHub** | [Frankamartino/taco-express-peabody](https://github.com/Frankamartino/taco-express-peabody) |
 | **Hosting** | Vercel project `taco-express-peabody` (its own project, its own keys) |
-| **Address** | 58 Pulaski St, Peabody, MA 01960 — inside The Mill (Eatery 58) |
+| **Address** | Inside Eatery 58 at Mills 58 · 58 Pulaski Street, Unit B · Peabody, MA 01960 |
 | **Phone** | (978) 982-1800 |
-| **Hours** | Wed–Sun 11 AM–5:45 PM · Mon–Tue closed |
+| **Hours** | Wed–Sun 11 AM–6 PM · Mon–Tue closed |
 
 ## Its own entity
 
@@ -21,7 +21,7 @@ accounts with anything else:
 - **Not** Maya or any other project
 
 The **only** shared thing is physical: kitchen tickets print on the same Star
-thermal printer / kitchen laptop at The Mill that Martino uses. Confirmed live
+thermal printer / kitchen laptop inside Eatery 58 at Mills 58. Confirmed live
 on Aug 27 — Leo watched a voice cash order hit the printer in about half a
 second.
 
@@ -114,7 +114,7 @@ with "none" is not printed on the ticket.
 | `api/queue-kitchen-ticket.js` | Cash tickets → kitchen printer. Refuses while closed. |
 | `api/create-checkout.js` | Stripe hosted checkout for card orders. Refuses while closed. |
 | `api/charge-order.js` | Hands-free saved-card charge (voice). Refuses while closed. Prints on success. |
-| `api/kitchenPrint.js` | The printer queue (Supabase → Star printer at The Mill). |
+| `api/kitchenPrint.js` | The printer queue (Supabase → Star printer inside Eatery 58 at Mills 58). |
 | `api/checkout-status.js` | Confirms a Stripe session after payment; queues the ticket. |
 | `api/shop-status.js` + `api/shopStatusStore.js` | Staff emergency close / reopen (owner name + PIN). |
 | `api/sold-out.js` + `api/soldOutStore.js` | Staff sold-out flags. |
