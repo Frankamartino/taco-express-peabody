@@ -1604,14 +1604,14 @@
           scheduledToday &&
           Number.isFinite(currentMinutes) &&
           currentMinutes >= 11 * 60 &&
-          currentMinutes < 17 * 60 + 45;
+          currentMinutes < 18 * 60;
         var emergencyClosed = !!(state && state.closed);
         var isOpen = withinHours && !emergencyClosed;
 
         status.classList.toggle('is-open', isOpen);
         status.classList.toggle('is-closed', !isOpen);
         label.textContent = isOpen ? 'OPEN' : 'CLOSED';
-        hours.textContent = scheduledToday ? 'Today · 11 AM–5:45 PM' : 'Today · Closed';
+        hours.textContent = scheduledToday ? 'Today · 11 AM–6 PM' : 'Today · Closed';
 
         if (reasonEl) {
           var reason = emergencyClosed && state.reason ? String(state.reason) : '';
