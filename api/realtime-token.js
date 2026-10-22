@@ -198,7 +198,7 @@ module.exports = async function handler(req, res) {
     'ENCHILADAS: "chicken enchilada(s)" / "one enchilada chicken" = Two Enchiladas · Shredded Chicken — ONE line, qty 1. Lock immediately.',
     'BURRITO / QUESADILLA: "a burrito" / "one quesadilla" with protein = ONE menu line for that item.',
     'TACOS: "beef taco(s)" = Three Tacos · Shredded Beef $13.49. Pork = Three Tacos · Shredded Pork $13.49. Shrimp = Three Tacos · Grilled Shrimp $21.99. "fish tacos" / "cod tacos" = Three Tacos · Crispy Cod $21.99.',
-    'CRISPY COD is tacos only — generous battered cod with colorful house lime tartar slaw in warm soft wheat tortillas. Do not offer cod burritos, enchiladas or quesadillas.',
+    'CRISPY COD is tacos only — generous battered cod with crisp festive lime slaw (green and red cabbage, carrots, jicama, vinegar, lime and light cilantro) in warm soft wheat tortillas, with tartar sauce on the side. The slaw is not creamy. Do not offer cod burritos, enchiladas or quesadillas.',
     'TACO PLATE only if they say dinner / plate / with rice and beans: Taco Plate · [protein] — ONE line (includes rice & beans).',
     'BURRITOS: "beef burrito" = Burrito · Shredded Beef $13.49 — LOCK NOW. Chicken/pork/shrimp burritos lock the same way.',
     'BURRITO + rice and beans / two sides / dinner / plate = Burrito Plate · Beef (etc.) $20.49 on YOUR ticket — ONE add_order_line. The website shows Burrito qty 1 AND Add two sides qty 1.',
