@@ -1,0 +1,38 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Restaurant",
+  "name": "Taco Express Peabody",
+  "url": "https://www.tacoexpresspeabody.com/",
+  "telephone": "+1-978-982-1800",
+  "description": "Tacos, burritos, enchiladas, quesadillas, sides, fryer favorites, and beverages for pickup or DoorDash delivery.",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "58 Pulaski Street, Unit B",
+    "addressLocality": "Peabody",
+    "addressRegion": "MA",
+    "postalCode": "01960",
+    "addressCountry": "US"
+  },
+  "containedInPlace": {
+    "@type": "Place",
+    "name": "Eatery 58 at Mills 58",
+    "url": "https://www.mills58.com/eatery58"
+  },
+  "openingHours": [
+    "We-Su 11:00-18:00"
+  ],
+  "menu": "https://www.tacoexpresspeabody.com/",
+  "hasMap": "https://www.google.com/maps?cid=2102545735255324937",
+  "potentialAction": [
+    {
+      "@type": "OrderAction",
+      "name": "Order pickup",
+      "target": "https://www.tacoexpresspeabody.com/"
+    },
+    {
+      "@type": "OrderAction",
+      "name": "Order DoorDash delivery",
+      "target": "https://www.doordash.com/store/taco-express-peabody-peabody-47282984/112302146/"
+    }
+  ]
+}

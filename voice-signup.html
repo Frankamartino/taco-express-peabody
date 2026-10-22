@@ -17,10 +17,10 @@
   <script defer src="/_vercel/insights/script.js"></script>
   <style>
     :root {
-      --lime: #84cc16;
-      --terra: #ea580c;
+      --lime: #e8c36a;
+      --terra: #7a1518;
       --white: #ffffff;
-      --charcoal: #1c1917;
+      --charcoal: #140808;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -34,8 +34,8 @@
       align-items: center;
     }
     .top-bar {
-      background: #14532d;
-      color: #bbf7d0;
+      background: #5c1012;
+      color: #f8efd8;
       text-align: center;
       padding: 8px 14px;
       font-size: 0.78rem;
@@ -49,13 +49,14 @@
       text-align: center;
     }
     .signup-logo {
-      width: 96px;
-      height: 96px;
+      width: 120px;
+      height: 120px;
       border-radius: 50%;
       object-fit: cover;
       display: block;
       margin: 0 auto 12px;
       background: #fff;
+      box-shadow: 0 0 0 3px #e8c36a, 0 8px 24px rgba(122, 21, 24, 0.45);
     }
     h1 {
       font-family: "Bebas Neue", sans-serif;
@@ -172,7 +173,7 @@
 </head>
 <body>
   <div class="top-bar">
-    58 Pulaski St · Peabody MA 01960 · <a href="tel:+19789821800">(978) 982-1800</a>
+    Inside Eatery 58 at Mills 58 · 58 Pulaski Street, Unit B · Peabody, MA 01960 · <a href="tel:+19789821800">(978) 982-1800</a>
   </div>
   <div class="signup-brand">
     <img class="signup-logo" src="images/taco-express-logo.jpg" width="96" height="96" alt="Taco Express Peabody" />
@@ -300,7 +301,7 @@
               clientSecret: res.d.clientSecret,
               appearance: {
                 theme: 'night',
-                variables: { colorPrimary: '#ea580c', colorBackground: '#0c0a09', colorText: '#ffffff' },
+                variables: { colorPrimary: '#7a1518', colorBackground: '#140808', colorText: '#ffffff' },
               },
             });
             var paymentElement = elements.create('payment');
