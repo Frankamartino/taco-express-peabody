@@ -153,13 +153,15 @@
     .header-inner {
       max-width: 960px;
       margin: 0 auto;
-      padding: 8px 14px;
-      display: flex;
-      flex-direction: row;
+      padding: 9px 14px 8px;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      grid-template-areas: "logo nav status";
       align-items: center;
-      gap: 12px;
+      gap: 10px 16px;
     }
     .header-logo {
+      grid-area: logo;
       display: block;
       width: 44px;
       height: 44px;
@@ -169,21 +171,42 @@
       flex-shrink: 0;
       box-shadow: 0 0 0 2px #e8c36a;
     }
-    .header-end {
+    .header-status {
+      grid-area: status;
       display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      flex-shrink: 0;
-      margin-left: auto;
+      flex-direction: column;
+      align-items: flex-end;
+      min-width: 128px;
+      text-align: right;
     }
-    .header-phone {
-      color: var(--lime);
+    .header-status-label {
+      color: #4ade80;
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 1.5rem;
       font-weight: 700;
-      font-size: 0.95rem;
-      text-decoration: none;
+      letter-spacing: 0.08em;
+      line-height: 1;
+      text-shadow: 0 0 14px rgba(74, 222, 128, 0.35);
+    }
+    .header-status.is-closed .header-status-label {
+      color: #f87171;
+      text-shadow: 0 0 14px rgba(248, 113, 113, 0.3);
+    }
+    .header-status-hours,
+    .header-status-reason {
+      color: var(--cream);
+      font-size: 0.7rem;
+      font-weight: 700;
+      line-height: 1.25;
+      margin-top: 3px;
       white-space: nowrap;
     }
-    .header-phone:hover { color: var(--white); filter: none; }
+    .header-status-reason {
+      color: #fecaca;
+      font-weight: 600;
+      max-width: 260px;
+      white-space: normal;
+    }
     .order-btn {
       display: inline-flex;
       align-items: center;
@@ -360,6 +383,7 @@
       max-width: 520px;
     }
     nav {
+      grid-area: nav;
       flex: 1;
       min-width: 0;
       margin: 0;
@@ -608,24 +632,6 @@
       text-transform: uppercase;
       color: #fecaca;
     }
-    #shopClosedBanner {
-      display: none;
-      background: rgba(127, 29, 29, 0.95);
-      color: #fecaca;
-      text-align: center;
-      padding: 12px 16px;
-      font-weight: 700;
-      font-size: 0.95rem;
-      border-bottom: 1px solid rgba(248, 113, 113, 0.5);
-    }
-    #shopClosedBanner.show { display: block; }
-    #shopClosedBanner .shop-closed-reason {
-      display: block;
-      font-weight: 600;
-      font-size: 0.85rem;
-      margin-top: 4px;
-      color: #fee2e2;
-    }
     .card.is-sold-out .sold-out-badge {
       margin: 8px 0 0;
     }
@@ -830,20 +836,25 @@
       letter-spacing: 0.06em;
     }
     @media (max-width: 720px) {
-      .header-inner { padding: 6px 10px; }
-      .header-logo {
-        width: 36px;
-        height: 36px;
+      .header-inner {
+        padding: 7px 10px 6px;
+        grid-template-columns: auto minmax(0, 1fr);
+        grid-template-areas:
+          "logo status"
+          "nav nav";
+        gap: 7px 10px;
       }
-      .header-phone { font-size: 0.82rem; }
+      .header-logo {
+        width: 42px;
+        height: 42px;
+      }
+      .header-status { min-width: 0; }
+      .header-status-label { font-size: 1.35rem; }
+      nav { gap: 12px; }
     }
   </style>
 </head>
 <body>
-  <div id="shopClosedBanner" role="status" aria-live="polite">
-    <span>Temporarily closed for today</span>
-    <span class="shop-closed-reason" id="shopClosedReason"></span>
-  </div>
   <header>
     <div class="header-inner">
       <img class="header-logo" src="images/taco-express-logo.jpg" width="44" height="44" alt="Taco Express Peabody" />
@@ -857,8 +868,10 @@
         <a href="#drinks">Drinks</a>
         <a href="/checkout">Checkout</a>
       </nav>
-      <div class="header-end">
-        <a class="header-phone" href="tel:+19789821800">(978) 982-1800</a>
+      <div class="header-status" id="shopStatus" role="status" aria-live="polite">
+        <span class="header-status-label" id="shopStatusLabel">CHECKING</span>
+        <span class="header-status-hours" id="shopStatusHours">Today’s hours</span>
+        <span class="header-status-reason" id="shopStatusReason" hidden></span>
       </div>
     </div>
   </header>
@@ -1561,23 +1574,54 @@
       })();
 
       function applyShopStatus(state) {
-        var banner = document.getElementById('shopClosedBanner');
-        var reasonEl = document.getElementById('shopClosedReason');
-        if (!banner) return;
-        if (state && state.closed) {
-          banner.classList.add('show');
-          if (reasonEl) {
-            reasonEl.textContent = state.reason
-              ? String(state.reason)
-              : 'We had to close early. Please check back next visit.';
-          }
-        } else {
-          banner.classList.remove('show');
-          if (reasonEl) reasonEl.textContent = '';
+        var status = document.getElementById('shopStatus');
+        var label = document.getElementById('shopStatusLabel');
+        var hours = document.getElementById('shopStatusHours');
+        var reasonEl = document.getElementById('shopStatusReason');
+        if (!status || !label || !hours) return;
+
+        var easternParts = {};
+        try {
+          new Intl.DateTimeFormat('en-US', {
+            timeZone: 'America/New_York',
+            weekday: 'long',
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: false,
+          })
+            .formatToParts(new Date())
+            .forEach(function (part) {
+              if (part.type !== 'literal') easternParts[part.type] = part.value;
+            });
+        } catch (eTime) {}
+
+        var weekday = easternParts.weekday || '';
+        var hour = Number(easternParts.hour);
+        var minute = Number(easternParts.minute);
+        var currentMinutes = hour * 60 + minute;
+        var scheduledToday = /^(Wednesday|Thursday|Friday|Saturday|Sunday)$/.test(weekday);
+        var withinHours =
+          scheduledToday &&
+          Number.isFinite(currentMinutes) &&
+          currentMinutes >= 11 * 60 &&
+          currentMinutes < 17 * 60 + 45;
+        var emergencyClosed = !!(state && state.closed);
+        var isOpen = withinHours && !emergencyClosed;
+
+        status.classList.toggle('is-open', isOpen);
+        status.classList.toggle('is-closed', !isOpen);
+        label.textContent = isOpen ? 'OPEN' : 'CLOSED';
+        hours.textContent = scheduledToday ? 'Today · 11 AM–5:45 PM' : 'Today · Closed';
+
+        if (reasonEl) {
+          var reason = emergencyClosed && state.reason ? String(state.reason) : '';
+          reasonEl.textContent = reason;
+          reasonEl.hidden = !reason;
         }
       }
 
       function refreshShopStatus() {
+        applyShopStatus(null);
         fetch('/api/shop-status', { cache: 'no-store' })
           .then(function (r) {
             return r.ok ? r.json() : null;
