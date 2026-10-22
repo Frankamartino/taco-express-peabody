@@ -98,6 +98,13 @@ window.TACO_MENU_ITEMS = [
     "priceCents": 2199
   },
   {
+    "id": "burrito-cod",
+    "section": "burritos",
+    "title": "Crispy Cod",
+    "name": "Burrito · Crispy Cod",
+    "priceCents": 2199
+  },
+  {
     "id": "burrito-beef-plate",
     "section": "burritos",
     "title": "Beef Dinner",
@@ -123,6 +130,13 @@ window.TACO_MENU_ITEMS = [
     "section": "burritos",
     "title": "Shrimp Dinner",
     "name": "Burrito Plate · Shrimp (burrito + rice & beans)",
+    "priceCents": 700
+  },
+  {
+    "id": "burrito-cod-plate",
+    "section": "burritos",
+    "title": "Crispy Cod Dinner",
+    "name": "Burrito Plate · Crispy Cod (burrito + rice & beans)",
     "priceCents": 700
   },
   {

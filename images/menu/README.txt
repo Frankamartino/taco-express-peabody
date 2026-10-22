@@ -10,6 +10,7 @@ Food photos for DoorDash menu cards. Exact filenames:
   burrito-chicken.jpg
   burrito-pork.png
   burrito-shrimp.jpg
+  burrito-cod.jpg
   enchiladas-beef.jpg
   enchiladas-chicken.jpg
   enchiladas-pork.jpg
