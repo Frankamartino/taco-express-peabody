@@ -109,6 +109,8 @@
     if (/\bchicken\b/.test(norm)) return 'chicken';
     if (/\bpork\b/.test(norm)) return 'pork';
     if (/\bbeef\b/.test(norm)) return 'beef';
+    /* Lamb is tacos only — do not let a burrito/enchilada/quesadilla line loose-match the taco. */
+    if (/\blamb\b/.test(norm) && !/\bburrito|\benchilada|\bquesadilla/.test(norm)) return 'lamb';
     return '';
   }
 
