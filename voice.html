@@ -2789,7 +2789,8 @@
         if (data.type === 'hangup') hangUp();
       });
 
-      /* Homepage sheet → /voice?start=1&embed=1 — connect immediately, stay on menu. */
+      /* Legacy direct links can still request start=1. The homepage now waits
+         for a trusted tap inside this document so mobile audio is allowed. */
       (function maybeAutostartDiego() {
         var params = new URLSearchParams(window.location.search || '');
         var wantStart = params.get('start') === '1';
