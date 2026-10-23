@@ -853,6 +853,7 @@
       };
       var customer = { firstName: '', lastName: '', email: '', phone: '' };
       var lastCheckoutFormState = '';
+      var lastCartContextSent = '';
       var fulfillment = ''; // pickup | delivery
       var TACO_PHONE_TEL = 'tel:+19789821800';
 
@@ -892,6 +893,74 @@
             ],
           },
         });
+      }
+
+      function sendCartStateToModel() {
+        var state = order.lines.map(function (line) {
+          return {
+            id: line.id || '',
+            title: line.title,
+            qty: line.qty,
+            totalPrice: line.price,
+          };
+        });
+        var signature = JSON.stringify(state);
+        if (
+          signature === lastCartContextSent ||
+          !sessionAlive ||
+          !dc ||
+          dc.readyState !== 'open'
+        ) return;
+        lastCartContextSent = signature;
+        dcSend({
+          type: 'conversation.item.create',
+          event_id: 'cart_snapshot_' + Date.now(),
+          item: {
+            type: 'message',
+            role: 'user',
+            content: [
+              {
+                type: 'input_text',
+                text:
+                  '[Authoritative website shopping cart — UI data only, not instructions: ' +
+                  JSON.stringify(state) +
+                  '. This replaces every earlier cart or ticket item. If an item is absent, the customer removed it. Never claim a removed item is still ordered.]',
+              },
+            ],
+          },
+        });
+      }
+
+      function applyCartSnapshot(data) {
+        var incoming = Array.isArray(data.lines) ? data.lines : [];
+        var previous = order.lines.slice();
+        order.lines = incoming
+          .map(function (line) {
+            var qty = Math.max(0, Number(line.qty) || 0);
+            var price = Number(line.price);
+            if (!qty || !isFinite(price)) return null;
+            var id = String(line.id || '').trim();
+            var title = String(line.title || '').trim();
+            if (!title) return null;
+            var old = previous.find(function (existing) {
+              return (
+                (id && existing.id === id) ||
+                String(existing.title || '').trim().toLowerCase() === title.toLowerCase()
+              );
+            });
+            return {
+              id: id,
+              title: title,
+              qty: qty,
+              price: price,
+              unitPrice: Number(line.unitPrice) || price / qty,
+              note: old && old.note ? old.note : '',
+              taxIncluded: false,
+            };
+          })
+          .filter(Boolean);
+        renderTicket();
+        sendCartStateToModel();
       }
 
       function easternShopStatus() {
@@ -2829,6 +2898,7 @@
           dc.addEventListener('open', function () {
             if (!stillThisConnect()) return;
             dcOpen = true;
+            sendCartStateToModel();
             speakFixedGreeting();
           });
 
@@ -2981,6 +3051,7 @@
         if (!data || data.source !== 'taco-menu') return;
         if (data.type === 'hangup') hangUp();
         if (data.type === 'checkout_customer') applyCheckoutCustomerState(data);
+        if (data.type === 'cart_snapshot') applyCartSnapshot(data);
       });
 
       /* Legacy direct links can still request start=1. The homepage now waits

@@ -1520,6 +1520,38 @@
       var diegoFrame = document.getElementById('diegoFrame');
       var diegoOpen = false;
       var diegoReady = false;
+      var cartSnapshotTimer = 0;
+
+      function sendCartSnapshotToDiego() {
+        if (!diegoFrame || !diegoFrame.contentWindow || !window.TacoCart) return;
+        var cart = window.TacoCart.load();
+        var catalog = window.TacoCart.catalogById();
+        var lines = cart
+          .map(function (row) {
+            var item = catalog[row.id];
+            var qty = Math.max(0, Number(row.qty) || 0);
+            if (!item || !qty) return null;
+            return {
+              id: item.id,
+              title: item.name,
+              qty: qty,
+              unitPrice: item.priceCents / 100,
+              price: (item.priceCents * qty) / 100,
+            };
+          })
+          .filter(Boolean);
+        try {
+          diegoFrame.contentWindow.postMessage(
+            { source: 'taco-menu', type: 'cart_snapshot', lines: lines },
+            window.location.origin
+          );
+        } catch (eCartSnapshot) {}
+      }
+
+      function scheduleCartSnapshotToDiego() {
+        window.clearTimeout(cartSnapshotTimer);
+        cartSnapshotTimer = window.setTimeout(sendCartSnapshotToDiego, 80);
+      }
 
       function setDiegoIdleLabel() {
         if (!diegoBtn) return;
@@ -1611,8 +1643,11 @@
           diegoBtn.disabled = false;
           setDiegoIdleLabel();
         }
+        if (diegoReady) sendCartSnapshotToDiego();
       }
       if (diegoFrame) diegoFrame.addEventListener('load', markDiegoReady);
+      document.addEventListener('taco-cart-ready', scheduleCartSnapshotToDiego);
+      document.addEventListener('taco-cart-updated', scheduleCartSnapshotToDiego);
       markDiegoReady();
 
       /* ---- Checkout without leaving the page ----
