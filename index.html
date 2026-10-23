@@ -823,7 +823,9 @@
     }
     .map-links a { color: var(--lime); text-decoration: none; }
     .map-links a:hover { color: var(--white); }
-    /* Diego talks in background; header Hang Up only — no dock UI */
+    /* Mobile browsers require a real tap inside the voice document before
+       unmuted audio can play. Show Diego as a small panel instead of hiding
+       him in a 1px iframe that can fail silently on iPhone/Android. */
     #diegoFrame {
       position: fixed;
       width: 1px;
@@ -835,6 +837,37 @@
       bottom: 0;
       z-index: -1;
     }
+    body.diego-open #diegoFrame {
+      width: auto;
+      height: min(72vh, 620px);
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      opacity: 1;
+      pointer-events: auto;
+      z-index: 10001;
+      background: #101010;
+      border: 2px solid rgba(255, 255, 255, 0.18);
+      border-radius: 18px;
+      box-shadow: 0 22px 70px rgba(0, 0, 0, 0.72);
+    }
+    #diegoPanelClose {
+      display: none;
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 10002;
+      min-height: 44px;
+      padding: 10px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 999px;
+      background: #991b1b;
+      color: #fff;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    body.diego-open #diegoPanelClose { display: block; }
     footer a.is-live { color: #fca5a5; }
     /* Checkout rides on top of the menu so a live call is never torn down. */
     #checkoutOverlay {
@@ -1492,6 +1525,7 @@
   </div>
 
   <iframe id="diegoFrame" title="Diego voice" allow="microphone *; autoplay *"></iframe>
+  <button type="button" id="diegoPanelClose" aria-label="Close Diego voice panel">Close</button>
 
   <div id="checkoutOverlay" aria-hidden="true">
     <iframe id="checkoutFrame" title="Checkout"></iframe>
@@ -1505,6 +1539,7 @@
       /* Diego is a small header helper — never a hero and never fixed over the menu. */
       var diegoBtn = document.getElementById('diegoHelperLink');
       var diegoFrame = document.getElementById('diegoFrame');
+      var diegoPanelClose = document.getElementById('diegoPanelClose');
       var diegoOpen = false;
 
       function setDiegoIdleLabel() {
@@ -1517,8 +1552,8 @@
       function setDiegoLiveLabel() {
         if (!diegoBtn) return;
         diegoBtn.classList.add('is-live');
-        diegoBtn.textContent = 'Hang up Diego';
-        diegoBtn.setAttribute('aria-label', 'Hang up Diego');
+        diegoBtn.textContent = 'Close Diego';
+        diegoBtn.setAttribute('aria-label', 'Close Diego voice panel');
       }
 
       function closeDiego(fromChild) {
@@ -1537,6 +1572,7 @@
         }
         setDiegoIdleLabel();
         pushDiegoStateToCheckout();
+        if (!fromChild && diegoBtn) diegoBtn.focus();
       }
 
       function openDiego() {
@@ -1545,9 +1581,9 @@
         document.body.classList.add('diego-open');
         setDiegoLiveLabel();
         try {
-          sessionStorage.setItem('diegoAutostart', '1');
+          sessionStorage.removeItem('diegoAutostart');
         } catch (eStore) {}
-        diegoFrame.src = '/voice?start=1&embed=1';
+        diegoFrame.src = '/voice?embed=1';
         pushDiegoStateToCheckout();
       }
 
@@ -1556,32 +1592,18 @@
           closeDiego(false);
           return;
         }
-        var go = function () {
-          openDiego();
-        };
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-          navigator.mediaDevices
-            .getUserMedia({ audio: true })
-            .then(function (stream) {
-              try {
-                stream.getTracks().forEach(function (t) {
-                  t.stop();
-                });
-              } catch (eStop) {}
-              go();
-            })
-            .catch(function () {
-              go();
-            });
-        } else {
-          go();
-        }
+        openDiego();
       }
 
       if (diegoBtn) {
         diegoBtn.addEventListener('click', function (ev) {
           ev.preventDefault();
           startDiegoOnMenu();
+        });
+      }
+      if (diegoPanelClose) {
+        diegoPanelClose.addEventListener('click', function () {
+          closeDiego(false);
         });
       }
 

@@ -2636,6 +2636,7 @@
                 ". Your name should already be on pickup details — email and phone if needed, then tip, then card or cash."
               : "We're at checkout — first and last name for pickup?"
             : "Hi, I'm Diego — first and last name please?";
+          var closedGreeting = false;
           var dcOpen = false;
           var greetingArmed = false;
           var greetingSpoken = false;
@@ -2644,9 +2645,11 @@
             if (!stillThisConnect() || !sessionAlive || !dcOpen || !greetingArmed || greetingSpoken) return;
             greetingSpoken = true;
             greetingArmed = false;
-            var follow = resumeCheckout
-              ? 'Say that EXACT line once in one smooth breath — no long pause mid-sentence. Then STOP and listen. Do NOT re-introduce yourself. Do NOT restart the menu greeting.'
-              : 'Say that EXACT line once in one smooth breath — no dramatic pause after Hi or after your name. No language choice. Then STOP and listen for their name only. Nothing else. Do not repeat yourself.';
+            var follow = closedGreeting
+              ? 'Say that EXACT line once in one smooth breath. Then STOP and listen for their question. Do not ask for their name unless they want to plan an order.'
+              : resumeCheckout
+                ? 'Say that EXACT line once in one smooth breath — no long pause mid-sentence. Then STOP and listen. Do NOT re-introduce yourself. Do NOT restart the menu greeting.'
+                : 'Say that EXACT line once in one smooth breath — no dramatic pause after Hi or after your name. No language choice. Then STOP and listen for their name only. Nothing else. Do not repeat yourself.';
             dcSend({
               type: 'response.create',
               response: {
@@ -2710,10 +2713,11 @@
              heads up." Closed goes in the FIRST breath, not after the order. */
           var shopNow = easternShopStatus();
           if (tokenPayload.shopOpen === false || !shopNow.open) {
-            greetingExact +=
-              " Quick heads up — we're closed right now; we open " +
+            greetingExact =
+              "Hi, I'm Diego. We're closed right now; we open " +
               nextOpenPhrase(shopNow) +
-              '. Happy to answer questions or plan your next order.';
+              '. I can still answer questions or help plan your next order.';
+            closedGreeting = true;
           }
           // Arm BEFORE SDP answer — ontrack fires on setRemoteDescription; if
           // sessionAlive is still false, older code stopped the remote track (silence).
