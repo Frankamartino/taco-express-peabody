@@ -23,7 +23,7 @@ so it drops straight into the website with no code changes needed.
 ### Burritos  →  `images/menu/`
 - [x] Burrito · Shredded Beef → `burrito-beef.jpg`
 - [x] Burrito · Shredded Chicken → `burrito-chicken.jpg`
-- [x] Burrito · Pork → `burrito-pork.png`
+- [x] Burrito · Pork → `burrito-pork.jpg`
 - [x] Burrito · Grilled Shrimp → `burrito-shrimp.jpg`
 
 ### Enchiladas  →  `images/menu/`
