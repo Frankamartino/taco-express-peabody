@@ -540,6 +540,7 @@
 
   <audio id="remoteAudio" autoplay playsinline></audio>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="/js/diego-customer-readback.js"></script>
 
   <script>
     (function () {
@@ -1256,6 +1257,7 @@
       function resetCustomer() {
         customer = { firstName: '', lastName: '', email: '', phone: '' };
         fulfillment = '';
+        if (customerReadback) customerReadback.clear();
       }
 
       function findOrderLineIndex(args) {
@@ -1307,6 +1309,38 @@
           paid: !!order.paid,
           paymentIntentId: order.paymentIntentId || '',
           tipAsked: !!order.tipAsked,
+        };
+      }
+
+      var customerReadback = DiegoCustomerReadback.createGate();
+
+      function contactInfoComplete() {
+        return DiegoCustomerReadback.contactInfoComplete(customer);
+      }
+
+      function customerInfoReadbackHint() {
+        return DiegoCustomerReadback.readbackHint(customer, order.instructions);
+      }
+
+      function customerInfoReadbackLine() {
+        return DiegoCustomerReadback.readbackLine(customer, order.instructions);
+      }
+
+      function armCustomerReadback() {
+        customerReadback.arm();
+      }
+
+      function customerPayReadbackBlock() {
+        if (!contactInfoComplete()) return null;
+        if (!customerReadback.isArmed()) armCustomerReadback();
+        if (!customerReadback.blocksPay()) return null;
+        return {
+          ok: false,
+          code: 'readback_required',
+          error:
+            'Read back full name, email, and phone, then wait for the guest to confirm before tip or pay.',
+          speakHint: customerInfoReadbackHint(),
+          ticket: ticketSnapshot(),
         };
       }
 
@@ -1382,6 +1416,7 @@
         if (!text) return;
         history.push({ role: role, text: String(text).slice(0, 500) });
         if (history.length > 24) history = history.slice(-24);
+        if (role === 'customer' && customerReadback) customerReadback.noteUtterance(text);
       }
 
       function dcSend(obj) {
@@ -1565,29 +1600,48 @@
         }
 
         if (name === 'set_customer') {
-          if (args.firstName != null && String(args.firstName).trim()) {
-            customer.firstName = String(args.firstName).trim();
+          var contactChanged = false;
+          function takeContact(key, value, transform) {
+            if (value == null) return;
+            var next = String(value).trim();
+            if (!next) return;
+            if (transform) next = transform(next);
+            if (customer[key] !== next) contactChanged = true;
+            customer[key] = next;
           }
-          if (args.lastName != null && String(args.lastName).trim()) {
-            customer.lastName = String(args.lastName).trim();
-          }
-          if (args.email != null && String(args.email).trim()) {
-            customer.email = String(args.email).trim().toLowerCase();
-          }
-          if (args.phone != null && String(args.phone).trim()) {
-            customer.phone = String(args.phone).trim();
-          }
+          takeContact('firstName', args.firstName);
+          takeContact('lastName', args.lastName);
+          takeContact('email', args.email, function (v) {
+            return v.toLowerCase();
+          });
+          takeContact('phone', args.phone);
+          var emailBeforeMemory = customer.email;
+          var phoneBeforeMemory = customer.phone;
           var matched = applyKnownGuestAndPersist();
+          if (customer.email !== emailBeforeMemory || customer.phone !== phoneBeforeMemory) {
+            contactChanged = true;
+          }
           var out = { ok: true, ticket: ticketSnapshot(), savedForCheckout: true };
           if (matched) {
             var mem = knownGuestPayload(matched);
             out.knownGuest = true;
             out.memories = mem.memories;
-            out.speakHint = mem.speakHint;
           }
-          out.speakHint =
-            (out.speakHint ? out.speakHint + ' ' : '') +
-            'Name is saved NOW (menu page is fine). Checkout pickup Full name will already show it. If email/phone still missing, ask those next — one at a time.';
+          if (contactInfoComplete()) {
+            if (contactChanged || !customerReadback.isArmed()) armCustomerReadback();
+            out.readbackRequired = customerReadback.blocksPay();
+            out.speakHint = customerReadback.blocksPay()
+              ? (matched ? 'One short recognition is enough. Then ' : '') +
+                customerInfoReadbackHint()
+              : 'Customer info is already confirmed. Continue with tip or pay. Do not read it back again unless they change it.';
+          } else {
+            customerReadback.clear();
+            var missing = DiegoCustomerReadback.missingContactFields(customer);
+            out.speakHint =
+              'Saved on the ticket. Still need ' +
+              missing.join(', ') +
+              '. Ask for the next missing piece only. When first name, last name, email, and phone are all saved, read all of them back in one breath and wait.';
+          }
           replyTool(callId, out);
           return;
         }
@@ -1931,6 +1985,11 @@
           }
           // Cash AND card: kitchen ticket must show email + phone (never skip)
           var contactGaps = contactReadyGaps();
+          var readbackBlock = customerPayReadbackBlock();
+          if (!contactGaps.length && readbackBlock) {
+            replyTool(callId, readbackBlock);
+            return;
+          }
           if (contactGaps.length) {
             replyTool(callId, {
               ok: false,
@@ -2070,6 +2129,11 @@
         }
 
         if (name === 'set_tip') {
+          var tipReadback = customerPayReadbackBlock();
+          if (tipReadback) {
+            replyTool(callId, tipReadback);
+            return;
+          }
           var tipAmt = Number(args.amount);
           order.tip = isFinite(tipAmt) && tipAmt >= 0 ? tipAmt : 0;
           order.tipAsked = true;
@@ -2083,7 +2147,17 @@
           order.instructions = args.text != null ? String(args.text) : '';
           renderTicket();
           persistCustomerForCheckout();
-          replyTool(callId, { ok: true, ticket: ticketSnapshot() });
+          var notesHint = 'Chef notes saved.';
+          if (contactInfoComplete()) {
+            armCustomerReadback();
+            notesHint = customerInfoReadbackHint();
+          }
+          replyTool(callId, {
+            ok: true,
+            ticket: ticketSnapshot(),
+            readbackRequired: customerReadback.blocksPay(),
+            speakHint: notesHint,
+          });
           return;
         }
 
@@ -2212,6 +2286,12 @@
           var closedNowCharge = closedRefusal();
           if (closedNowCharge) {
             replyTool(callId, closedNowCharge);
+            return;
+          }
+          var chargeReadback = customerPayReadbackBlock();
+          if (!contactReadyGaps().length && chargeReadback) {
+            chargeReadback.paid = false;
+            replyTool(callId, chargeReadback);
             return;
           }
           var gaps = payReadyGaps();
@@ -2837,11 +2917,13 @@
           };
 
           var greetingExact = resumeCheckout
-            ? customer.firstName
-              ? "We're at checkout, " +
-                customer.firstName +
-                ". Your name should already be on pickup details — email and phone if needed, then tip, then card or cash."
-              : "We're at checkout — first and last name for pickup?"
+            ? contactInfoComplete()
+              ? 'I have ' + customerInfoReadbackLine() + '. Is that all correct?'
+              : customer.firstName
+                ? "We're at checkout, " +
+                  customer.firstName +
+                  '. I still need the missing email or phone, then I will read your name, email, and phone back before tip or pay.'
+                : "We're at checkout — first and last name for pickup?"
             : "Hi, I'm Diego. We have five minutes together — first and last name, please?";
           var closedGreeting = false;
           var dcOpen = false;
@@ -2964,11 +3046,15 @@
           renderTicket();
           if (tokenPayload.greetingExact && !resumeCheckout) {
             greetingExact = String(tokenPayload.greetingExact);
+          } else if (resumeCheckout && contactInfoComplete()) {
+            armCustomerReadback();
+            greetingExact =
+              'I have ' + customerInfoReadbackLine() + '. Is that all correct?';
           } else if (resumeCheckout && customer.firstName) {
             greetingExact =
               "We're at checkout, " +
               customer.firstName +
-              '. Your name should already be on pickup details. Confirm email and phone if needed, then tip, then card or cash.';
+              '. I still need the missing email or phone, then I will read your name, email, and phone back before tip or pay.';
           } else if (tokenPayload.greetingExact) {
             greetingExact = String(tokenPayload.greetingExact);
           }
