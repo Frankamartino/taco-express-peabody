@@ -577,13 +577,19 @@
         window.clearTimeout(contactSyncTimer);
         contactSyncTimer = window.setTimeout(function () {
           var c = readContact();
-          tellHost({
-            type: 'customer_input',
-            name: c.name,
-            email: c.email,
-            phone: c.phone,
-            instructions: c.instructions,
-          });
+          try {
+            window.parent.postMessage(
+              {
+                source: 'taco-checkout',
+                type: 'customer_input',
+                name: c.name,
+                email: c.email,
+                phone: c.phone,
+                instructions: c.instructions,
+              },
+              window.location.origin
+            );
+          } catch (eContactSync) {}
         }, immediate ? 0 : 350);
       }
 
