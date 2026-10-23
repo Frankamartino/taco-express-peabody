@@ -830,6 +830,15 @@
       var hangUpTimer = null;
       var callLimitWarningTimer = null;
       var callLimitTimer = null;
+      /* Realtime allows one response on the conversation. The 30s heads-up has
+         to wait out speech or an unanswered tool call, or response.create is
+         rejected and the hang-up arrives with no notice. */
+      var modelResponseActive = false;
+      var openToolCalls = 0;
+      var callLimitWarning = ''; // '' | 'due' | 'live' | 'done'
+      var callLimitWarningResponseId = '';
+      var callLimitWarningAttempts = 0;
+      var resumeAfterCallLimitWarning = false;
       var connectGen = 0;
       var CALL_LIMIT_MS = 5 * 60 * 1000;
       var CALL_WARNING_MS = CALL_LIMIT_MS - 30 * 1000;
@@ -1284,6 +1293,43 @@
         if (callLimitTimer) clearTimeout(callLimitTimer);
         callLimitWarningTimer = null;
         callLimitTimer = null;
+        callLimitWarning = '';
+        callLimitWarningResponseId = '';
+        callLimitWarningAttempts = 0;
+        resumeAfterCallLimitWarning = false;
+      }
+
+      function speakCallLimitWarning() {
+        if (!callInProgress()) return;
+        if (callLimitWarning === 'live' || callLimitWarning === 'done') return;
+        /* Output has to land before another response.create, so wait for replyTool.
+           Cancelling this response would drop the function call. */
+        if (openToolCalls > 0) {
+          callLimitWarning = 'due';
+          return;
+        }
+        if (modelResponseActive) {
+          if (callLimitWarning !== 'due') {
+            callLimitWarning = 'due';
+            dcSend({ type: 'response.cancel' });
+            dcSend({ type: 'output_audio_buffer.clear' });
+          }
+          return;
+        }
+        if (callLimitWarningAttempts >= 3) {
+          callLimitWarning = 'done';
+          return;
+        }
+        callLimitWarningAttempts += 1;
+        callLimitWarning = 'live';
+        callLimitWarningResponseId = '';
+        dcSend({
+          type: 'response.create',
+          response: {
+            instructions:
+              'Say exactly one short sentence: "Quick heads up, we have about thirty seconds left on this call." Then listen.',
+          },
+        });
       }
 
       function armCallLimitTimers() {
@@ -1291,13 +1337,7 @@
         callLimitWarningTimer = setTimeout(function () {
           callLimitWarningTimer = null;
           if (!callInProgress()) return;
-          dcSend({
-            type: 'response.create',
-            response: {
-              instructions:
-                'Say exactly one short sentence: "Quick heads up, we have about thirty seconds left on this call." Then listen.',
-            },
-          });
+          speakCallLimitWarning();
         }, CALL_WARNING_MS);
         callLimitTimer = setTimeout(function () {
           callLimitTimer = null;
@@ -1307,6 +1347,7 @@
 
       function replyTool(callId, output) {
         if (!sessionAlive) return;
+        if (openToolCalls > 0) openToolCalls -= 1;
         dcSend({
           type: 'conversation.item.create',
           item: {
@@ -1315,6 +1356,13 @@
             output: typeof output === 'string' ? output : JSON.stringify(output),
           },
         });
+        /* The heads-up owns the one active response. Speak it once the tool
+           output is in, then continue with a normal reply after it finishes. */
+        if (callLimitWarning === 'due' || callLimitWarning === 'live') {
+          resumeAfterCallLimitWarning = true;
+          if (callLimitWarning === 'due') speakCallLimitWarning();
+          return;
+        }
         dcSend({ type: 'response.create' });
       }
 
@@ -2247,12 +2295,83 @@
         }
         if (!data || !data.type) return;
 
+        if (data.type === 'response.created') {
+          modelResponseActive = true;
+          if (callLimitWarning === 'live' && data.response && data.response.id) {
+            callLimitWarningResponseId = data.response.id;
+          }
+          return;
+        }
+
+        if (data.type === 'response.done') {
+          modelResponseActive = false;
+          var doneId = (data.response && data.response.id) || '';
+          if (
+            callLimitWarning === 'live' &&
+            callLimitWarningResponseId &&
+            (!doneId || doneId === callLimitWarningResponseId)
+          ) {
+            callLimitWarning = 'done';
+            callLimitWarningResponseId = '';
+            if (resumeAfterCallLimitWarning && callInProgress() && openToolCalls === 0) {
+              resumeAfterCallLimitWarning = false;
+              dcSend({ type: 'response.create' });
+            }
+            return;
+          }
+          if (callLimitWarning === 'live' && !callLimitWarningResponseId) {
+            /* Create is in flight; this done belongs to the reply we cancelled. */
+            return;
+          }
+          if (callLimitWarning === 'due') {
+            speakCallLimitWarning();
+            if (
+              callLimitWarning === 'done' &&
+              resumeAfterCallLimitWarning &&
+              callInProgress() &&
+              openToolCalls === 0
+            ) {
+              resumeAfterCallLimitWarning = false;
+              dcSend({ type: 'response.create' });
+            }
+          }
+          return;
+        }
+
+        if (data.type === 'error' && (callLimitWarning === 'due' || callLimitWarning === 'live')) {
+          var err = data.error || {};
+          var errCode = String(err.code || '');
+          var errMessage = String(err.message || '');
+          var cancelMissed =
+            errCode === 'response_cancel_not_active' || /no active response/i.test(errMessage);
+          var createBlocked =
+            errCode === 'conversation_already_has_active_response' ||
+            /already has an active response/i.test(errMessage);
+          if (cancelMissed && callLimitWarning === 'due') {
+            modelResponseActive = false;
+            speakCallLimitWarning();
+            return;
+          }
+          if (createBlocked && callLimitWarning === 'live' && !callLimitWarningResponseId) {
+            if (callLimitWarningAttempts >= 3) {
+              callLimitWarning = 'done';
+              return;
+            }
+            callLimitWarning = 'due';
+            modelResponseActive = true;
+            dcSend({ type: 'response.cancel' });
+            dcSend({ type: 'output_audio_buffer.clear' });
+            return;
+          }
+        }
+
         if (data.type === 'response.function_call_arguments.done') {
           var fname = data.name;
           var callId = data.call_id;
           if (!fname || !callId) return;
           if (pendingCalls[callId]) return;
           pendingCalls[callId] = true;
+          openToolCalls += 1;
           var done = function () {
             delete pendingCalls[callId];
           };
@@ -2305,6 +2424,8 @@
             return;
           }
           done();
+          if (openToolCalls > 0) openToolCalls -= 1;
+          if (callLimitWarning === 'due') speakCallLimitWarning();
           return;
         }
 
@@ -2475,6 +2596,8 @@
           hangUpTimer = null;
         }
         clearCallLimitTimers();
+        modelResponseActive = false;
+        openToolCalls = 0;
         try {
           if (dc && dc.readyState === 'open') {
             try {
@@ -2599,6 +2722,8 @@
         }
         connecting = true;
         sessionAlive = false;
+        modelResponseActive = false;
+        openToolCalls = 0;
         intentionallyHungUp = false;
         btn.disabled = false;
         btn.classList.add('canceling');
