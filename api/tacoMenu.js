@@ -35,7 +35,7 @@ ENCHILADA PITCH (first-time guests / when they ask how enchiladas are made — w
 "Our enchiladas are packed with braised shredded beef, slow-cooked like a rich beef stew, then wrapped in soft tortillas, smothered in sauce, melted cheese on top — ready to finish with sour cream or pico. Pure comfort right out of the oven."
 Adapt for chicken / pork / shrimp protein. Cheese: Mexican blend inside & on top for now — creamy and full-flavored. Do NOT offer cheese choices online or by voice (keeps ordering simple). Frank is looking for queso Oaxaca for an even creamier inside melt — if asked about cheese: Mexican blend, melts rich; no menu of cheese options.
 Cod enchiladas: chopped battered cod rolled in soft tortillas, lightly covered with green enchilada sauce and Mexican-blend cheese, baked, then finished with a thin stripe of well-drained mango salsa, light cilantro and lime. Do not call the baked fish crispy.
-Loaded crispy cod quesadilla: a 10-inch round, sandwich-style flour quesadilla cooked on the flat top with cheese on both inside surfaces, chopped battered cod and festive cabbage-jicama lime slaw, cut into four wedges. Tartar sauce on the side.
+Crispy cod quesadilla: a 10-inch quesadilla with chopped battered cod, melted cheese and a little pico de gallo, toasted and cut into four wedges.
 Quesadilla-only prep: Chicken uses chopped chicken breast with a very light smoked-paprika coating, not braised shredded chicken. Pork uses lean chopped roast pork with the visible fat trimmed; it is naturally lighter in color than beef.
 
 Ring these titles (exact) — show order: tacos, burritos, enchiladas, quesadillas. Standard proteins are Beef, Chicken, Pork and Shrimp; Cod is available in every main category. Mediterranean lamb is a limited taco-only special:
@@ -45,7 +45,7 @@ BURRITOS (alone): Burrito · Shredded Beef $13.49 | Burrito · Shredded Chicken 
 BURRITO DINNER (+$7 rice & beans): Burrito Plate · Beef $20.49 | Chicken $20.49 | Pork $20.49 | Shrimp $28.99 | Crispy Cod $28.99
 ENCHILADAS (two alone): Two Enchiladas · Shredded Beef $13.99 | Two Enchiladas · Shredded Chicken $13.99 | Two Enchiladas · Pork $13.99 | Two Enchiladas · Grilled Shrimp $21.99 | Two Enchiladas · Cod with Mango Salsa $21.99
 ENCHILADA DINNER (+$7 rice & beans): Enchilada Plate · Beef $20.99 | Chicken $20.99 | Pork $20.99 | Shrimp $28.99 | Cod $28.99
-QUESADILLAS (alone): Loaded Quesadillas Beef $13.99 | Loaded Quesadillas Chicken $13.99 | Loaded Quesadillas Pork $13.99 | Loaded Quesadillas Shrimp $21.99 | Loaded Quesadilla · Crispy Cod $21.99
+QUESADILLAS (alone; protein, melted cheese & a little pico): Quesadilla · Beef $13.99 | Quesadilla · Chicken $13.99 | Quesadilla · Pork $13.99 | Quesadilla · Shrimp $21.99 | Quesadilla · Crispy Cod $21.99
 QUESADILLA DINNER (+$7 rice & beans): Quesadilla Plate · Beef $20.99 | Chicken $20.99 | Pork $20.99 | Shrimp $28.99 | Crispy Cod $28.99
 When they say dinner, plate, or with rice and beans on any of the above, use the matching DINNER / Plate item — ONE voice ticket line.
 SCREEN CART: Dinner / Plate becomes MAIN qty + "Add two sides" (+$7) on the website — never sides alone without the burrito/tacos.

@@ -12,7 +12,7 @@ so it drops straight into the website with no code changes needed.
 ## On the live menu (reshoot if a stand-in still looks wrong)
 
 ### Quesadillas  →  `images/menu/`
-- [ ] Loaded quesadilla (shared card) → `quesadilla.jpg`
+- [ ] Quesadilla · Beef → `quesadilla.jpg`
 
 ### Tacos  →  `images/menu/`
 - [x] Three Tacos · Shredded Beef → `tacos-beef.jpg`
