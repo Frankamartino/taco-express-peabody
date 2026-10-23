@@ -2735,30 +2735,13 @@
         var t = String(transcript || '').toLowerCase();
         if (!t) return;
 
-        // After paid or a queued cash ticket: Diego's closing goodbye ends the
-        // call (was leaving dead air). Never a blind timer — only the goodbye.
-        if (who === 'diego' && (order.paid || order.cashQueued)) {
-          var diegoDone =
-            /\b(see you soon|have a great|take care|catch you|arrivederci|my pleasure)\b/i.test(t) ||
-            /\b(ready for pickup|start making (your|the) food)\b/i.test(t);
-          if (diegoDone) {
-            if (hangUpTimer) clearTimeout(hangUpTimer);
-            hangUpTimer = setTimeout(function () {
-              if (!callInProgress()) return;
-              hangUp();
-            }, 3500);
-          }
-          return;
-        }
-
+        // Diego never decides that a payment confirmation ends the call.
+        // Only the customer's explicit farewell or hang-up request may do that.
         if (who !== 'customer') return;
         var bye =
           /\b(bye|goodbye|good bye|hang up|end call|end the call)\b/i.test(t) ||
           /\b(start over|start all over|start again|all over again)\b/i.test(t) ||
-          /\b(thank you|thanks).{0,40}\b(bye|goodbye)\b/i.test(t) ||
-          // After paid / cash queued, plain thanks is enough to hang up
-          ((order.paid || order.cashQueued) &&
-            /\b(thank you|thanks|ok thanks|okay thanks|appreciate it)\b/i.test(t));
+          /\b(thank you|thanks).{0,40}\b(bye|goodbye)\b/i.test(t);
         if (!bye) {
           /* They are still talking — cancel any armed goodbye. A customer asking
              "what time do you close?" must never be hung up on mid-answer. */
