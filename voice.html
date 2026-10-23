@@ -2666,7 +2666,7 @@
                 customer.firstName +
                 ". Your name should already be on pickup details — email and phone if needed, then tip, then card or cash."
               : "We're at checkout — first and last name for pickup?"
-            : "Hi, I'm Diego — first and last name please?";
+            : "Hi, I'm Diego. We have five minutes together — first and last name, please?";
           var closedGreeting = false;
           var dcOpen = false;
           var greetingArmed = false;
@@ -2745,7 +2745,7 @@
           var shopNow = easternShopStatus();
           if (tokenPayload.shopOpen === false || !shopNow.open) {
             greetingExact =
-              "Hi, I'm Diego. We're closed right now; we open " +
+              "Hi, I'm Diego. We have five minutes together. We're closed right now; we open " +
               nextOpenPhrase(shopNow) +
               '. I can still answer questions or help plan your next order.';
             closedGreeting = true;

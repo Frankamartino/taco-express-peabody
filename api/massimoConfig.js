@@ -9,7 +9,8 @@ module.exports = {
   /**
    * Fixed opener — ENGLISH ONLY. One breath. No mid-line drama pause.
    */
-  GREETING_EXACT: "Hi, I'm Diego — first and last name please?",
+  GREETING_EXACT:
+    "Hi, I'm Diego. We have five minutes together — first and last name, please?",
 
   /** After name is on the ticket (English). */
   AFTER_PICK_ENGLISH: 'Thanks — what are you in the mood for?',
