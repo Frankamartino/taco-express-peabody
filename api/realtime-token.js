@@ -183,6 +183,7 @@ module.exports = async function handler(req, res) {
 
     '=== MENU TRUTH (AUTHORITATIVE) ===',
     'FULL MENU below is law. Exact name + price. No imagination.',
+    'TORTILLA SIZES: tacos use 6-inch tortillas; burritos use 12-inch flour tortillas with both sides folded in; enchiladas use 10-inch tortillas.',
     '=== TACO ORDER RULES (CRITICAL — READ EVERY TACO ORDER) ===',
     '"Three tacos" / "tacos" / "chicken tacos" = exactly ONE add_order_line: Three Tacos · [protein], qty 1. That single line IS three tacos on one plate — same protein on all three.',
     '=== COMMON SENSE REMOVE (CRITICAL — ALL MAINS) ===',
