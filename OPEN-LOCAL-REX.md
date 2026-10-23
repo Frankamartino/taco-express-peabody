@@ -17,7 +17,7 @@ Open `drop-photos.html` in a browser (or run `npx serve .` and visit `/drop-phot
 | `images/menu/tacos-shrimp.jpg` | Three Tacos · Grilled Shrimp |
 | `images/menu/burrito-beef.jpg` | Burrito · Shredded Beef |
 | `images/menu/burrito-chicken.jpg` | Burrito · Shredded Chicken |
-| `images/menu/burrito-pork.png` | Burrito · Pork |
+| `images/menu/burrito-pork.jpg` | Burrito · Pork |
 | `images/menu/burrito-shrimp.jpg` | Burrito · Grilled Shrimp |
 | `images/menu/enchiladas-beef.jpg` | Two Enchiladas · Shredded Beef |
 | `images/menu/enchiladas-chicken.jpg` | Two Enchiladas · Shredded Chicken |
