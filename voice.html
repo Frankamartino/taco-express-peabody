@@ -839,6 +839,8 @@
       var outputTranscriptBuffer = '';
       var inputTranscriptTimer = null;
       var outputTranscriptTimer = null;
+      /* Quiet-confirm before goodbye detection. Deltas are cadence fragments. */
+      var turnHangupTimer = null;
       var taxRate = 0.07;
       var knownGuests = [];
       var order = {
@@ -2257,11 +2259,28 @@
         if (!text) return;
         pushHistory(who, text);
         if (isCustomer) maybeCaptureFirstName(text);
-        maybeAutoHangUp(text, who);
+        /* 650ms groups captions, not a turn. Wait out a real pause before
+           goodbye detection so "start making the food" cannot arm hang-up
+           while Diego is still talking. */
+        if (turnHangupTimer) clearTimeout(turnHangupTimer);
+        turnHangupTimer = setTimeout(function () {
+          turnHangupTimer = null;
+          maybeAutoHangUp(text, who);
+        }, 1500);
       }
 
       function queueLiveTranscript(who, delta) {
         if (!delta) return;
+        /* More speech means the previous line was not the final goodbye.
+           Never touch the five-minute call cap. */
+        if (turnHangupTimer) {
+          clearTimeout(turnHangupTimer);
+          turnHangupTimer = null;
+        }
+        if (hangUpTimer) {
+          clearTimeout(hangUpTimer);
+          hangUpTimer = null;
+        }
         if (who === 'customer') {
           inputTranscriptBuffer += String(delta);
           if (inputTranscriptTimer) clearTimeout(inputTranscriptTimer);
@@ -2549,8 +2568,10 @@
         clearCallLimitTimers();
         if (inputTranscriptTimer) clearTimeout(inputTranscriptTimer);
         if (outputTranscriptTimer) clearTimeout(outputTranscriptTimer);
+        if (turnHangupTimer) clearTimeout(turnHangupTimer);
         inputTranscriptTimer = null;
         outputTranscriptTimer = null;
+        turnHangupTimer = null;
         inputTranscriptBuffer = '';
         outputTranscriptBuffer = '';
         try {
@@ -2624,22 +2645,29 @@
       }
 
       function maybeAutoHangUp(transcript, who) {
+        if (!callInProgress()) return;
         var t = String(transcript || '').toLowerCase();
         if (!t) return;
 
         // After paid or a queued cash ticket: Diego's closing goodbye ends the
         // call (was leaving dead air). Never a blind timer — only the goodbye.
+        // Any later line that is not a farewell disarms it.
         if (who === 'diego' && (order.paid || order.cashQueued)) {
           var diegoDone =
             /\b(see you soon|have a great|take care|catch you|arrivederci|my pleasure)\b/i.test(t) ||
             /\b(ready for pickup|start making (your|the) food)\b/i.test(t);
-          if (diegoDone) {
-            if (hangUpTimer) clearTimeout(hangUpTimer);
-            hangUpTimer = setTimeout(function () {
-              if (!callInProgress()) return;
-              hangUp();
-            }, 3500);
+          if (!diegoDone) {
+            if (hangUpTimer) {
+              clearTimeout(hangUpTimer);
+              hangUpTimer = null;
+            }
+            return;
           }
+          if (hangUpTimer) clearTimeout(hangUpTimer);
+          hangUpTimer = setTimeout(function () {
+            if (!callInProgress()) return;
+            hangUp();
+          }, 3500);
           return;
         }
 
@@ -2713,8 +2741,9 @@
           }
 
           pc = new RTCPeerConnection();
+          var peer = pc;
           localStream.getTracks().forEach(function (track) {
-            pc.addTrack(track, localStream);
+            peer.addTrack(track, localStream);
           });
 
           pc.ontrack = function (ev) {
@@ -2793,26 +2822,68 @@
             speakFixedGreeting();
           });
 
-          var offer = await pc.createOffer();
-          await pc.setLocalDescription(offer);
-          if (pc.iceGatheringState !== 'complete') {
+          var offer = await peer.createOffer();
+          if (!stillThisConnect() || pc !== peer) {
+            if (pc === peer) cleanup();
+            return;
+          }
+          await peer.setLocalDescription(offer);
+          if (!stillThisConnect() || pc !== peer) {
+            if (pc === peer) cleanup();
+            return;
+          }
+          var iceGathering = '';
+          try {
+            iceGathering = peer.iceGatheringState;
+          } catch (eIce) {
+            iceGathering = '';
+          }
+          if (iceGathering !== 'complete') {
             await new Promise(function (resolve, reject) {
+              var settled = false;
               var timeout = setTimeout(function () {
-                pc.removeEventListener('icegatheringstatechange', onIceState);
-                reject(new Error('Timed out while gathering ICE candidates'));
+                finish(
+                  !stillThisConnect() || pc !== peer
+                    ? null
+                    : new Error('Timed out while gathering ICE candidates')
+                );
               }, 10000);
-              function onIceState() {
-                if (pc.iceGatheringState !== 'complete') return;
+              function finish(err) {
+                if (settled) return;
+                settled = true;
                 clearTimeout(timeout);
-                pc.removeEventListener('icegatheringstatechange', onIceState);
-                resolve();
+                try {
+                  peer.removeEventListener('icegatheringstatechange', onIceState);
+                } catch (eRemove) {}
+                if (err) reject(err);
+                else resolve();
               }
-              pc.addEventListener('icegatheringstatechange', onIceState);
+              function onIceState() {
+                if (!stillThisConnect() || pc !== peer) {
+                  finish();
+                  return;
+                }
+                var gathering = '';
+                try {
+                  gathering = peer.iceGatheringState;
+                } catch (eState) {
+                  finish();
+                  return;
+                }
+                if (gathering !== 'complete') return;
+                finish();
+              }
+              try {
+                peer.addEventListener('icegatheringstatechange', onIceState);
+              } catch (eListen) {
+                finish();
+                return;
+              }
               onIceState();
             });
           }
-          if (!stillThisConnect()) {
-            cleanup();
+          if (!stillThisConnect() || pc !== peer) {
+            if (pc === peer) cleanup();
             return;
           }
 
@@ -2908,12 +2979,11 @@
         btn.setAttribute('aria-label', 'Hang up');
           setStatus('Diego is on — ticket updates as you order');
         } catch (e) {
+          if (!stillThisConnect()) return;
           console.error('[Taco Diego]', e);
-          if (stillThisConnect()) {
-            cleanup();
-            setStatus('Could not start Diego. Try again.');
-            notifyMenuParent({ type: 'start_failed' });
-          }
+          cleanup();
+          setStatus('Could not start Diego. Try again.');
+          notifyMenuParent({ type: 'start_failed' });
         }
       }
 
