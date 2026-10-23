@@ -407,6 +407,7 @@
       <div class="pay-actions">
         <button type="button" class="pay-btn" id="payBtn">Pay with card</button>
         <button type="button" class="pay-btn" id="cashBtn">Pay with cash</button>
+        <a class="pay-btn" href="https://www.doordash.com/store/taco-express-peabody-peabody-47282984/112302146/" target="_blank" rel="noopener">Order delivery with DoorDash</a>
       </div>
       <p id="msg" aria-live="polite"></p>
     </div>
@@ -568,6 +569,22 @@
           phone: document.getElementById('phone').value.trim(),
           instructions: document.getElementById('instructions').value.trim(),
         };
+      }
+
+      var contactSyncTimer = 0;
+      function shareContactWithDiego(immediate) {
+        if (!embedMode) return;
+        window.clearTimeout(contactSyncTimer);
+        contactSyncTimer = window.setTimeout(function () {
+          var c = readContact();
+          tellHost({
+            type: 'customer_input',
+            name: c.name,
+            email: c.email,
+            phone: c.phone,
+            instructions: c.instructions,
+          });
+        }, immediate ? 0 : 350);
       }
 
       function validateContact(c) {
@@ -762,8 +779,14 @@
       });
       [nameInput, emailInput, phoneInput].forEach(function (el) {
         if (!el) return;
-        el.addEventListener('input', updateGuide);
-        el.addEventListener('change', updateGuide);
+        el.addEventListener('input', function () {
+          updateGuide();
+          shareContactWithDiego(false);
+        });
+        el.addEventListener('change', function () {
+          updateGuide();
+          shareContactWithDiego(true);
+        });
       });
       if (instructionsInput) {
         instructionsInput.addEventListener('focus', function () {
@@ -773,6 +796,10 @@
         instructionsInput.addEventListener('input', function () {
           instructionsTouched = true;
           updateGuide();
+          shareContactWithDiego(false);
+        });
+        instructionsInput.addEventListener('change', function () {
+          shareContactWithDiego(true);
         });
       }
 

@@ -1674,6 +1674,37 @@
           pushDiegoStateToCheckout();
           return;
         }
+        if (d.type === 'customer_input') {
+          var typedName = String(d.name || '').trim().split(/\s+/).filter(Boolean);
+          var typedContact = JSON.stringify({
+            firstName: typedName[0] || '',
+            lastName: typedName.slice(1).join(' ') || '',
+            name: d.name || '',
+            email: d.email || '',
+            phone: d.phone || '',
+            instructions: d.instructions || '',
+          });
+          try {
+            sessionStorage.setItem('tacoCheckoutContact', typedContact);
+            localStorage.setItem('tacoCheckoutContact', withoutInstructions(typedContact));
+          } catch (eTypedContact) {}
+          if (diegoFrame && diegoFrame.contentWindow) {
+            try {
+              diegoFrame.contentWindow.postMessage(
+                {
+                  source: 'taco-menu',
+                  type: 'checkout_customer',
+                  name: d.name || '',
+                  email: d.email || '',
+                  phone: d.phone || '',
+                  instructions: d.instructions || '',
+                },
+                window.location.origin
+              );
+            } catch (eTypedDiego) {}
+          }
+          return;
+        }
         if (d.type === 'diego_toggle') {
           startDiegoOnMenu();
           setTimeout(pushDiegoStateToCheckout, 300);
