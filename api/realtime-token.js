@@ -700,8 +700,8 @@ module.exports = async function handler(req, res) {
     },
   };
 
-  const sdpOffer = typeof body.sdp === 'string' ? body.sdp.trim() : '';
-  if (sdpOffer) {
+  const sdpOffer = typeof body.sdp === 'string' ? body.sdp : '';
+  if (sdpOffer.trim()) {
     const supervisorModel =
       process.env.OPENAI_SUPERVISOR_MODEL?.trim() || 'gpt-5.6';
     const liveTools = session.tools.filter(
