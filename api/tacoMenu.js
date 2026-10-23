@@ -27,6 +27,7 @@ TACO MAPPING (CRITICAL):
 
 COOKING METHOD (say when they ask how it's made — short; do not dump on every order):
 Beef, chicken & pork are braised / shredded — never ground. Beef: slow-cooked with carrots, celery & taco seasoning (like a good beef stew), cooled, shredded, simmered again. Shrimp: seasoned & grilled to perfection.
+Beef, chicken and pork tacos are finished with colorful pico de gallo and just a light drizzle of sour cream. Shrimp tacos have no cheese; finish them with extra pico de gallo and fresh avocado slivers.
 Crispy cod tacos and burrito: generous pieces of golden battered cod with crisp festive slaw made from green and red cabbage, carrots, jicama, lime, a light splash of white wine or apple cider vinegar and a little cilantro, served in warm soft wheat tortillas. The slaw is bright and non-creamy; tartar sauce is served on the side.
 Mediterranean lamb tacos: grilled chopped lamb in warm 6-inch flour tortillas with lemon-and-olive-oil dressed shredded iceberg, cucumber, seeded diced tomato, finely diced red onion, tzatziki, fresh mint and a light touch of fresh oregano. No cheese.
 

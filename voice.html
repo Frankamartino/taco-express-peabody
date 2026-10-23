@@ -828,7 +828,11 @@
       var sessionAlive = false;
       var intentionallyHungUp = false;
       var hangUpTimer = null;
+      var callLimitWarningTimer = null;
+      var callLimitTimer = null;
       var connectGen = 0;
+      var CALL_LIMIT_MS = 5 * 60 * 1000;
+      var CALL_WARNING_MS = CALL_LIMIT_MS - 30 * 1000;
       var history = [];
       var pendingCalls = {};
       var taxRate = 0.07;
@@ -1273,6 +1277,32 @@
         try {
           dc.send(JSON.stringify(obj));
         } catch (e) {}
+      }
+
+      function clearCallLimitTimers() {
+        if (callLimitWarningTimer) clearTimeout(callLimitWarningTimer);
+        if (callLimitTimer) clearTimeout(callLimitTimer);
+        callLimitWarningTimer = null;
+        callLimitTimer = null;
+      }
+
+      function armCallLimitTimers() {
+        clearCallLimitTimers();
+        callLimitWarningTimer = setTimeout(function () {
+          callLimitWarningTimer = null;
+          if (!callInProgress()) return;
+          dcSend({
+            type: 'response.create',
+            response: {
+              instructions:
+                'Say exactly one short sentence: "Quick heads up, we have about thirty seconds left on this call." Then listen.',
+            },
+          });
+        }, CALL_WARNING_MS);
+        callLimitTimer = setTimeout(function () {
+          callLimitTimer = null;
+          if (callInProgress()) hangUp();
+        }, CALL_LIMIT_MS);
       }
 
       function replyTool(callId, output) {
@@ -2444,6 +2474,7 @@
           clearTimeout(hangUpTimer);
           hangUpTimer = null;
         }
+        clearCallLimitTimers();
         try {
           if (dc && dc.readyState === 'open') {
             try {
@@ -2758,6 +2789,7 @@
 
           connected = true;
           connecting = false;
+          armCallLimitTimers();
           btn.disabled = false;
           btn.classList.remove('canceling');
           btn.classList.add('live');

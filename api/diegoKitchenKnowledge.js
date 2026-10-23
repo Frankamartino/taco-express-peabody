@@ -18,6 +18,7 @@ const DIEGO_KITCHEN_KNOWLEDGE = `
 - Season: avocado oil + taco spice + crushed/minced garlic — toss in a stainless bowl.
 - Cook: onto the grill hot; finish with a couple tabs of butter, spinning with a fork so it coats.
 - Portion: chill and bag (e.g. four shrimp = eight pieces after butterflying); finish on the charbroiler, then into taco / burrito / enchilada / quesadilla.
+- Shrimp tacos: no cheese; finish with extra pico de gallo and fresh avocado slivers.
 - Guest vibe: juicy, garlicky, taco-spiced, buttery finish — next-level shrimp.
 
 ---
@@ -40,6 +41,11 @@ const DIEGO_KITCHEN_KNOWLEDGE = `
 
 ## Shredded pork
 - Same slow-braise / shred / juice-back care as the beef — locks in homemade flavor for every plate.
+
+---
+
+## Beef, chicken & pork taco finish
+- Top the three-taco orders with colorful pico de gallo and only a light drizzle of sour cream — just enough flair without covering the braised meat.
 
 ---
 
