@@ -1326,8 +1326,8 @@
         return DiegoCustomerReadback.readbackLine(customer, order.instructions);
       }
 
-      function armCustomerReadback() {
-        customerReadback.arm();
+      function armCustomerReadback(opts) {
+        customerReadback.arm(opts);
       }
 
       function customerPayReadbackBlock() {
@@ -1628,7 +1628,9 @@
             out.memories = mem.memories;
           }
           if (contactInfoComplete()) {
-            if (contactChanged || !customerReadback.isArmed()) armCustomerReadback();
+            if (contactChanged || !customerReadback.isArmed()) {
+              armCustomerReadback({ dropInFlight: true });
+            }
             out.readbackRequired = customerReadback.blocksPay();
             out.speakHint = customerReadback.blocksPay()
               ? (matched ? 'One short recognition is enough. Then ' : '') +
@@ -2144,13 +2146,18 @@
         }
 
         if (name === 'set_instructions') {
+          var prevReadback = contactInfoComplete() ? customerInfoReadbackLine() : '';
           order.instructions = args.text != null ? String(args.text) : '';
           renderTicket();
           persistCustomerForCheckout();
           var notesHint = 'Chef notes saved.';
           if (contactInfoComplete()) {
-            armCustomerReadback();
-            notesHint = customerInfoReadbackHint();
+            // Empty, "none", and unchanged notes stay off the spoken card.
+            // Re-arming would wipe a yes the guest already gave.
+            if (!customerReadback.isArmed() || customerInfoReadbackLine() !== prevReadback) {
+              armCustomerReadback({ dropInFlight: true });
+            }
+            if (customerReadback.blocksPay()) notesHint = customerInfoReadbackHint();
           }
           replyTool(callId, {
             ok: true,

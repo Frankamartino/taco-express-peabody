@@ -1,9 +1,15 @@
 /**
- * Diego must read back the whole customer card before tip or pay.
- * The gate ignores the utterance that filled the card (and a duplicate
- * live-transcript flush of that same utterance) so he waits for a real yes.
+ * Diego must read the whole customer card back and hear a yes before tip or pay.
+ * The turn that filled the card does not count — including a live transcript
+ * that lands after arm(), or a second ASR of that same turn — and neither
+ * does any other speech that is not a confirmation.
  */
 (function (root) {
+  // set_customer can beat the 650ms live-transcript flush. Completed ASR of
+  // that same turn can lag a bit more. The spoken readback is longer than
+  // this, so a yes inside the window is still the filling turn.
+  var IN_FLIGHT_MS = 3000;
+
   function clean(value) {
     return String(value || '').trim();
   }
@@ -55,19 +61,79 @@
     var needed = false;
     var heardGuest = false;
     var armedEpoch = 0;
+    var inFlightUntil = 0;
 
     function utteranceKey(text) {
       return clean(text)
         .toLowerCase()
+        .replace(/['’]/g, '')
         .replace(/[^a-z0-9]+/g, ' ')
         .trim();
     }
 
-    function sameUtterance(a, b) {
-      a = utteranceKey(a);
-      b = utteranceKey(b);
-      if (!a || !b) return false;
-      return a === b || a.indexOf(b) >= 0 || b.indexOf(a) >= 0;
+    // A readback yes is a short agreement. Orders, "no", and contact dumps
+    // (even "yes, my email is …") are not confirmations.
+    function isConfirmation(text) {
+      var key = utteranceKey(text).replace(/^(uh|um|oh)\s+/, '');
+      if (!key || key.length > 48 || /\d/.test(key)) return false;
+      if (
+        /\b(no|nope|nah|not|dont|wrong|incorrect|change|actually|email|phone|gmail|yahoo|hotmail|outlook|but)\b/.test(
+          key
+        )
+      ) {
+        return false;
+      }
+      if (key === 'uh huh' || key === 'mm hmm' || key === 'mmhm' || key === 'you got it') return true;
+      var words = key.split(' ');
+      var allowed = {
+        yes: 1,
+        yeah: 1,
+        yep: 1,
+        yup: 1,
+        ya: 1,
+        ok: 1,
+        okay: 1,
+        sure: 1,
+        correct: 1,
+        right: 1,
+        perfect: 1,
+        absolutely: 1,
+        confirmed: 1,
+        exactly: 1,
+        that: 1,
+        thats: 1,
+        it: 1,
+        is: 1,
+        all: 1,
+        me: 1,
+        please: 1,
+        you: 1,
+        got: 1,
+        sounds: 1,
+        everything: 1,
+        good: 1,
+        true: 1,
+        sir: 1,
+      };
+      for (var i = 0; i < words.length; i++) {
+        if (!allowed[words[i]]) return false;
+      }
+      if (key === 'thats me' || key === 'that is me') return true;
+      return /\b(yes|yeah|yep|yup|ya|ok|okay|sure|correct|right|perfect|absolutely|confirmed|exactly|good|true)\b/.test(
+        key
+      );
+    }
+
+    function sameUtterance(next, prev) {
+      next = utteranceKey(next);
+      prev = utteranceKey(prev);
+      if (!next || !prev) return false;
+      // "yes, my email is …" must not swallow a later "yes", and a stored
+      // "yes" must not swallow "yes that is correct".
+      if (isConfirmation(next) || isConfirmation(prev)) return false;
+      if (next === prev) return true;
+      // Growing live transcript, or a longer ASR of one contact dump.
+      return prev.length >= 24 && next.indexOf(prev) !== -1;
     }
 
     return {
@@ -82,18 +148,24 @@
         lastTurnAt = at;
         lastTurnText = norm;
         speechEpoch += 1;
-        if (needed && speechEpoch > armedEpoch) heardGuest = true;
+        if (!needed || speechEpoch <= armedEpoch) return heardGuest;
+        if (at < inFlightUntil) return heardGuest;
+        if (isConfirmation(norm)) heardGuest = true;
         return heardGuest;
       },
-      arm: function () {
+      arm: function (opts) {
+        opts = opts && typeof opts === 'object' ? opts : {};
         needed = true;
         heardGuest = false;
         armedEpoch = speechEpoch;
+        var at = opts.now == null ? Date.now() : opts.now;
+        inFlightUntil = opts.dropInFlight ? at + IN_FLIGHT_MS : 0;
       },
       clear: function () {
         needed = false;
         heardGuest = false;
         armedEpoch = speechEpoch;
+        inFlightUntil = 0;
       },
       isArmed: function () {
         return needed;
