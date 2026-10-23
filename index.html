@@ -868,12 +868,15 @@
       cursor: pointer;
     }
     body.diego-open #diegoPanelClose { display: block; }
+    /* Checkout covers the sheet. Hide Close so it cannot unload the iframe. */
+    body.checkout-open #diegoFrame { pointer-events: none; }
+    body.checkout-open #diegoPanelClose { display: none; }
     footer a.is-live { color: #fca5a5; }
-    /* Checkout rides on top of the menu so a live call is never torn down. */
+    /* Above the menu and the live Diego sheet so Pay stays reachable on the call. */
     #checkoutOverlay {
       position: fixed;
       inset: 0;
-      z-index: 9999;
+      z-index: 10003;
       background: var(--bg, #0a0a0a);
       display: none;
     }
