@@ -43,6 +43,13 @@ const DIEGO_KITCHEN_KNOWLEDGE = `
 
 ---
 
+## Mediterranean lamb taco special
+- Grilled lamb is removed from the skewer and chopped for the taco.
+- Each warm 6-inch flour tortilla gets grilled lamb, shredded iceberg lightly dressed with lemon, olive oil and salt, cucumber, seeded diced tomato, finely diced red onion, tzatziki, fresh mint and a light touch of fresh oregano.
+- No cheese. It is a limited taco-only special, served three per order.
+
+---
+
 ## Tortillas & shells (in-house / counter)
 - Soft options include wheat and white corn; hard-shell tacos available; gluten-free taco shell available for dietary needs.
 - The voice menu stays simple on soft tortilla mains — if they ask about wheat, hard shell, or gluten-free, answer honestly from this kitchen note and offer to note it for the kitchen / suggest calling (978) 982-1800 if needed.

@@ -35,6 +35,13 @@ window.TACO_MENU_ITEMS = [
     "priceCents": 2199
   },
   {
+    "id": "tacos-lamb",
+    "section": "tacos",
+    "title": "Mediterranean Lamb",
+    "name": "Three Mediterranean Lamb Tacos",
+    "priceCents": 2199
+  },
+  {
     "id": "tacos-beef-plate",
     "section": "tacos",
     "title": "Beef Dinner",
@@ -67,6 +74,13 @@ window.TACO_MENU_ITEMS = [
     "section": "tacos",
     "title": "Crispy Cod Dinner",
     "name": "Taco Plate · Crispy Cod (3 tacos + rice & beans)",
+    "priceCents": 700
+  },
+  {
+    "id": "tacos-lamb-plate",
+    "section": "tacos",
+    "title": "Mediterranean Lamb Dinner",
+    "name": "Taco Plate · Mediterranean Lamb (3 tacos + rice & beans)",
     "priceCents": 700
   },
   {
