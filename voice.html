@@ -835,6 +835,10 @@
       var CALL_WARNING_MS = CALL_LIMIT_MS - 30 * 1000;
       var history = [];
       var pendingCalls = {};
+      var inputTranscriptBuffer = '';
+      var outputTranscriptBuffer = '';
+      var inputTranscriptTimer = null;
+      var outputTranscriptTimer = null;
       var taxRate = 0.07;
       var knownGuests = [];
       var order = {
@@ -1292,11 +1296,11 @@
           callLimitWarningTimer = null;
           if (!callInProgress()) return;
           dcSend({
-            type: 'response.create',
-            response: {
-              instructions:
-                'Say exactly one short sentence: "Quick heads up, we have about thirty seconds left on this call." Then listen.',
-            },
+            type: 'session.commentary.append',
+            event_id: 'call_limit_warning_' + Date.now(),
+            delegation_id: null,
+            content:
+              'Quick heads up, we have about thirty seconds left on this call.',
           });
         }, CALL_WARNING_MS);
         callLimitTimer = setTimeout(function () {
@@ -1308,14 +1312,15 @@
       function replyTool(callId, output) {
         if (!sessionAlive) return;
         dcSend({
-          type: 'conversation.item.create',
+          type: 'response.item.create',
+          event_id: 'tool_result_' + Date.now(),
           item: {
             type: 'function_call_output',
             call_id: callId,
             output: typeof output === 'string' ? output : JSON.stringify(output),
           },
         });
-        dcSend({ type: 'response.create' });
+        dcSend({ type: 'response.create', event_id: 'tool_continue_' + Date.now() });
       }
 
       async function askSupervisor(question) {
@@ -2238,6 +2243,40 @@
         }
       }
 
+      function flushLiveTranscript(who) {
+        var isCustomer = who === 'customer';
+        var text = isCustomer ? inputTranscriptBuffer : outputTranscriptBuffer;
+        if (isCustomer) {
+          inputTranscriptBuffer = '';
+          inputTranscriptTimer = null;
+        } else {
+          outputTranscriptBuffer = '';
+          outputTranscriptTimer = null;
+        }
+        text = String(text || '').trim();
+        if (!text) return;
+        pushHistory(who, text);
+        if (isCustomer) maybeCaptureFirstName(text);
+        maybeAutoHangUp(text, who);
+      }
+
+      function queueLiveTranscript(who, delta) {
+        if (!delta) return;
+        if (who === 'customer') {
+          inputTranscriptBuffer += String(delta);
+          if (inputTranscriptTimer) clearTimeout(inputTranscriptTimer);
+          inputTranscriptTimer = setTimeout(function () {
+            flushLiveTranscript('customer');
+          }, 650);
+          return;
+        }
+        outputTranscriptBuffer += String(delta);
+        if (outputTranscriptTimer) clearTimeout(outputTranscriptTimer);
+        outputTranscriptTimer = setTimeout(function () {
+          flushLiveTranscript('diego');
+        }, 650);
+      }
+
       function onServerEvent(raw) {
         var data;
         try {
@@ -2246,6 +2285,25 @@
           return;
         }
         if (!data || !data.type) return;
+
+        if (
+          data.type === 'response.event' &&
+          data.event &&
+          data.event.type === 'response.output_item.done' &&
+          data.event.item &&
+          data.event.item.type === 'function_call'
+        ) {
+          var item = data.event.item;
+          data = {
+            type: 'response.function_call_arguments.done',
+            name: item.name,
+            call_id: item.call_id,
+            arguments:
+              typeof item.arguments === 'string'
+                ? item.arguments
+                : JSON.stringify(item.arguments || {}),
+          };
+        }
 
         if (data.type === 'response.function_call_arguments.done') {
           var fname = data.name;
@@ -2305,6 +2363,20 @@
             return;
           }
           done();
+          return;
+        }
+
+        if (data.type === 'session.input_transcript.delta' && data.delta) {
+          queueLiveTranscript('customer', data.delta);
+          return;
+        }
+        if (data.type === 'session.output_transcript.delta' && data.delta) {
+          queueLiveTranscript('diego', data.delta);
+          return;
+        }
+        if (data.type === 'session.closed') {
+          cleanup(true);
+          notifyMenuHangup();
           return;
         }
 
@@ -2466,7 +2538,7 @@
         }
       }
 
-      function cleanup() {
+      function cleanup(skipSessionClose) {
         sessionAlive = false;
         connecting = false;
         connected = false;
@@ -2475,14 +2547,22 @@
           hangUpTimer = null;
         }
         clearCallLimitTimers();
+        if (inputTranscriptTimer) clearTimeout(inputTranscriptTimer);
+        if (outputTranscriptTimer) clearTimeout(outputTranscriptTimer);
+        inputTranscriptTimer = null;
+        outputTranscriptTimer = null;
+        inputTranscriptBuffer = '';
+        outputTranscriptBuffer = '';
         try {
-          if (dc && dc.readyState === 'open') {
+          if (!skipSessionClose && dc && dc.readyState === 'open') {
             try {
-              dc.send(JSON.stringify({ type: 'response.cancel' }));
+              dc.send(
+                JSON.stringify({
+                  type: 'session.close',
+                  event_id: 'session_close_' + Date.now(),
+                })
+              );
             } catch (e) {}
-            try {
-              dc.send(JSON.stringify({ type: 'output_audio_buffer.clear' }));
-            } catch (e2) {}
           }
         } catch (e3) {}
         try {
@@ -2620,18 +2700,6 @@
         } catch (eUnlock) {}
 
         try {
-          var tokenPromise = fetch('/api/realtime-token', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(resumeCheckout ? { resume: 'checkout' } : {}),
-          }).then(async function (resp) {
-            if (!resp.ok) {
-              var errText = await resp.text().catch(function () { return ''; });
-              throw new Error('token ' + resp.status + (errText ? ': ' + errText.slice(0, 180) : ''));
-            }
-            return resp.json();
-          });
-
           localStream = await navigator.mediaDevices.getUserMedia({
             audio: {
               echoCancellation: true,
@@ -2669,11 +2737,19 @@
             : "Hi, I'm Diego. We have five minutes together — first and last name, please?";
           var closedGreeting = false;
           var dcOpen = false;
+          var liveSessionStarted = false;
           var greetingArmed = false;
           var greetingSpoken = false;
 
           function speakFixedGreeting() {
-            if (!stillThisConnect() || !sessionAlive || !dcOpen || !greetingArmed || greetingSpoken) return;
+            if (
+              !stillThisConnect() ||
+              !sessionAlive ||
+              !dcOpen ||
+              !liveSessionStarted ||
+              !greetingArmed ||
+              greetingSpoken
+            ) return;
             greetingSpoken = true;
             greetingArmed = false;
             var follow = closedGreeting
@@ -2682,20 +2758,33 @@
                 ? 'Say that EXACT line once in one smooth breath — no long pause mid-sentence. Then STOP and listen. Do NOT re-introduce yourself. Do NOT restart the menu greeting.'
                 : 'Say that EXACT line once in one smooth breath — no dramatic pause after Hi or after your name. No language choice. Then STOP and listen for their name only. Nothing else. Do not repeat yourself.';
             dcSend({
-              type: 'response.create',
-              response: {
-                instructions:
-                  'Happy pleasant smiling tone, snappy natural pace. Say EXACTLY and ONLY: "' +
-                  greetingExact +
-                  '" ' +
-                  follow,
-              },
+              type: 'session.instructions.append',
+              event_id: 'greeting_instruction_' + Date.now(),
+              delegation_id: null,
+              content:
+                'Happy pleasant smiling tone, snappy natural pace. Say EXACTLY and ONLY: "' +
+                greetingExact +
+                '" ' +
+                follow,
+            });
+            dcSend({
+              type: 'session.commentary.append',
+              event_id: 'greeting_speak_' + Date.now(),
+              delegation_id: null,
+              content: 'Deliver the required opening greeting now, then listen.',
             });
           }
 
           dc = pc.createDataChannel('oai-events');
           dc.addEventListener('message', function (ev) {
             if (!sessionAlive || myGen !== connectGen) return;
+            try {
+              var liveEvent = JSON.parse(ev.data);
+              if (liveEvent && liveEvent.type === 'session.started') {
+                liveSessionStarted = true;
+                speakFixedGreeting();
+              }
+            } catch (eLiveEvent) {}
             onServerEvent(ev.data);
           });
           dc.addEventListener('open', function () {
@@ -2706,18 +2795,52 @@
 
           var offer = await pc.createOffer();
           await pc.setLocalDescription(offer);
+          if (pc.iceGatheringState !== 'complete') {
+            await new Promise(function (resolve, reject) {
+              var timeout = setTimeout(function () {
+                pc.removeEventListener('icegatheringstatechange', onIceState);
+                reject(new Error('Timed out while gathering ICE candidates'));
+              }, 10000);
+              function onIceState() {
+                if (pc.iceGatheringState !== 'complete') return;
+                clearTimeout(timeout);
+                pc.removeEventListener('icegatheringstatechange', onIceState);
+                resolve();
+              }
+              pc.addEventListener('icegatheringstatechange', onIceState);
+              onIceState();
+            });
+          }
           if (!stillThisConnect()) {
             cleanup();
             return;
           }
 
-          var tokenPayload = await tokenPromise;
+          var localSdp = pc.localDescription && pc.localDescription.sdp;
+          if (!localSdp) throw new Error('Missing local SDP offer');
+          var liveResp = await fetch('/api/realtime-token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sdp: localSdp,
+              resume: resumeCheckout ? 'checkout' : '',
+            }),
+          });
+          var livePayload = await liveResp.json().catch(function () {
+            return {};
+          });
+          if (!liveResp.ok) {
+            var liveErr =
+              (livePayload && livePayload.error && livePayload.error.message) ||
+              (livePayload && livePayload.error) ||
+              'GPT-Live session failed';
+            throw new Error('live ' + liveResp.status + ': ' + String(liveErr).slice(0, 180));
+          }
           if (!stillThisConnect()) {
             cleanup();
             return;
           }
-          var ephemeralKey = (tokenPayload.value || '').trim();
-          if (!ephemeralKey) throw new Error('Missing ephemeral token');
+          var tokenPayload = livePayload.app || {};
           if (tokenPayload.greetingExact) greetingExact = String(tokenPayload.greetingExact);
           if (tokenPayload.resume === 'checkout') {
             resumeCheckout = true;
@@ -2755,23 +2878,11 @@
           greetingArmed = true;
           sessionAlive = true;
 
-          var sdpResp = await fetch('https://api.openai.com/v1/realtime/calls', {
-            method: 'POST',
-            body: offer.sdp,
-            headers: {
-              Authorization: 'Bearer ' + ephemeralKey,
-              'Content-Type': 'application/sdp',
-            },
-          });
-          if (!sdpResp.ok) {
-            var sdpErr = await sdpResp.text().catch(function () { return ''; });
-            throw new Error('realtime ' + sdpResp.status + (sdpErr ? ': ' + sdpErr.slice(0, 180) : ''));
-          }
-          if (!stillThisConnect()) {
-            cleanup();
-            return;
-          }
-          var answerSdp = await sdpResp.text();
+          var answerSdp =
+            livePayload &&
+            livePayload.transport &&
+            String(livePayload.transport.sdp || '');
+          if (!answerSdp) throw new Error('Missing GPT-Live SDP answer');
           await pc.setRemoteDescription({ type: 'answer', sdp: answerSdp });
           if (!stillThisConnect()) {
             cleanup();

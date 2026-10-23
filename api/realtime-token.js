@@ -1,7 +1,7 @@
 /**
- * Taco Express Peabody — Diego voice token (/voice on tacoexpresspeabody.com).
- * Mic/mouth: gpt-realtime + cedar
- * Brain (via ask_supervisor tool): GPT-5.6
+ * Taco Express Peabody — Diego voice session (/voice on tacoexpresspeabody.com).
+ * Mic/mouth: GPT-Live 1 + Cedar
+ * Delegated backend: GPT-5.6 on demand
  *
  * Fixed greeting/tone/pace: api/massimoConfig.js — loaded every session.
  * Audio: speed 0.92, near_field, plain HTML audio, AGC on.
@@ -37,6 +37,8 @@ module.exports = async function handler(req, res) {
 
   const model =
     process.env.OPENAI_REALTIME_MODEL?.trim() || cfg.MODEL_DEFAULT;
+  const liveModel =
+    process.env.OPENAI_LIVE_MODEL?.trim() || 'gpt-live-1';
   const voice = cfg.VOICE;
 
   const knownGuestBlock = (Array.isArray(cfg.KNOWN_GUESTS) ? cfg.KNOWN_GUESTS : [])
@@ -697,6 +699,94 @@ module.exports = async function handler(req, res) {
       },
     },
   };
+
+  const sdpOffer = typeof body.sdp === 'string' ? body.sdp.trim() : '';
+  if (sdpOffer) {
+    const supervisorModel =
+      process.env.OPENAI_SUPERVISOR_MODEL?.trim() || 'gpt-5.6';
+    const liveTools = session.tools.filter(
+      (tool) => tool && tool.name !== 'ask_supervisor'
+    );
+    const sharedInstructions = instructions.join('\n');
+    const liveSession = {
+      model: liveModel,
+      instructions:
+        sharedInstructions +
+        '\n\n=== GPT-LIVE DELEGATION ===\n' +
+        'Handle warm conversation, menu explanations and personality directly. ' +
+        'Delegate whenever the guest wants an action or verified state: cart/order changes, customer details, checkout/payment, screen navigation, current time/web facts, sold-out status or staff controls. ' +
+        'Wait for the delegated result before claiming an action happened.',
+      audio: {
+        output: { voice },
+      },
+      delegation: {
+        type: 'responses',
+        responses: {
+          model: supervisorModel,
+          instructions:
+            sharedInstructions +
+            '\n\nYou are Diego’s private delegated backend. Execute the appropriate tool for requested actions and verified state. Return concise, accurate results for Diego to say naturally. Never identify yourself as a separate agent.',
+          tools: liveTools,
+          tool_choice: 'auto',
+          parallel_tool_calls: false,
+          max_output_tokens: 512,
+        },
+      },
+      store: false,
+    };
+
+    try {
+      const r = await fetch('https://api.openai.com/v1/live/sessions', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          session: liveSession,
+          transport: { type: 'webrtc', sdp: sdpOffer },
+        }),
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        console.error(
+          '[Taco Diego] live session error:',
+          r.status,
+          JSON.stringify(data).slice(0, 600)
+        );
+        return res.status(r.status).json(data);
+      }
+      if (!data?.transport?.sdp || !data?.session?.id) {
+        return res.status(502).json({ error: 'Invalid GPT-Live session response' });
+      }
+      console.log(
+        `[Taco Diego] live session model=${liveModel} voice=${voice} backend=${supervisorModel} resume=${resumeMode || 'none'}`
+      );
+      return res.status(201).json({
+        session: data.session,
+        transport: data.transport,
+        app: {
+          model: liveModel,
+          voice,
+          host: cfg.HOST_NAME,
+          resume: resumeMode || '',
+          greetingExact:
+            resumeMode === 'checkout' ? checkoutGreeting : cfg.GREETING_EXACT,
+          greetingTone: cfg.GREETING_TONE,
+          greetingPace: cfg.GREETING_PACE,
+          taxRate: cfg.TAX_RATE,
+          knownGuests: Array.isArray(cfg.KNOWN_GUESTS) ? cfg.KNOWN_GUESTS : [],
+          shopStatus: shopStatus.line,
+          shopOpen: shopStatus.open,
+          supervisor: supervisorModel,
+        },
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'GPT-Live session failed';
+      console.error('[Taco Diego] Live session error:', e);
+      return res.status(500).json({ error: msg });
+    }
+  }
 
   try {
     const r = await fetch('https://api.openai.com/v1/realtime/client_secrets', {
