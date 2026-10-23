@@ -2769,7 +2769,6 @@
           if (stillThisConnect()) {
             cleanup();
             setStatus('Could not start Diego. Try again.');
-            notifyMenuParent({ type: 'start_failed' });
           }
         }
       }
@@ -2781,16 +2780,6 @@
         }
         startDiego();
       });
-
-      /* The homepage owns the one visible Diego button. Calling this same-origin
-         API directly from that click keeps mobile user activation intact. */
-      window.startDiegoFromMenu = function () {
-        return startDiego();
-      };
-      window.hangUpDiegoFromMenu = function () {
-        if (callInProgress()) hangUp();
-      };
-      if (embedMode) notifyMenuParent({ type: 'ready' });
 
       window.addEventListener('message', function (ev) {
         if (!embedMode) return;

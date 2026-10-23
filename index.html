@@ -823,9 +823,9 @@
     }
     .map-links a { color: var(--lime); text-decoration: none; }
     .map-links a:hover { color: var(--white); }
-    /* Diego stays loaded in a same-origin frame. The one visible header button
-       starts him directly during the customer's tap, preserving mobile audio
-       permission without showing a second button or panel. */
+    /* Mobile browsers require a real tap inside the voice document before
+       unmuted audio can play. Show Diego as a small panel instead of hiding
+       him in a 1px iframe that can fail silently on iPhone/Android. */
     #diegoFrame {
       position: fixed;
       width: 1px;
@@ -837,6 +837,37 @@
       bottom: 0;
       z-index: -1;
     }
+    body.diego-open #diegoFrame {
+      width: auto;
+      height: min(72vh, 620px);
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      opacity: 1;
+      pointer-events: auto;
+      z-index: 10001;
+      background: #101010;
+      border: 2px solid rgba(255, 255, 255, 0.18);
+      border-radius: 18px;
+      box-shadow: 0 22px 70px rgba(0, 0, 0, 0.72);
+    }
+    #diegoPanelClose {
+      display: none;
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 10002;
+      min-height: 44px;
+      padding: 10px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 999px;
+      background: #991b1b;
+      color: #fff;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    body.diego-open #diegoPanelClose { display: block; }
     footer a.is-live { color: #fca5a5; }
     /* Checkout rides on top of the menu so a live call is never torn down. */
     #checkoutOverlay {
@@ -1493,7 +1524,8 @@
     </div>
   </div>
 
-  <iframe id="diegoFrame" title="Diego voice" src="/voice?embed=1" allow="microphone *; autoplay *"></iframe>
+  <iframe id="diegoFrame" title="Diego voice" allow="microphone *; autoplay *"></iframe>
+  <button type="button" id="diegoPanelClose" aria-label="Close Diego voice panel">Close</button>
 
   <div id="checkoutOverlay" aria-hidden="true">
     <iframe id="checkoutFrame" title="Checkout"></iframe>
@@ -1507,8 +1539,8 @@
       /* Diego is a small header helper — never a hero and never fixed over the menu. */
       var diegoBtn = document.getElementById('diegoHelperLink');
       var diegoFrame = document.getElementById('diegoFrame');
+      var diegoPanelClose = document.getElementById('diegoPanelClose');
       var diegoOpen = false;
-      var diegoReady = false;
 
       function setDiegoIdleLabel() {
         if (!diegoBtn) return;
@@ -1520,25 +1552,23 @@
       function setDiegoLiveLabel() {
         if (!diegoBtn) return;
         diegoBtn.classList.add('is-live');
-        diegoBtn.textContent = 'Hang up Diego';
-        diegoBtn.setAttribute('aria-label', 'Hang up Diego');
+        diegoBtn.textContent = 'Close Diego';
+        diegoBtn.setAttribute('aria-label', 'Close Diego voice panel');
       }
 
       function closeDiego(fromChild) {
         diegoOpen = false;
+        document.body.classList.remove('diego-open');
         if (diegoFrame) {
-          if (!fromChild) {
+          if (!fromChild && diegoFrame.getAttribute('src')) {
             try {
-              if (typeof diegoFrame.contentWindow.hangUpDiegoFromMenu === 'function') {
-                diegoFrame.contentWindow.hangUpDiegoFromMenu();
-              } else {
-                diegoFrame.contentWindow.postMessage(
-                  { source: 'taco-menu', type: 'hangup' },
-                  window.location.origin
-                );
-              }
+              diegoFrame.contentWindow.postMessage(
+                { source: 'taco-menu', type: 'hangup' },
+                window.location.origin
+              );
             } catch (eMsg) {}
           }
+          diegoFrame.removeAttribute('src');
         }
         setDiegoIdleLabel();
         pushDiegoStateToCheckout();
@@ -1546,26 +1576,15 @@
       }
 
       function openDiego() {
-        if (!diegoFrame || !diegoReady) return false;
+        if (!diegoFrame) return;
+        diegoOpen = true;
+        document.body.classList.add('diego-open');
+        setDiegoLiveLabel();
         try {
           sessionStorage.removeItem('diegoAutostart');
         } catch (eStore) {}
-        try {
-          if (typeof diegoFrame.contentWindow.startDiegoFromMenu !== 'function') {
-            diegoReady = false;
-            return false;
-          }
-          /* Same-origin direct call stays inside this trusted click. That is the
-             mobile-safe one-tap path for microphone and speaker permission. */
-          diegoFrame.contentWindow.startDiegoFromMenu();
-        } catch (eStart) {
-          diegoReady = false;
-          return false;
-        }
-        diegoOpen = true;
-        setDiegoLiveLabel();
+        diegoFrame.src = '/voice?embed=1';
         pushDiegoStateToCheckout();
-        return true;
       }
 
       function startDiegoOnMenu() {
@@ -1573,36 +1592,20 @@
           closeDiego(false);
           return;
         }
-        if (!openDiego() && diegoBtn) {
-          diegoBtn.textContent = 'Diego is loading…';
-          diegoBtn.disabled = true;
-        }
+        openDiego();
       }
 
       if (diegoBtn) {
-        diegoBtn.disabled = true;
-        diegoBtn.textContent = 'Loading Diego…';
         diegoBtn.addEventListener('click', function (ev) {
           ev.preventDefault();
           startDiegoOnMenu();
         });
       }
-
-      function markDiegoReady() {
-        try {
-          diegoReady =
-            !!diegoFrame &&
-            typeof diegoFrame.contentWindow.startDiegoFromMenu === 'function';
-        } catch (eReady) {
-          diegoReady = false;
-        }
-        if (diegoReady && diegoBtn && !diegoOpen) {
-          diegoBtn.disabled = false;
-          setDiegoIdleLabel();
-        }
+      if (diegoPanelClose) {
+        diegoPanelClose.addEventListener('click', function () {
+          closeDiego(false);
+        });
       }
-      if (diegoFrame) diegoFrame.addEventListener('load', markDiegoReady);
-      markDiegoReady();
 
       /* ---- Checkout without leaving the page ----
          Navigating to /checkout destroys this document, and Diego's WebRTC call
@@ -1774,18 +1777,6 @@
         if (ev.origin !== window.location.origin) return;
         var data = ev.data;
         if (!data || data.source !== 'taco-diego') return;
-        if (data.type === 'ready') {
-          markDiegoReady();
-          return;
-        }
-        if (data.type === 'start_failed') {
-          closeDiego(true);
-          if (diegoBtn) {
-            diegoBtn.textContent = 'Try Diego again';
-            diegoBtn.setAttribute('aria-label', 'Diego could not start. Try again');
-          }
-          return;
-        }
         if (data.type === 'hangup') {
           closeDiego(true);
           return;
