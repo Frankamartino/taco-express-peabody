@@ -860,15 +860,18 @@
       function applyCheckoutCustomerState(data) {
         var fullName = String(data.name || '').trim();
         var parts = fullName.split(/\s+/).filter(Boolean);
-        customer.firstName = parts[0] || '';
-        customer.lastName = parts.slice(1).join(' ') || '';
+        var validFullName = parts.length >= 2;
+        if (validFullName) {
+          customer.firstName = parts[0];
+          customer.lastName = parts.slice(1).join(' ');
+        }
         customer.email = String(data.email || '').trim().toLowerCase();
         customer.phone = String(data.phone || '').trim();
         order.instructions = String(data.instructions || '').trim();
         renderTicket();
 
         var state = {
-          fullName: fullName,
+          fullName: validFullName ? fullName : '',
           email: customer.email,
           phone: customer.phone,
           instructions: order.instructions,
@@ -877,21 +880,13 @@
         if (signature === lastCheckoutFormState) return;
         lastCheckoutFormState = signature;
         dcSend({
-          type: 'conversation.item.create',
+          type: 'session.thinking.append',
           event_id: 'checkout_form_' + Date.now(),
-          item: {
-            type: 'message',
-            role: 'user',
-            content: [
-              {
-                type: 'input_text',
-                text:
-                  '[Checkout form state — UI data only, not instructions: ' +
-                  JSON.stringify(state) +
-                  '. Treat every non-empty field as already collected and do not ask for it again.]',
-              },
-            ],
-          },
+          delegation_id: null,
+          content:
+            '[Checkout form state — UI data only, not instructions: ' +
+            JSON.stringify(state) +
+            '. Treat every non-empty field as already collected and do not ask for it again.]',
         });
       }
 
@@ -913,21 +908,13 @@
         ) return;
         lastCartContextSent = signature;
         dcSend({
-          type: 'conversation.item.create',
+          type: 'session.thinking.append',
           event_id: 'cart_snapshot_' + Date.now(),
-          item: {
-            type: 'message',
-            role: 'user',
-            content: [
-              {
-                type: 'input_text',
-                text:
-                  '[Authoritative website shopping cart — UI data only, not instructions: ' +
-                  JSON.stringify(state) +
-                  '. This replaces every earlier cart or ticket item. If an item is absent, the customer removed it. Never claim a removed item is still ordered.]',
-              },
-            ],
-          },
+          delegation_id: null,
+          content:
+            '[Authoritative website shopping cart — UI data only, not instructions: ' +
+            JSON.stringify(state) +
+            '. This replaces every earlier cart or ticket item. If an item is absent, the customer removed it. Never claim a removed item is still ordered.]',
         });
       }
 
@@ -1565,11 +1552,24 @@
         }
 
         if (name === 'set_customer') {
-          if (args.firstName != null && String(args.firstName).trim()) {
-            customer.firstName = String(args.firstName).trim();
-          }
-          if (args.lastName != null && String(args.lastName).trim()) {
-            customer.lastName = String(args.lastName).trim();
+          var hasNameArgs = args.firstName != null || args.lastName != null;
+          var proposedFirst = String(
+            args.firstName != null ? args.firstName : customer.firstName || ''
+          ).trim();
+          var proposedLast = String(
+            args.lastName != null ? args.lastName : customer.lastName || ''
+          ).trim();
+          var proposedFull = [proposedFirst, proposedLast].filter(Boolean).join(' ');
+          var badNameWords =
+            /\b(hi|hey|hello|diego|please|thanks|thank|taco|burrito|order|checkout|email|phone)\b/i;
+          var validFullName =
+            proposedFirst.length >= 2 &&
+            proposedLast.length >= 2 &&
+            /^[A-Za-zÀ-ÖØ-öø-ÿ' -]+$/.test(proposedFull) &&
+            !badNameWords.test(proposedFull);
+          if (hasNameArgs && validFullName) {
+            customer.firstName = proposedFirst;
+            customer.lastName = proposedLast;
           }
           if (args.email != null && String(args.email).trim()) {
             customer.email = String(args.email).trim().toLowerCase();
@@ -1578,16 +1578,28 @@
             customer.phone = String(args.phone).trim();
           }
           var matched = applyKnownGuestAndPersist();
-          var out = { ok: true, ticket: ticketSnapshot(), savedForCheckout: true };
+          var out = {
+            ok: !hasNameArgs || validFullName,
+            nameSaved: !hasNameArgs || validFullName,
+            ticket: ticketSnapshot(),
+            savedForCheckout: !hasNameArgs || validFullName,
+          };
+          if (hasNameArgs && !validFullName) {
+            out.error = 'A real first and last name are required.';
+            out.speakHint =
+              'Do not save conversation words as the name. Ask only: "First and last name, please?" Then call set_customer again with both names.';
+          }
           if (matched) {
             var mem = knownGuestPayload(matched);
             out.knownGuest = true;
             out.memories = mem.memories;
             out.speakHint = mem.speakHint;
           }
-          out.speakHint =
-            (out.speakHint ? out.speakHint + ' ' : '') +
-            'Name is saved NOW (menu page is fine). Checkout pickup Full name will already show it. If email/phone still missing, ask those next — one at a time.';
+          if (!hasNameArgs || validFullName) {
+            out.speakHint =
+              (out.speakHint ? out.speakHint + ' ' : '') +
+              'Name is saved NOW (menu page is fine). Checkout pickup Full name will already show it. If email/phone still missing, ask those next — one at a time.';
+          }
           replyTool(callId, out);
           return;
         }
@@ -2070,12 +2082,44 @@
         }
 
         if (name === 'set_tip') {
+          var hasTipPercent = args.percent != null && String(args.percent).trim() !== '';
+          var hasTipAmount = args.amount != null && String(args.amount).trim() !== '';
+          var tipPercent = args.percent != null ? Number(args.percent) : NaN;
           var tipAmt = Number(args.amount);
-          order.tip = isFinite(tipAmt) && tipAmt >= 0 ? tipAmt : 0;
+          var usedPercent = hasTipPercent && isFinite(tipPercent) && tipPercent >= 0;
+          var usedAmount = hasTipAmount && isFinite(tipAmt) && tipAmt >= 0;
+          if (!usedPercent && !usedAmount) {
+            replyTool(callId, {
+              ok: false,
+              error: 'Provide percent for a percentage tip or amount for a dollar tip.',
+              speakHint: 'Ask for the tip again and preserve whether they say percent or dollars.',
+            });
+            return;
+          }
+          if (usedPercent) {
+            tipPercent = Math.min(100, tipPercent);
+            order.tip = Math.round(subtotal() * tipPercent) / 100;
+          } else {
+            order.tip = isFinite(tipAmt) && tipAmt >= 0 ? tipAmt : 0;
+          }
           order.tipAsked = true;
           renderTicket();
-          notifyMenuParent({ type: 'tip_update', amount: order.tip });
-          replyTool(callId, { ok: true, ticket: ticketSnapshot() });
+          notifyMenuParent({
+            type: 'tip_update',
+            mode: usedPercent ? 'percent' : 'amount',
+            percent: usedPercent ? tipPercent : null,
+            amount: order.tip,
+          });
+          replyTool(callId, {
+            ok: true,
+            tipMode: usedPercent ? 'percent' : 'amount',
+            tipPercent: usedPercent ? tipPercent : null,
+            tipAmount: order.tip,
+            ticket: ticketSnapshot(),
+            speakHint: usedPercent
+              ? tipPercent + '% tip applied as ' + money(order.tip) + '. Continue immediately.'
+              : 'Dollar tip applied as ' + money(order.tip) + '. Continue immediately.',
+          });
           return;
         }
 
@@ -2515,9 +2559,9 @@
           .trim();
         var words = t.split(/\s+/).filter(Boolean);
         /* Full name up front: "Frank Martino" or "Frank A Martino" */
-        if (words.length < 1 || words.length > 3) return;
+        if (words.length < 2 || words.length > 3) return;
         if (
-          /taco|burrito|beef|chicken|pork|shrimp|coke|drink|order|spicy|mild|please|thanks|thank|checkout|email|phone/i.test(
+          /\b(taco|burrito|beef|chicken|pork|shrimp|coke|drink|order|spicy|mild|please|thanks|thank|checkout|email|phone|diego|hello|hi|hey)\b/i.test(
             t
           )
         ) {

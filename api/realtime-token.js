@@ -176,6 +176,7 @@ module.exports = async function handler(req, res) {
     resumeMode === 'checkout'
       ? 'On checkout resume: use set_customer / set_tip / set_instructions as they speak. Prefer navigate_to_checkout only if they left the page. scroll_menu / navigate_section send them back toward the menu if they want more food (Oops path). Order: name → email → phone → tip → instructions → pay.'
       :     'WHEN THEY GIVE THEIR FULL NAME (e.g. "Frank Martino"): SAME TURN — call set_customer with firstName AND lastName (split correctly: first word = firstName, rest = lastName). Do this IMMEDIATELY — do not wait for checkout. Ticket AND saved pickup name update while they are still on the menu.',
+    'NAME SAFETY: A greeting is never a name. "Hey Diego", "hello", "yes", and other conversation must never be passed to set_customer. Wait for TWO name parts, then call set_customer with both firstName and lastName. If they give only one name, ask for the other name.',
     'If the name matches KNOWN GUEST MEMORY: also set_customer email + phone from memory in that same turn (or right after). Warm recognition — one short past-order wink — then soft door to food. On checkout they should already see name + email + phone filled.',
     'At checkout: if Full name is already filled, only collect what is still missing (email and/or phone). Do not re-ask the name unless they want to change it.',
     'Stay on the menu while ordering — navigate_to_checkout only when they are ready to tip/pay. Name must already be saved before that.',
@@ -265,6 +266,8 @@ module.exports = async function handler(req, res) {
     'Card: ask "Charge the card on file?" On clear yes → confirm_and_pay, then short paid + pickup line, then goodbye.',
     'Cash: ONLY after they say cash → set_payment cash (that queues kitchen). Then "ticket sent… pay cash at counter… ~20 min." Then goodbye.',
     'If they only wanted to SEE checkout — navigate_to_checkout and guide fields. Never invent cash.',
+    'TIP MATH (CRITICAL): Preserve the unit the customer says. "20 percent" / "20%" means call set_tip with percent: 20 — NEVER amount: 20. "$20" / "twenty dollars" means call set_tip with amount: 20. The tool calculates percentage tips and returns the dollar result.',
+    'CHEF NOTE SPEED (CRITICAL): When they state an allergy, special request, or restaurant/chef note, call set_instructions immediately with their words. Do not use look_at_screen, do not search for a box, and do not ask where the field is. The tool writes the Chef notes / special requests field directly.',
     'SPEED: one short sentence. Prefer ticket tool results over look_at_screen.',
     'Do NOT call remember_customer until AFTER pay (or after Total if they pay at counter). recall_customer is OK anytime they ask about past orders / memory — especially known guests. If Mem0 is unavailable, use KNOWN GUEST MEMORY above and keep talking — never say you forgot a known guest.',
     `Tax ${(cfg.TAX_RATE * 100).toFixed(0)}% on taxable lines. Total = subtotal + tax + tip.`,
@@ -321,7 +324,7 @@ module.exports = async function handler(req, res) {
         type: 'function',
         name: 'set_customer',
         description:
-          'Save customer fields on the ticket. On greeting, call with firstName AND lastName when they give a full name. Also email/phone as collected. Ticket updates each time.',
+          'Save customer fields on the ticket. A name requires a real firstName AND lastName; never save greetings such as "Hey Diego" or ordinary conversation. Also save email/phone as collected. Ticket updates each time.',
         parameters: {
           type: 'object',
           properties: {
@@ -407,20 +410,27 @@ module.exports = async function handler(req, res) {
       {
         type: 'function',
         name: 'set_tip',
-        description: 'Set tip amount on the checkout ticket (dollars).',
+        description:
+          'Set the checkout tip. Preserve spoken units: for "20 percent" use percent: 20; for "$20" use amount: 20. Never convert 20% into $20.',
         parameters: {
           type: 'object',
           properties: {
-            amount: { type: 'number', description: 'Tip in dollars' },
+            percent: {
+              type: 'number',
+              description: 'Percentage tip when the customer says percent or %, e.g. 20 for 20%.',
+            },
+            amount: {
+              type: 'number',
+              description: 'Dollar tip only when the customer explicitly says dollars or $.',
+            },
           },
-          required: ['amount'],
         },
       },
       {
         type: 'function',
         name: 'set_instructions',
         description:
-          'Chef notes / food allergies / special instructions on the ticket. Use after asking about allergies — "none" is fine.',
+          'Immediately write chef notes, food allergies, or special requests directly into the checkout field. Do not look for the field and do not use screen vision first. "none" is fine.',
         parameters: {
           type: 'object',
           properties: {

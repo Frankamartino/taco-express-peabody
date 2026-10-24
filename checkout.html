@@ -545,6 +545,21 @@
         render();
       }
 
+      /** Diego preserves a spoken percentage as a percentage on the checkout picker. */
+      function applyTipPercent(percent) {
+        var value = Number(percent);
+        if (!isFinite(value) || value < 0) return;
+        value = Math.min(100, value);
+        tipMode = 'percent';
+        tipPercent = value;
+        tipOtherWrap.classList.remove('show');
+        document.querySelectorAll('.tip-btn').forEach(function (btn) {
+          btn.classList.toggle('active', btn.getAttribute('data-tip') === String(value));
+        });
+        tipChosen = true;
+        render();
+      }
+
       function loadSavedCheckoutContact() {
         try {
           var raw =
@@ -596,7 +611,16 @@
       function validateContact(c) {
         msg.textContent = '';
         msg.className = '';
-        if (!c.name) { msg.textContent = 'Please enter your name.'; msg.className = 'err'; return false; }
+        var nameParts = splitName(c.name);
+        if (
+          !nameParts.firstName ||
+          !nameParts.lastName ||
+          /\b(hi|hey|hello|diego|please|thanks|thank)\b/i.test(c.name)
+        ) {
+          msg.textContent = 'Please enter your first and last name.';
+          msg.className = 'err';
+          return false;
+        }
         if (!c.email || c.email.indexOf('@') < 1) { msg.textContent = 'Please enter a valid email.'; msg.className = 'err'; return false; }
         if (!c.phone) { msg.textContent = 'Please enter your phone.'; msg.className = 'err'; return false; }
         return true;
@@ -906,6 +930,7 @@
       window.TacoCheckout = {
         applyContact: applyCheckoutContact,
         setTipDollars: applyTipDollars,
+        setTipPercent: applyTipPercent,
       };
 
       loadSavedCheckoutContact();
@@ -1092,7 +1117,13 @@
           return;
         }
         if (data.type === 'tip_update') {
-          if (window.TacoCheckout) window.TacoCheckout.setTipDollars(data.amount);
+          if (window.TacoCheckout) {
+            if (data.mode === 'percent' && data.percent != null) {
+              window.TacoCheckout.setTipPercent(data.percent);
+            } else {
+              window.TacoCheckout.setTipDollars(data.amount);
+            }
+          }
           return;
         }
         if (data.type === 'sold_out_refresh') {
