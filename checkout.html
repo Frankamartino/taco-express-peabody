@@ -577,6 +577,24 @@
         return { firstName: parts[0], lastName: parts.slice(1).join(' ') };
       }
 
+      /** Reject all-greeting phrases ("Hey Diego"), but allow Diego in a real full name. */
+      function isGreetingName(full) {
+        var parts = String(full || '')
+          .toLowerCase()
+          .split(/\s+/)
+          .map(function (word) {
+            return word.replace(/[^a-z']/g, '');
+          })
+          .filter(Boolean);
+        if (!parts.length) return false;
+        for (var i = 0; i < parts.length; i++) {
+          if (!/^(hi|hey|hello|please|thanks|thank|diego|you|yes|yeah)$/.test(parts[i])) {
+            return false;
+          }
+        }
+        return true;
+      }
+
       function readContact() {
         return {
           name: document.getElementById('name').value.trim(),
@@ -612,11 +630,7 @@
         msg.textContent = '';
         msg.className = '';
         var nameParts = splitName(c.name);
-        if (
-          !nameParts.firstName ||
-          !nameParts.lastName ||
-          /\b(hi|hey|hello|diego|please|thanks|thank)\b/i.test(c.name)
-        ) {
+        if (!nameParts.firstName || !nameParts.lastName || isGreetingName(c.name)) {
           msg.textContent = 'Please enter your first and last name.';
           msg.className = 'err';
           return false;
