@@ -227,35 +227,35 @@ window.TACO_MENU_ITEMS = [
     "id": "quesadilla-beef",
     "section": "quesadillas",
     "title": "Beef",
-    "name": "Loaded Quesadillas Beef",
+    "name": "Quesadilla · Beef",
     "priceCents": 1399
   },
   {
     "id": "quesadilla-chicken",
     "section": "quesadillas",
     "title": "Chicken",
-    "name": "Loaded Quesadillas Chicken",
+    "name": "Quesadilla · Chicken",
     "priceCents": 1399
   },
   {
     "id": "quesadilla-pork",
     "section": "quesadillas",
     "title": "Pork",
-    "name": "Loaded Quesadillas Pork",
+    "name": "Quesadilla · Pork",
     "priceCents": 1399
   },
   {
     "id": "quesadilla-shrimp",
     "section": "quesadillas",
     "title": "Shrimp",
-    "name": "Loaded Quesadillas Shrimp",
+    "name": "Quesadilla · Shrimp",
     "priceCents": 2199
   },
   {
     "id": "quesadilla-cod",
     "section": "quesadillas",
     "title": "Crispy Cod",
-    "name": "Loaded Quesadilla · Crispy Cod",
+    "name": "Quesadilla · Crispy Cod",
     "priceCents": 2199
   },
   {

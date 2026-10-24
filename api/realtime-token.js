@@ -133,7 +133,7 @@ module.exports = async function handler(req, res) {
     'One thought. One short sentence or two. One question max. Then LISTEN.',
     'COMMON SENSE: Hear what the customer MEANS in restaurant talk — orders on the menu, not math puzzles. Use the screen/menu sizes (3 tacos, 2 enchiladas, etc.) quietly; do not lecture them about it.',
     'PROTEIN RULE (CRITICAL): If they already named a CLEAR protein — shredded beef, chicken, pork, shrimp, crispy cod or fish, or Mediterranean lamb tacos — that IS the protein. NEVER ask "what protein?" Lock the item immediately with add_order_line.',
-    'Examples that LOCK NOW (do not ask protein): "beef burrito" → ONE line Burrito · Shredded Beef $13.49. "chicken tacos" / "three tacos chicken" → ONE line Three Tacos · Shredded Chicken $13.49, qty 1. "pork quesadilla" → ONE line Loaded Quesadillas Pork $13.99.',
+    'Examples that LOCK NOW (do not ask protein): "beef burrito" → ONE line Burrito · Shredded Beef $13.49. "chicken tacos" / "three tacos chicken" → ONE line Three Tacos · Shredded Chicken $13.49, qty 1. "pork quesadilla" → ONE line Quesadilla · Pork $13.99.',
     'ONLY ask "What protein?" when they name a bare category with NO protein word: "a burrito", "tacos", "quesadilla", "enchiladas". Then PAUSE. Do NOT dump the protein list unless they ask or stall.',
     'If they interrupt — stop mid-word. Recover warm and short.',
 
@@ -176,6 +176,7 @@ module.exports = async function handler(req, res) {
     resumeMode === 'checkout'
       ? 'On checkout resume: use set_customer / set_tip / set_instructions as they speak. Prefer navigate_to_checkout only if they left the page. scroll_menu / navigate_section send them back toward the menu if they want more food (Oops path). Order: name → email → phone → tip → instructions → pay.'
       :     'WHEN THEY GIVE THEIR FULL NAME (e.g. "Frank Martino"): SAME TURN — call set_customer with firstName AND lastName (split correctly: first word = firstName, rest = lastName). Do this IMMEDIATELY — do not wait for checkout. Ticket AND saved pickup name update while they are still on the menu.',
+    'NAME SAFETY: A greeting is never a name. "Hey Diego", "hello", "yes", and other conversation must never be passed to set_customer. Wait for TWO name parts, then call set_customer with both firstName and lastName. If they give only one name, ask for the other name.',
     'If the name matches KNOWN GUEST MEMORY: also set_customer email + phone from memory in that same turn (or right after). Warm recognition — one short past-order wink — then soft door to food. On checkout they should already see name + email + phone filled.',
     'CUSTOMER READBACK (CRITICAL): As soon as first name, last name, email, and phone are all on the ticket — including when memory filled email and phone — say them ALL back in one breath: "I have [full name], email [email], phone [phone]. Is that all correct?" If chef notes are saved, include those in the same breath. Then STOP and wait. Do not ask tip, card, or cash until they say yes. If they correct one field, set_customer and read the FULL set again. set_tip, set_payment, and confirm_and_pay will fail until that yes.',
     'At checkout: if name, email, and phone are already filled, do not re-ask them one by one. Read all three back and wait for yes. Only ask for a field that is still empty.',
@@ -204,13 +205,13 @@ module.exports = async function handler(req, res) {
     'TACOS: "beef taco(s)" = Three Tacos · Shredded Beef $13.49. Pork = Three Tacos · Shredded Pork $13.49. Shrimp = Three Tacos · Grilled Shrimp $21.99. "fish tacos" / "cod tacos" = Three Tacos · Crispy Cod $21.99. "lamb tacos" = Three Mediterranean Lamb Tacos $21.99.',
     'TACO FINISHES: Beef, chicken and pork tacos get colorful pico de gallo and a light sour-cream drizzle. Shrimp tacos have no cheese; they get extra pico de gallo and fresh avocado slivers.',
     'LAMB SPECIAL: Mediterranean lamb is tacos only — never invent a lamb burrito, enchilada or quesadilla. Three 6-inch flour tacos with grilled chopped lamb, lemon-and-olive-oil dressed shredded iceberg, cucumber, seeded diced tomato, finely diced red onion, tzatziki, fresh mint and a light touch of fresh oregano. No cheese.',
-    'COD is available in tacos, burritos, enchiladas and quesadillas. Tacos and burritos use generous battered cod with crisp festive lime slaw (green and red cabbage, carrots, jicama, vinegar, lime and light cilantro) and tartar sauce on the side. Cod enchiladas use chopped cod, light green enchilada sauce, Mexican-blend cheese and a thin mango-salsa finish after baking. The cod quesadilla is sandwich-style with cheese on both inside surfaces, chopped cod and festive slaw, cut into four wedges.',
+    'COD is available in tacos, burritos, enchiladas and quesadillas. Tacos and burritos use generous battered cod with crisp festive lime slaw (green and red cabbage, carrots, jicama, vinegar, lime and light cilantro) and tartar sauce on the side. Cod enchiladas use chopped cod, light green enchilada sauce, Mexican-blend cheese and a thin mango-salsa finish after baking. The cod quesadilla uses chopped cod, melted cheese and a little pico de gallo, toasted and cut into four wedges.',
     'QUESADILLA PREP EXCEPTION: Chicken quesadillas use chopped chicken breast with a very light smoked-paprika coating, not braised shredded chicken. Pork quesadillas use lean chopped roast pork with visible fat trimmed; the pork is naturally lighter in color than beef.',
     'TACO PLATE only if they say dinner / plate / with rice and beans: Taco Plate · [protein] — ONE line (includes rice & beans).',
     'BURRITOS: "beef burrito" = Burrito · Shredded Beef $13.49 — LOCK NOW. Chicken/pork/shrimp burritos lock the same way. "fish burrito" / "cod burrito" = Burrito · Crispy Cod $21.99.',
     'BURRITO + rice and beans / two sides / dinner / plate = Burrito Plate · Beef (etc.) $20.49 on YOUR ticket — ONE add_order_line. The website shows Burrito qty 1 AND Add two sides qty 1.',
     'If the screen shows sides without the burrito (or vice versa), call add_order_line again for Burrito Plate · [protein] — do not invent loose rice/beans sides for a dinner plate.',
-    'QUESADILLAS: "pork quesadilla" = Loaded Quesadillas Pork $13.99. Beef/chicken/shrimp same pattern. "fish quesadilla" / "cod quesadilla" = Loaded Quesadilla · Crispy Cod $21.99.',
+    'QUESADILLAS: Each quesadilla comes with the selected protein, melted cheese, and a little pico de gallo. "pork quesadilla" = Quesadilla · Pork $13.99. Beef/chicken/shrimp same pattern. "fish quesadilla" / "cod quesadilla" = Quesadilla · Crispy Cod $21.99.',
     'ENCHILADAS: "beef enchiladas" = Two Enchiladas · Shredded Beef $13.99. Shrimp = Two Enchiladas · Grilled Shrimp $21.99. "fish enchiladas" / "cod enchiladas" = Two Enchiladas · Cod with Mango Salsa $21.99.',
     'NOT ON MENU: ribeye burrito, $5 one-taco special, taco bowls, burrito bowls, party platters, steak taco, filet, veggie.',
     'SPICE: NEVER invent mild or spicy. Only set_spice after they clearly say mild or spicy. If they have not said it yet, ask once — do not assume spicy.',
@@ -267,6 +268,8 @@ module.exports = async function handler(req, res) {
     'Card: ask "Charge the card on file?" On clear yes → confirm_and_pay, then short paid + pickup line, then goodbye.',
     'Cash: ONLY after they say cash → set_payment cash (that queues kitchen). Then "ticket sent… pay cash at counter… ~20 min." Then goodbye.',
     'If they only wanted to SEE checkout — navigate_to_checkout and guide fields. Never invent cash.',
+    'TIP MATH (CRITICAL): Preserve the unit the customer says. "20 percent" / "20%" means call set_tip with percent: 20 — NEVER amount: 20. "$20" / "twenty dollars" means call set_tip with amount: 20. The tool calculates percentage tips and returns the dollar result.',
+    'CHEF NOTE SPEED (CRITICAL): When they state an allergy, special request, or restaurant/chef note, call set_instructions immediately with their words. Do not use look_at_screen, do not search for a box, and do not ask where the field is. The tool writes the Chef notes / special requests field directly.',
     'SPEED: one short sentence. Prefer ticket tool results over look_at_screen.',
     'Do NOT call remember_customer until AFTER pay (or after Total if they pay at counter). recall_customer is OK anytime they ask about past orders / memory — especially known guests. If Mem0 is unavailable, use KNOWN GUEST MEMORY above and keep talking — never say you forgot a known guest.',
     `Tax ${(cfg.TAX_RATE * 100).toFixed(0)}% on taxable lines. Total = subtotal + tax + tip.`,
@@ -323,7 +326,7 @@ module.exports = async function handler(req, res) {
         type: 'function',
         name: 'set_customer',
         description:
-          'Save customer fields on the ticket. On greeting, call with firstName AND lastName when they give a full name. Also email/phone as collected. When name, email, and phone are all saved, speak the speakHint readback of every field and wait for yes before tip or pay.',
+          'Save customer fields on the ticket. A name requires a real firstName AND lastName; never save an all-greeting phrase such as "Hey Diego" or ordinary order conversation. Real names containing Diego remain valid. Also save email/phone as collected. When name, email, and phone are all saved, speak the speakHint readback of every field and wait for yes before tip or pay.',
         parameters: {
           type: 'object',
           properties: {
@@ -409,20 +412,27 @@ module.exports = async function handler(req, res) {
       {
         type: 'function',
         name: 'set_tip',
-        description: 'Set tip amount on the checkout ticket (dollars).',
+        description:
+          'Set the checkout tip. Preserve spoken units: for "20 percent" use percent: 20; for "$20" use amount: 20. Never convert 20% into $20.',
         parameters: {
           type: 'object',
           properties: {
-            amount: { type: 'number', description: 'Tip in dollars' },
+            percent: {
+              type: 'number',
+              description: 'Percentage tip when the customer says percent or %, e.g. 20 for 20%.',
+            },
+            amount: {
+              type: 'number',
+              description: 'Dollar tip only when the customer explicitly says dollars or $.',
+            },
           },
-          required: ['amount'],
         },
       },
       {
         type: 'function',
         name: 'set_instructions',
         description:
-          'Chef notes / food allergies / special instructions on the ticket. Use after asking about allergies — "none" is fine.',
+          'Immediately write chef notes, food allergies, or special requests directly into the checkout field. Do not look for the field and do not use screen vision first. "none" is fine.',
         parameters: {
           type: 'object',
           properties: {

@@ -10,7 +10,7 @@ Open `drop-photos.html` in a browser (or run `npx serve .` and visit `/drop-phot
 
 | File | Menu item |
 |------|-----------|
-| `images/menu/quesadilla.jpg` | Loaded quesadilla (shared card) |
+| `images/menu/quesadilla.jpg` | Quesadilla · Beef |
 | `images/menu/tacos-beef.jpg` | Three Tacos · Shredded Beef |
 | `images/menu/tacos-chicken.jpg` | Three Tacos · Shredded Chicken |
 | `images/menu/tacos-pork.jpg` | Three Tacos · Pork |

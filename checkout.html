@@ -545,6 +545,21 @@
         render();
       }
 
+      /** Diego preserves a spoken percentage as a percentage on the checkout picker. */
+      function applyTipPercent(percent) {
+        var value = Number(percent);
+        if (!isFinite(value) || value < 0) return;
+        value = Math.min(100, value);
+        tipMode = 'percent';
+        tipPercent = value;
+        tipOtherWrap.classList.remove('show');
+        document.querySelectorAll('.tip-btn').forEach(function (btn) {
+          btn.classList.toggle('active', btn.getAttribute('data-tip') === String(value));
+        });
+        tipChosen = true;
+        render();
+      }
+
       function loadSavedCheckoutContact() {
         try {
           var raw =
@@ -560,6 +575,24 @@
         if (!parts.length) return { firstName: '', lastName: '' };
         if (parts.length === 1) return { firstName: '', lastName: parts[0] };
         return { firstName: parts[0], lastName: parts.slice(1).join(' ') };
+      }
+
+      /** Reject all-greeting phrases ("Hey Diego"), but allow Diego in a real full name. */
+      function isGreetingName(full) {
+        var parts = String(full || '')
+          .toLowerCase()
+          .split(/\s+/)
+          .map(function (word) {
+            return word.replace(/[^a-z']/g, '');
+          })
+          .filter(Boolean);
+        if (!parts.length) return false;
+        for (var i = 0; i < parts.length; i++) {
+          if (!/^(hi|hey|hello|please|thanks|thank|diego|you|yes|yeah)$/.test(parts[i])) {
+            return false;
+          }
+        }
+        return true;
       }
 
       function readContact() {
@@ -596,7 +629,12 @@
       function validateContact(c) {
         msg.textContent = '';
         msg.className = '';
-        if (!c.name) { msg.textContent = 'Please enter your name.'; msg.className = 'err'; return false; }
+        var nameParts = splitName(c.name);
+        if (!nameParts.firstName || !nameParts.lastName || isGreetingName(c.name)) {
+          msg.textContent = 'Please enter your first and last name.';
+          msg.className = 'err';
+          return false;
+        }
         if (!c.email || c.email.indexOf('@') < 1) { msg.textContent = 'Please enter a valid email.'; msg.className = 'err'; return false; }
         if (!c.phone) { msg.textContent = 'Please enter your phone.'; msg.className = 'err'; return false; }
         return true;
@@ -906,6 +944,7 @@
       window.TacoCheckout = {
         applyContact: applyCheckoutContact,
         setTipDollars: applyTipDollars,
+        setTipPercent: applyTipPercent,
       };
 
       loadSavedCheckoutContact();
@@ -1092,7 +1131,13 @@
           return;
         }
         if (data.type === 'tip_update') {
-          if (window.TacoCheckout) window.TacoCheckout.setTipDollars(data.amount);
+          if (window.TacoCheckout) {
+            if (data.mode === 'percent' && data.percent != null) {
+              window.TacoCheckout.setTipPercent(data.percent);
+            } else {
+              window.TacoCheckout.setTipDollars(data.amount);
+            }
+          }
           return;
         }
         if (data.type === 'sold_out_refresh') {
