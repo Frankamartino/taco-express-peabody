@@ -30,11 +30,19 @@ module.exports = async function handler(req, res) {
   }
 
   const since = new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString();
+  // print_jobs is shared with Martino. Limit only after keeping Taco tickets,
+  // or a Martino rush drops unacknowledged orders from the next poll.
+  const tacoOnly =
+    'or=(order_id.like.TACO-*,receipt_data->>orderId.like.TACO-*,receipt_data->>storeName.eq.' +
+    encodeURIComponent('"TACO EXPRESS"') +
+    ')';
   const query =
     cfg.url +
     '/rest/v1/print_jobs?select=id,order_id,status,created_at,receipt_data' +
     '&created_at=gte.' +
     encodeURIComponent(since) +
+    '&' +
+    tacoOnly +
     '&order=created_at.desc&limit=40';
 
   try {
