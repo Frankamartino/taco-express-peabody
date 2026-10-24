@@ -2,6 +2,10 @@
 
 **One restaurant. One repo. One address.**
 
+Looking for Frankie Slice or Martino Pasta Bar? They are next door at the food hall.
+The map is [`FOOD-HALL.md`](FOOD-HALL.md) — all three shops, one page, so you are
+not jumping around. Agents: start at [`AGENTS.md`](AGENTS.md).
+
 | | |
 |---|---|
 | **Website** | https://www.tacoexpresspeabody.com |
@@ -14,10 +18,12 @@
 ## Its own entity
 
 This repository is **standalone**. It is not a fork and shares no code, keys, or
-accounts with anything else:
+accounts with anything else. The three shops at the food hall, and where each one
+lives, are listed in [`FOOD-HALL.md`](FOOD-HALL.md):
 
+- **This repo** is Taco Express Peabody (`tacoexpresspeabody.com`)
 - **Not** Martino Pasta Bar (`martinopastabar.com` lives in its own repo)
-- **Not** Frankie's Slice
+- **Not** Frankie Slice (`frankieslice.com` is Squarespace)
 - **Not** Maya or any other project
 
 The **only** shared thing is physical: kitchen tickets print on the same Star
