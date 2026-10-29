@@ -1,4 +1,4 @@
 {
-  "name": "Taco Express Peabody",
+  "name": "Taco Express Peabody only",
   "install": "node --check api/tacoMenu.js\nnode --check api/massimoConfig.js\nnode --check api/realtime-token.js\nnode --check api/supervisor.js\nnode --check api/charge-order.js\npython3 -m py_compile scripts/cloudinary-enhance-menu.py scripts/enhance-menu-images.py scripts/normalize-drink-images.py scripts/split-jarritos-pack.py"
 }
