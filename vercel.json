@@ -2,5 +2,12 @@
   "buildCommand": null,
   "outputDirectory": ".",
   "cleanUrls": true,
-  "trailingSlash": false
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/how-to-order",
+      "destination": "/order",
+      "permanent": true
+    }
+  ]
 }
