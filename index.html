@@ -65,7 +65,13 @@
       "openingHoursSpecification": [
         {
           "@type": "OpeningHoursSpecification",
-          "dayOfWeek": ["Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+          "dayOfWeek": ["Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+          "opens": "11:00",
+          "closes": "20:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": ["Sunday"],
           "opens": "11:00",
           "closes": "18:00"
         }
@@ -1468,8 +1474,8 @@
       <h2>Hours &amp; location</h2>
       <table class="hours-table" aria-label="Hours">
         <tr><td>Monday</td><td>Closed</td></tr>
-        <tr><td>Tuesday</td><td>Closed</td></tr>
-        <tr><td>Wed – Sun</td><td>11 AM – 6 PM</td></tr>
+        <tr><td>Tue – Sat</td><td>11 AM – 8 PM</td></tr>
+        <tr><td>Sunday</td><td>11 AM – 6 PM</td></tr>
       </table>
       <p style="margin-top:20px;font-size:0.95rem;">
         <strong>Taco Express Peabody</strong><br>
@@ -1811,19 +1817,20 @@
         var hour = Number(easternParts.hour);
         var minute = Number(easternParts.minute);
         var currentMinutes = hour * 60 + minute;
-        var scheduledToday = /^(Wednesday|Thursday|Friday|Saturday|Sunday)$/.test(weekday);
+        var scheduledToday = /^(Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)$/.test(weekday);
+        var closeMinutes = weekday === 'Sunday' ? 18 * 60 : 20 * 60;
         var withinHours =
           scheduledToday &&
           Number.isFinite(currentMinutes) &&
           currentMinutes >= 11 * 60 &&
-          currentMinutes < 18 * 60;
+          currentMinutes < closeMinutes;
         var emergencyClosed = !!(state && state.closed);
         var isOpen = withinHours && !emergencyClosed;
 
         status.classList.toggle('is-open', isOpen);
         status.classList.toggle('is-closed', !isOpen);
         label.textContent = isOpen ? 'OPEN' : 'CLOSED';
-        hours.textContent = scheduledToday ? 'Today · 11 AM–6 PM' : 'Today · Closed';
+        hours.textContent = scheduledToday ? (weekday === 'Sunday' ? 'Today · 11 AM–6 PM' : 'Today · 11 AM–8 PM') : 'Today · Closed';
 
         if (reasonEl) {
           var reason = emergencyClosed && state.reason ? String(state.reason) : '';

@@ -15,8 +15,9 @@ Directions: https://www.google.com/maps/dir/?api=1&destination=Taco+Express+Peab
 
 ## Hours
 
-Wednesday–Sunday: 11 AM–6 PM
-Monday–Tuesday: Closed
+Tuesday–Saturday: 11 AM–8 PM
+Sunday: 11 AM–6 PM
+Monday: Closed
 Time zone: America/New_York
 
 ## Ordering

@@ -1,11 +1,17 @@
 /**
  * Taco Express Peabody — shop hours (US Eastern).
- * Open Wed–Sun 11 AM–6 PM. Closed Mon–Tue.
- * Same close time as Martino Pasta Bar (limited staff / no cashier help).
+ * Open Tue–Sat 11 AM–8 PM, Sun 11 AM–6 PM. Closed Monday.
+ * Same hours as Martino Pasta Bar.
  */
 const OPEN_START_MINS = 11 * 60;
-const CLOSE_MINS = 18 * 60; // 6 PM
-const HOURS_LABEL = '11 AM–6 PM';
+
+function closeMinsFor(day) {
+  return day === 'Sunday' ? 18 * 60 : 20 * 60; // 6 PM Sun, 8 PM Tue–Sat
+}
+
+function hoursLabelFor(day) {
+  return day === 'Sunday' ? '11 AM–6 PM' : '11 AM–8 PM';
+}
 
 function getTacoShopStatus(now = new Date()) {
   const tz = 'America/New_York';
@@ -18,6 +24,8 @@ function getTacoShopStatus(now = new Date()) {
   }).formatToParts(now);
   const part = (t) => parts.find((p) => p.type === t)?.value || '';
   const day = part('weekday');
+  const CLOSE_MINS = closeMinsFor(day);
+  const HOURS_LABEL = hoursLabelFor(day);
   const hour = parseInt(part('hour') || '0', 10);
   const minute = parseInt(part('minute') || '0', 10);
   const mins = hour * 60 + minute;
@@ -41,7 +49,7 @@ function getTacoShopStatus(now = new Date()) {
       closedToday: true,
       line:
         `OPEN/CLOSED RIGHT NOW (AUTHORITATIVE): ${formatted} Eastern. CLOSED TODAY — ${day} we are always closed. ` +
-        'Open Wednesday–Sunday 11 AM–6 PM. Closed Monday and Tuesday. Next open: ' +
+        'Open Tuesday–Saturday 11 AM–8 PM, Sunday 11 AM–6 PM. Closed Monday. Next open: ' +
         nextOpenFromClosedDay(day) +
         '. ' +
         'If they want food today, say clearly we are CLOSED — do NOT imply pickup in 20 minutes. ' +
@@ -64,12 +72,11 @@ function getTacoShopStatus(now = new Date()) {
 }
 
 function isAlwaysClosedDay(day) {
-  return day === 'Monday' || day === 'Tuesday';
+  return day === 'Monday';
 }
 
 function nextOpenFromClosedDay(day) {
-  if (day === 'Tuesday') return 'tomorrow at 11 AM';
-  return 'Wednesday at 11 AM';
+  return 'tomorrow at 11 AM';
 }
 
 /** Short spoken phrase for when the shop opens next. */
@@ -80,7 +87,7 @@ function nextOpenPhrase(status) {
   if (isAlwaysClosedDay(day)) return nextOpenFromClosedDay(day);
   if (beforeOpen) return 'today at 11 AM';
   // After close on an open day (Wed–Sun)
-  if (day === 'Sunday') return 'Wednesday at 11 AM';
+  if (day === 'Sunday') return 'Tuesday at 11 AM';
   return 'tomorrow at 11 AM';
 }
 
@@ -97,11 +104,11 @@ async function shopClosedCheck(now) {
       closed: true,
       code: 'shop_closed',
       message: isAlwaysClosedDay(hours.day)
-        ? 'Taco Express is closed today — we are open Wednesday through Sunday, 11 AM–6 PM. We open ' +
+        ? 'Taco Express is closed today — we are open Tuesday through Saturday, 11 AM–8 PM, and Sunday 11 AM–6 PM. We open ' +
           when +
           '.'
         : 'Taco Express is closed right now — today\u2019s hours are ' +
-          (hours.hoursLabel || HOURS_LABEL) +
+          (hours.hoursLabel || hoursLabelFor(hours.day)) +
           '. We open ' +
           when +
           '.',
