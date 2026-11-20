@@ -981,10 +981,9 @@
           minute: '2-digit',
           hour12: true,
         }).format(now);
-        var alwaysClosed = day === 'Monday' || day === 'Tuesday';
+        var alwaysClosed = day === 'Monday';
         if (alwaysClosed) {
-          var nextClosed =
-            day === 'Tuesday' ? 'tomorrow at 11 AM' : 'Wednesday at 11 AM';
+          var nextClosed = 'tomorrow at 11 AM';
           return {
             formatted: formatted,
             day: day,
@@ -995,14 +994,14 @@
               formatted +
               ' Eastern. CLOSED TODAY — ' +
               day +
-              ' we are always closed. Open Wednesday–Sunday 11 AM–6 PM. Closed Mon–Tue. Next open ' +
+              ' we are always closed. Open Tuesday–Saturday 11 AM–8 PM, Sunday 11 AM–6 PM. Closed Monday. Next open ' +
               nextClosed +
               '.',
           };
         }
         var openStart = 11 * 60;
-        var openEnd = 18 * 60; // 6 PM
-        var hoursLabel = '11 AM–6 PM';
+        var openEnd = day === 'Sunday' ? 18 * 60 : 20 * 60; // 6 PM Sun, 8 PM Tue–Sat
+        var hoursLabel = day === 'Sunday' ? '11 AM–6 PM' : '11 AM–8 PM';
         var open = mins >= openStart && mins < openEnd;
         return {
           formatted: formatted,
@@ -1021,15 +1020,15 @@
         };
       }
 
-      /** "today at 11 AM" / "tomorrow at 11 AM" / "Wednesday at 11 AM" (Wed–Sun open). */
+      /** "today at 11 AM" / "tomorrow at 11 AM" / "Tuesday at 11 AM" (Tue–Sun open). */
       function nextOpenPhrase(st) {
         var day = st.day;
         var beforeOpen = (st.mins || 0) < 11 * 60;
-        if (day === 'Monday' || day === 'Tuesday') {
-          return day === 'Tuesday' ? 'tomorrow at 11 AM' : 'Wednesday at 11 AM';
+        if (day === 'Monday') {
+          return 'tomorrow at 11 AM';
         }
         if (beforeOpen) return 'today at 11 AM';
-        if (day === 'Sunday') return 'Wednesday at 11 AM';
+        if (day === 'Sunday') return 'Tuesday at 11 AM';
         return 'tomorrow at 11 AM';
       }
 
